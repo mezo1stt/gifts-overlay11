@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔥 إعدادات شريط النص الناري | Fire Widget Settings</title>
+    <link rel="stylesheet" href="/css/fire.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&family=Tajawal:wght@700;900&family=Almarai:wght@800&family=Changa:wght@800&display=swap" rel="stylesheet">
+</head>
+<body class="fire-settings-body">
+
+    <div class="settings-container">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+            <a href="/" style="color:#c4b5fd;text-decoration:none;font-size:14px;font-weight:bold;background:rgba(255,255,255,0.08);padding:6px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);">
+                ← العودة للوحة الهدايا الرئيسية
+            </a>
+            <span id="boardIdDisplay" style="color:#ffd700;font-family:monospace;font-size:13px;background:rgba(0,0,0,0.5);padding:4px 10px;border-radius:6px;border:1px solid rgba(255,69,0,0.4);">
+                UID: board_XXXX
+            </span>
+        </div>
+
+        <h1>🔥 إعدادات شريط النص الناري (Fire Widget)</h1>
+
+        <div class="settings-box">
+
+            <!-- Text Input -->
+            <div class="input-group">
+                <label>✍️ النص المعروض على الشاشة:</label>
+                <input type="text" id="textInput" value="رابط الدعم بالبايو 🔥" maxlength="60" placeholder="مثلاً: رابط الدعم بالبايو / لا تنسى المتابعة">
+            </div>
+
+            <!-- Colors -->
+            <div class="input-group">
+                <label>🎨 لون النص الناري:</label>
+                <div class="color-row">
+                    <input type="color" id="colorInput" value="#A00000">
+                    <input type="text" id="colorHex" value="#A00000" maxlength="7">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>💡 لون التوهج واللمعان (Glow):</label>
+                <div class="color-row">
+                    <input type="color" id="shineInput" value="#FF3333">
+                    <input type="text" id="shineHex" value="#FF3333" maxlength="7">
+                </div>
+            </div>
+
+            <!-- Font Family -->
+            <div class="input-group">
+                <label>🔤 نوع الخط العربي:</label>
+                <select id="fontInput" class="select-input">
+                    <option value="Cairo">Cairo (خط كلاسيكي قوي)</option>
+                    <option value="Tajawal">Tajawal (عصري فخم)</option>
+                    <option value="Almarai">Almarai (عريض وواضح)</option>
+                    <option value="Changa">Changa (ناري وحاد)</option>
+                </select>
+            </div>
+
+            <!-- Font Size -->
+            <div class="input-group">
+                <label>📏 حجم الخط:</label>
+                <div class="size-row">
+                    <input type="range" id="sizeInput" min="25" max="110" value="58">
+                    <span id="sizeValue">58px</span>
+                </div>
+            </div>
+
+            <!-- Intro Style -->
+            <div class="input-group">
+                <label>💥 تأثير حركة الدخول (Intro Animation):</label>
+                <select id="introStyleInput" class="select-input">
+                    <option value="burst">💥 انفجار ناري عنيف (Fire Burst Slam)</option>
+                    <option value="volcano">🌋 صعود بركاني من الحمم (Volcano Rise)</option>
+                    <option value="slide">🚀 انزلاق ثلاثي الأبعاد (3D Fire Slide)</option>
+                    <option value="burn">🔥 احتراق وظهور تدريجي (Flame Burn In)</option>
+                    <option value="fade">✨ تلاشي ناعم كلاسيكي (Smooth Fade)</option>
+                </select>
+            </div>
+
+            <!-- Outro Style -->
+            <div class="input-group">
+                <label>💨 تأثير حركة الخروج (Outro Animation):</label>
+                <select id="outroStyleInput" class="select-input">
+                    <option value="burn">🔥 احتراق وتفكك إلى رماد وشرارات (Combust into Ash)</option>
+                    <option value="slide">💨 انزلاق سريع مع دخان (Fire Smoke Slide)</option>
+                    <option value="melt">🫠 ذوبان ناري (Flame Melt)</option>
+                    <option value="fade">✨ تلاشي هادئ (Smooth Fade Out)</option>
+                </select>
+            </div>
+
+            <!-- Timings -->
+            <div class="input-group">
+                <label>⏱️ مدة الظهور (Intro Duration):</label>
+                <div class="size-row">
+                    <input type="range" id="introDurationInput" min="1" max="5" step="0.5" value="2.5">
+                    <span id="introDurationValue">2.5s</span>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>⏸️ مدة البقاء على الشاشة (Hold Duration):</label>
+                <div class="size-row">
+                    <input type="range" id="holdDurationInput" min="1" max="8" step="0.5" value="3">
+                    <span id="holdDurationValue">3s</span>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>⏳ مدة الاختفاء (Outro Duration):</label>
+                <div class="size-row">
+                    <input type="range" id="outroDurationInput" min="1" max="5" step="0.5" value="2.5">
+                    <span id="outroDurationValue">2.5s</span>
+                </div>
+            </div>
+
+            <!-- Neon Glow Toggle -->
+            <div class="input-group">
+                <label>⚡ توهج النيون البركاني (Neon Strength):</label>
+                <div class="size-row">
+                    <input type="range" id="neonInput" min="10" max="100" value="85">
+                    <span id="neonValue">85%</span>
+                </div>
+            </div>
+
+            <!-- Live Preview -->
+            <div class="input-group">
+                <label>👁️ معاينة حية للنص الناري:</label>
+                <div class="preview-box">
+                    <div id="previewText" class="preview-text">رابط الدعم بالبايو 🔥</div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="buttons">
+                <button class="btn-save" id="saveBtn" onclick="saveSettings()">💾 حفظ الإعدادات</button>
+                <button class="btn-copy" id="copyBtn" onclick="copyWidgetUrl()">📋 نسخ رابط OBS</button>
+                <a class="btn-preview" id="previewBtn" href="#" target="_blank" style="text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;">
+                    👁️ فتح شاشة البث
+                </a>
+            </div>
+
+            <div class="status" id="statusBox"></div>
+        </div>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        let uid = params.get('uid') || localStorage.getItem('gifts_last_uid') || 'board_XXXX';
+        document.getElementById('boardIdDisplay').textContent = `UID: ${uid}`;
+
+        const widgetUrl = `${window.location.origin}/fire-text.html?uid=${encodeURIComponent(uid)}`;
+        document.getElementById('previewBtn').href = widgetUrl;
+
+        // Elements
+        const textInput = document.getElementById('textInput');
+        const colorInput = document.getElementById('colorInput');
+        const colorHex = document.getElementById('colorHex');
+        const shineInput = document.getElementById('shineInput');
+        const shineHex = document.getElementById('shineHex');
+        const fontInput = document.getElementById('fontInput');
+        const sizeInput = document.getElementById('sizeInput');
+        const sizeValue = document.getElementById('sizeValue');
+        const introStyleInput = document.getElementById('introStyleInput');
+        const outroStyleInput = document.getElementById('outroStyleInput');
+        const introDurationInput = document.getElementById('introDurationInput');
+        const introDurationValue = document.getElementById('introDurationValue');
+        const holdDurationInput = document.getElementById('holdDurationInput');
+        const holdDurationValue = document.getElementById('holdDurationValue');
+        const outroDurationInput = document.getElementById('outroDurationInput');
+        const outroDurationValue = document.getElementById('outroDurationValue');
+        const neonInput = document.getElementById('neonInput');
+        const neonValue = document.getElementById('neonValue');
+        const previewText = document.getElementById('previewText');
+        const statusBox = document.getElementById('statusBox');
+
+        // Color sync
+        colorInput.addEventListener('input', (e) => {
+            colorHex.value = e.target.value;
+            updatePreview();
+        });
+        colorHex.addEventListener('input', (e) => {
+            colorInput.value = e.target.value;
+            updatePreview();
+        });
+        shineInput.addEventListener('input', (e) => {
+            shineHex.value = e.target.value;
+            updatePreview();
+        });
+        shineHex.addEventListener('input', (e) => {
+            shineInput.value = e.target.value;
+            updatePreview();
+        });
+
+        // Sliders
+        sizeInput.addEventListener('input', (e) => {
+            sizeValue.textContent = `${e.target.value}px`;
+            updatePreview();
+        });
+        introDurationInput.addEventListener('input', (e) => {
+            introDurationValue.textContent = `${e.target.value}s`;
+        });
+        holdDurationInput.addEventListener('input', (e) => {
+            holdDurationValue.textContent = `${e.target.value}s`;
+        });
+        outroDurationInput.addEventListener('input', (e) => {
+            outroDurationValue.textContent = `${e.target.value}s`;
+        });
+        neonInput.addEventListener('input', (e) => {
+            neonValue.textContent = `${e.target.value}%`;
+            updatePreview();
+        });
+
+        textInput.addEventListener('input', updatePreview);
+        fontInput.addEventListener('change', updatePreview);
+
+        function updatePreview() {
+            previewText.textContent = textInput.value || 'رابط الدعم بالبايو';
+            previewText.style.color = colorInput.value;
+            previewText.style.fontFamily = `'${fontInput.value}', sans-serif`;
+            previewText.style.fontSize = `${Math.min(sizeInput.value, 46)}px`;
+
+            const glowIntensity = neonInput.value / 100;
+            const blur1 = 8 * glowIntensity;
+            const blur2 = 18 * glowIntensity;
+            const blur3 = 30 * glowIntensity;
+
+            previewText.style.textShadow = `
+                0 0 ${blur1}px ${shineInput.value},
+                0 0 ${blur2}px ${colorInput.value},
+                0 0 ${blur3}px ${colorInput.value}
+            `;
+        }
+
+        async function loadSettings() {
+            try {
+                const res = await fetch(`/api/fire-settings/${uid}`);
+                const data = await res.json();
+                if (data.success && data.settings) {
+                    const s = data.settings;
+                    if (s.text) textInput.value = s.text;
+                    if (s.color) { colorInput.value = s.color; colorHex.value = s.color; }
+                    if (s.shine_color) { shineInput.value = s.shine_color; shineHex.value = s.shine_color; }
+                    if (s.font_family) fontInput.value = s.font_family;
+                    if (s.font_size) { sizeInput.value = s.font_size; sizeValue.textContent = `${s.font_size}px`; }
+                    if (s.intro_style) introStyleInput.value = s.intro_style;
+                    if (s.outro_style) outroStyleInput.value = s.outro_style;
+                    if (s.intro_duration) { introDurationInput.value = s.intro_duration; introDurationValue.textContent = `${s.intro_duration}s`; }
+                    if (s.hold_duration) { holdDurationInput.value = s.hold_duration; holdDurationValue.textContent = `${s.hold_duration}s`; }
+                    if (s.outro_duration) { outroDurationInput.value = s.outro_duration; outroDurationValue.textContent = `${s.outro_duration}s`; }
+                    if (s.neon_strength) { neonInput.value = s.neon_strength; neonValue.textContent = `${s.neon_strength}%`; }
+                    updatePreview();
+                }
+            } catch (err) {}
+        }
+
+        async function saveSettings() {
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.disabled = true;
+            saveBtn.textContent = '⏳ جاري الحفظ...';
+
+            const payload = {
+                text: textInput.value.trim(),
+                color: colorInput.value,
+                shine_color: shineInput.value,
+                font_family: fontInput.value,
+                font_size: parseInt(sizeInput.value),
+                intro_style: introStyleInput.value,
+                outro_style: outroStyleInput.value,
+                intro_duration: parseFloat(introDurationInput.value),
+                hold_duration: parseFloat(holdDurationInput.value),
+                outro_duration: parseFloat(outroDurationInput.value),
+                neon_strength: parseInt(neonInput.value),
+                neon_enabled: 1,
+                flame_particles: true,
+                sound_enabled: true
+            };
+
+            try {
+                const res = await fetch(`/api/fire-settings/${uid}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!res.ok) throw new Error('فشل الحفظ');
+                
+                showStatus('✅ تم حفظ إعدادات النص الناري بنجاح! سيتم تحديث شاشة البث فوراً.', 'success');
+            } catch (err) {
+                showStatus('❌ خطأ في الحفظ: ' + err.message, 'error');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = '💾 حفظ الإعدادات';
+            }
+        }
+
+        function copyWidgetUrl() {
+            navigator.clipboard.writeText(widgetUrl).then(() => {
+                alert('✅ تم نسخ رابط شريط النص الناري! الصقه في Browser Source داخل TikTok Live Studio أو OBS.');
+            }).catch(() => {
+                alert('الرابط: ' + widgetUrl);
+            });
+        }
+
+        function showStatus(msg, type) {
+            statusBox.textContent = msg;
+            statusBox.className = `status show ${type}`;
+            setTimeout(() => { statusBox.classList.remove('show'); }, 4000);
+        }
+
+        loadSettings();
+    </script>
+</body>
+</html>

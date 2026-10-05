@@ -35,8 +35,8 @@
                     <span class="status-dot"></span>
                     <span id="storageStatusText">جاري الفحص...</span>
                 </div>
-                <button class="btn-action btn-supporter" onclick="openSupporterModal()">
-                    👑 إطار آخر داعم 🔥
+                <button class="btn-action btn-fire-nav" onclick="openFireModal()">
+                    🔥 شريط النص الناري (Fire Widget)
                 </button>
                 <button class="btn-action btn-obs" onclick="openObsModal()">
                     📺 رابط الـ Overlay
@@ -363,64 +363,31 @@ CLOUDINARY_API_SECRET=الرمز_السري</pre>
         </div>
     </div>
 
-    <!-- Modal: Last Supporter Configuration -->
-    <div class="modal-backdrop" id="supporterModal">
-        <div class="modal-box modal-wide">
-            <button class="modal-close" onclick="closeSupporterModal()">✕</button>
-            <h3 class="modal-title">👑 إطار آخر داعم للبث (Last Supporter Frame) 🔥</h3>
-            <p>إطار مخصص فخم لعرض آخر داعم في البث المباشر مع تأثيرات النار المشتعلة، أنترو الدخول المتفجر، وأوترو الخروج:</p>
+    <!-- Modal: Fire Widget (شريط النص الناري) -->
+    <div class="modal-backdrop" id="fireModal">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeFireModal()">✕</button>
+            <h3 class="modal-title">🔥 شريط النص الناري (Fire Widget)</h3>
+            <p>شريط نصي مشتعل يظهر على شاشة البث (OBS / TikTok Live Studio) مع تأثيرات النار، الانفجار الناري (Intro)، والاحتراق (Outro):</p>
 
-            <div class="supporter-settings-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin:15px 0;">
-                <div>
-                    <label style="font-size:13px;font-weight:bold;color:#c4b5fd;display:block;margin-bottom:6px;">
-                        👤 اسم المستخدم في TikAlert:
-                    </label>
-                    <input type="text" id="supporterUsername" value="mezo" class="form-input" placeholder="اسم حسابك">
-                </div>
-                <div>
-                    <label style="font-size:13px;font-weight:bold;color:#c4b5fd;display:block;margin-bottom:6px;">
-                        🏷️ نص العنوان الملكي:
-                    </label>
-                    <input type="text" id="supporterTitle" value="آخر داعم للبث" class="form-input" placeholder="مثال: داعم البث الأخير">
-                </div>
-                <div>
-                    <label style="font-size:13px;font-weight:bold;color:#c4b5fd;display:block;margin-bottom:6px;">
-                        🎨 ثيم وشكل الإطار:
-                    </label>
-                    <select id="supporterTheme" class="form-select">
-                        <option value="fire">🔥 نار وبركان مشتعل (Fire Flame)</option>
-                        <option value="gold">👑 ذهب ملكي فخم (Royal Gold)</option>
-                        <option value="neon">⚡ نيون سايبر (Cyberpunk Neon)</option>
-                        <option value="galaxy">🌌 مجرة كونية (Cosmic Galaxy)</option>
-                    </select>
-                </div>
-                <div>
-                    <label style="font-size:13px;font-weight:bold;color:#c4b5fd;display:block;margin-bottom:6px;">
-                        🎬 حركة وتأثير الأنترو (Intro):
-                    </label>
-                    <select id="supporterIntro" class="form-select">
-                        <option value="burst">💥 انفجار ناري عنيف (Fire Burst)</option>
-                        <option value="slide">🚀 انزلاق ثلاثي الأبعاد (3D Slide)</option>
-                        <option value="burn">🔥 احتراق وظهور (Flame Burn)</option>
-                    </select>
-                </div>
-            </div>
-
-            <div style="background:rgba(25,30,55,0.7);padding:14px;border-radius:12px;border:1px solid rgba(255,69,0,0.3);margin:15px 0;">
+            <div style="background:rgba(25,30,55,0.7);padding:16px;border-radius:12px;border:1px solid rgba(255,69,0,0.3);margin:15px 0;">
                 <p style="font-size:13px;color:#fca5a5;margin-bottom:8px;">📺 <strong>رابط الـ Browser Source لبرنامج OBS / TikTok Live Studio:</strong></p>
-                <div class="copy-box" style="margin:0 0 10px 0;">
-                    <input type="text" id="supporterObsUrl" readonly>
-                    <button class="btn-copy" onclick="copySupporterUrl()">📋 نسخ الرابط</button>
+                <div class="copy-box" style="margin:0 0 12px 0;">
+                    <input type="text" id="fireWidgetObsUrl" readonly>
+                    <button class="btn-copy" onclick="copyFireWidgetUrl()">📋 نسخ الرابط</button>
                 </div>
                 <div style="display:flex;gap:10px;flex-wrap:wrap;">
-                    <a id="testSupporterBtn" href="#" target="_blank" class="btn-primary" style="text-decoration:none;">
-                        👁️ فتح الإطار وتجربة التأثيرات
+                    <a href="/fire.html" class="btn-primary" style="text-decoration:none;">
+                        ⚙️ فتح صفحة إعدادات وتخصيص النص الناري
+                    </a>
+                    <a id="openFireTextBtn" href="#" target="_blank" class="btn-secondary" style="text-decoration:none;">
+                        👁️ فتح شاشة العرض
                     </a>
                 </div>
             </div>
 
             <div class="modal-footer">
-                <button class="btn-secondary" onclick="closeSupporterModal()">إغلاق</button>
+                <button class="btn-secondary" onclick="closeFireModal()">إغلاق</button>
             </div>
         </div>
     </div>

@@ -247,54 +247,80 @@ app.get('/overlay', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'overlay.html'));
 });
 
-// Last Supporter Widget (صفحة آخر داعم مع تأثيرات النار والأنترو والأوترو)
-app.get('/last-supporter.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'last-supporter.html'));
+// ================= FIRE WIDGET ROUTES ================= //
+
+// Fire Widget Display Page (صفحة العرض لشاشات البث OBS / TikTok Live Studio)
+app.get('/fire-text.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'fire-text.html'));
 });
 
-app.get('/last-supporter', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'last-supporter.html'));
+app.get('/fire-text', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'fire-text.html'));
 });
 
-app.get('/supporter', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'last-supporter.html'));
+// Fire Widget Settings Page (صفحة إعدادات النص الناري)
+app.get('/fire.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'fire.html'));
 });
 
-// Proxy for TikAlert (لتجاوز قيود X-Frame-Options وحل الروابط النسبية)
-app.get('/api/last-supporter', async (req, res) => {
-    const username = req.query.username || 'mezo';
+app.get('/fire', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'fire.html'));
+});
 
-    try {
-        const response = await fetch(
-            `https://tikalert-eg.com/last-supporter/widget?username=${encodeURIComponent(username)}`,
-            {
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
-                }
-            }
-        );
+// Device board UID helper
+app.get('/api/device-board', (req, res) => {
+    const ip = req.ip || req.connection.remoteAddress || 'default';
+    const board_id = 'board_' + Buffer.from(ip).toString('base64').replace(/[^a-z0-9]/gi, '').slice(0, 12);
+    res.json({ success: true, board_id });
+});
 
-        let html = await response.text();
+// Default Fire Settings
+function getDefaultFireSettings() {
+    return {
+        text: 'رابط الدعم بالبايو 🔥',
+        color: '#A00000',
+        shine_color: '#FF3333',
+        font_size: 58,
+        shine_speed: 4,
+        font_family: 'Cairo',
+        widget_type: 'both',
+        direction: 'right-left',
+        intro_duration: 2.5,
+        hold_duration: 3.0,
+        outro_duration: 2.5,
+        shadow_strength: 40,
+        neon_enabled: 1,
+        neon_strength: 85,
+        intro_style: 'burst',   // 'burst', 'slide', 'burn', 'volcano', 'fade'
+        outro_style: 'burn',    // 'burn', 'slide', 'melt', 'fade'
+        flame_particles: true,  // realistic rising sparks & flames
+        sound_enabled: true
+    };
+}
 
-        // حقن رابط Base لتصحيح كافة مسارات ملفات الـ JS والـ CSS من TikAlert
-        if (html.includes('<head>')) {
-            html = html.replace('<head>', '<head><base href="https://tikalert-eg.com/">');
-        } else if (html.includes('<HEAD>')) {
-            html = html.replace('<HEAD>', '<HEAD><base href="https://tikalert-eg.com/">');
-        }
+// Get Fire Settings
+app.get('/api/fire-settings/:uid', (req, res) => {
+    const uid = req.params.uid;
+    const data = readData();
+    const board = data[uid] || getDefaultBoard(uid);
+    const settings = board.fireSettings || getDefaultFireSettings();
+    res.set('Cache-Control', 'no-store');
+    res.json({ success: true, settings });
+});
 
-        // إزالة سياسة الأمان الصارمة للسماح بتشغيل الـ iframe
-        html = html.replace(/<meta\s+http-equiv=["']Content-Security-Policy["'][^>]*>/gi, '');
+// Save Fire Settings
+app.post('/api/fire-settings/:uid', (req, res) => {
+    const uid = req.params.uid;
+    const data = readData();
+    if (!data[uid]) data[uid] = getDefaultBoard(uid);
 
-        res.removeHeader('X-Frame-Options');
-        res.removeHeader('Content-Security-Policy');
-        res.set('Content-Type', 'text/html; charset=utf-8');
-        res.send(html);
-    } catch (err) {
-        console.error('Proxy error for last-supporter:', err);
-        res.status(500).send('Error loading widget: ' + err.message);
-    }
+    data[uid].fireSettings = {
+        ...(data[uid].fireSettings || getDefaultFireSettings()),
+        ...req.body
+    };
+
+    writeData(data);
+    res.json({ success: true, settings: data[uid].fireSettings });
 });
 
 // System Status & Storage Diagnostics

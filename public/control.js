@@ -721,45 +721,28 @@ function escapeHtml(str) {
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-// ================= Last Supporter Modal Logic ================= //
-function openSupporterModal() {
-    updateSupporterUrl();
-    document.getElementById('supporterModal').classList.add('open');
+// ================= Fire Widget Modal Logic ================= //
+function openFireModal() {
+    const fireUrl = `${window.location.origin}/fire-text.html?uid=${encodeURIComponent(uid)}`;
+    document.getElementById('fireWidgetObsUrl').value = fireUrl;
+    document.getElementById('openFireTextBtn').href = fireUrl;
+    document.getElementById('fireModal').classList.add('open');
 }
-function closeSupporterModal() {
-    document.getElementById('supporterModal').classList.remove('open');
-}
-
-function updateSupporterUrl() {
-    const username = document.getElementById('supporterUsername').value.trim() || 'mezo';
-    const title = document.getElementById('supporterTitle').value.trim() || 'آخر داعم للبث';
-    const theme = document.getElementById('supporterTheme').value;
-    const intro = document.getElementById('supporterIntro').value;
-
-    const url = `${window.location.origin}/last-supporter.html?username=${encodeURIComponent(username)}&theme=${encodeURIComponent(theme)}&intro=${encodeURIComponent(intro)}&title=${encodeURIComponent(title)}&test=true`;
-    document.getElementById('supporterObsUrl').value = url;
-    document.getElementById('testSupporterBtn').href = url;
+function closeFireModal() {
+    document.getElementById('fireModal').classList.remove('open');
 }
 
-function copySupporterUrl() {
-    const input = document.getElementById('supporterObsUrl');
+function copyFireWidgetUrl() {
+    const input = document.getElementById('fireWidgetObsUrl');
     input.select();
     input.setSelectionRange(0, 99999);
     navigator.clipboard.writeText(input.value).then(() => {
-        alert('✅ تم نسخ رابط إطار آخر داعم بنجاح! الصقه في Browser Source داخل TikTok Live Studio أو OBS.');
+        alert('✅ تم نسخ رابط شريط النص الناري! الصقه في Browser Source داخل TikTok Live Studio أو OBS.');
     }).catch(() => {
         document.execCommand('copy');
         alert('✅ تم نسخ الرابط!');
     });
 }
-
-['supporterUsername', 'supporterTitle', 'supporterTheme', 'supporterIntro'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-        el.addEventListener('input', updateSupporterUrl);
-        el.addEventListener('change', updateSupporterUrl);
-    }
-});
 
 // ================= Initial Load ================= //
 checkStatus();

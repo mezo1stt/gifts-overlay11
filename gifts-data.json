@@ -61,6 +61,26 @@
     "fontSize": 22,
     "glowIntensity": 15,
     "animationType": "slide",
-    "animationDuration": 7
+    "animationDuration": 7,
+    "fireSettings": {
+      "text": "??? ?????: MEZO ??",
+      "color": "#A00000",
+      "shine_color": "#FF3333",
+      "font_size": 64,
+      "shine_speed": 4,
+      "font_family": "Cairo",
+      "widget_type": "both",
+      "direction": "right-left",
+      "intro_duration": 2.5,
+      "hold_duration": 3,
+      "outro_duration": 2.5,
+      "shadow_strength": 40,
+      "neon_enabled": 1,
+      "neon_strength": 85,
+      "intro_style": "burst",
+      "outro_style": "burn",
+      "flame_particles": true,
+      "sound_enabled": true
+    }
   }
 }
