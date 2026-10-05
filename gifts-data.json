@@ -1,0 +1,66 @@
+{
+  "board_XXXX": {
+    "color": "#ef4444",
+    "gifts": [
+      {
+        "id": 4,
+        "name": "تيربو ",
+        "image": "rose.png"
+      },
+      {
+        "id": 1791197817002,
+        "name": "مكوك فضائي",
+        "image": "1791197817001-eb77ead5c3abb6da6034d3cf6cfeb438~tplv-obj.webp"
+      },
+      {
+        "id": 1791197852392,
+        "name": "حمايه",
+        "image": "1791197852391-e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp"
+      },
+      {
+        "id": 3,
+        "name": "صاروخ",
+        "image": "perfume.png"
+      },
+      {
+        "id": 2,
+        "name": "بوابه ",
+        "image": "donut.png"
+      },
+      {
+        "id": 1791197748045,
+        "name": "نيزك ",
+        "image": "1791197748042-81cb495abfe066981b9c135cfff21c7a.png~tplv-obj.webp"
+      },
+      {
+        "id": 1791197915044,
+        "name": "تبطئ الاعبين ",
+        "image": "1791197915043-374dfe46d5b09ce1db19be06202d34f5.png~tplv-obj.webp"
+      },
+      {
+        "id": 1791198042523,
+        "name": "اسرع لاعب",
+        "image": "1791198042522-9f8bd92363c400c284179f6719b6ba9c~tplv-obj.webp"
+      },
+      {
+        "id": 1791198055545,
+        "name": "نقل اسطوري",
+        "image": "1791198055544-79a02148079526539f7599150da9fd28.png~tplv-obj.webp"
+      },
+      {
+        "id": 1791198066525,
+        "name": "فوز",
+        "image": "1791198066523-1d067d13988e8754ed6adbebd89b9ee8.png~tplv-obj.webp"
+      }
+    ],
+    "verticalAlign": "top",
+    "scale": 110,
+    "offsetY": 0,
+    "horizontalAlign": "right",
+    "offsetX": 30,
+    "fontSize": 22,
+    "glowIntensity": 15,
+    "animationType": "slide",
+    "animationDuration": 7
+  }
+}

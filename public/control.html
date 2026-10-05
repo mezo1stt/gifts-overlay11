@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎛️ لوحة تحكم هدايا التيك توك | Gifts Overlay</title>
+    <link rel="stylesheet" href="/control.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="app-header">
+        <div class="header-container">
+            <div class="logo-area">
+                <span class="logo-icon">🎁</span>
+                <div>
+                    <h1 class="logo-title">TikTok Gifts Overlay</h1>
+                    <p class="logo-subtitle">لوحة التحكم التفاعلية في هدايا البث المباشر</p>
+                </div>
+            </div>
+
+            <!-- Board ID & Switcher -->
+            <div class="board-selector-area">
+                <div class="board-id-badge">
+                    <span class="label">معرف اللوحة (ID):</span>
+                    <input type="text" id="uidInput" placeholder="board_XXXX" title="اضغط Enter للانتقال">
+                    <button id="switchUidBtn" class="btn-sm btn-neon">تغيير اللوحة</button>
+                </div>
+            </div>
+
+            <!-- Quick Status & Actions -->
+            <div class="header-actions">
+                <div class="status-indicator" id="storageStatusBadge" title="حالة التخزين السحابي">
+                    <span class="status-dot"></span>
+                    <span id="storageStatusText">جاري الفحص...</span>
+                </div>
+                <button class="btn-action btn-supporter" onclick="openSupporterModal()">
+                    👑 إطار آخر داعم 🔥
+                </button>
+                <button class="btn-action btn-obs" onclick="openObsModal()">
+                    📺 رابط الـ Overlay
+                </button>
+                <button class="btn-action btn-cloud" onclick="openCloudModal()">
+                    ☁️ إعدادات Render
+                </button>
+                <button class="btn-action btn-backup" onclick="openBackupModal()">
+                    💾 نسخة احتياطية
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard -->
+    <main class="dashboard-grid">
+        
+        <!-- Right Column: Settings & Live Preview -->
+        <section class="panel-section control-panel">
+            <div class="panel-card">
+                <h2 class="card-title">
+                    <span>↕️ موقع الـ Overlay على الشاشة (تحريك لأعلى وأسفل)</span>
+                </h2>
+                
+                <div class="position-control-box">
+                    <p class="control-hint">تحكم في مكان ظهور الهدايا في OBS و TikTok Live Studio:</p>
+                    
+                    <div class="pos-preset-buttons">
+                        <button class="btn-pos" data-valign="top" onclick="setPosition('top', 0)">
+                            ⬆️ أعلى اليمين
+                        </button>
+                        <button class="btn-pos active" data-valign="center" onclick="setPosition('center', 0)">
+                            ⏺️ منتصف اليمين
+                        </button>
+                        <button class="btn-pos" data-valign="bottom" onclick="setPosition('bottom', 0)">
+                            ⬇️ أسفل اليمين
+                        </button>
+                    </div>
+
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <label>↕️ إزاحة دقيقة لأعلى ولأسفل (Y-Offset):</label>
+                            <span class="slider-badge" id="offsetYValue">0 px</span>
+                        </div>
+                        <div class="slider-controls">
+                            <span class="range-bound">⬆️ أعلى</span>
+                            <input type="range" id="offsetYSlider" min="-400" max="400" step="5" value="0">
+                            <span class="range-bound">⬇️ أسفل</span>
+                            <button class="btn-reset" onclick="resetOffsetY()" title="إعادة للصفر">↺</button>
+                        </div>
+                    </div>
+
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <label>↔️ المحاذاة الأفقية:</label>
+                            <div class="btn-toggle-group">
+                                <button class="btn-toggle active" id="btnAlignRight" onclick="setHorizontalAlign('right')">يمين ➡️</button>
+                                <button class="btn-toggle" id="btnAlignLeft" onclick="setHorizontalAlign('left')">⬅️ يسار</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Appearance & Neon -->
+            <div class="panel-card">
+                <h2 class="card-title">
+                    <span>🎨 مظهر النيون والحجم</span>
+                </h2>
+
+                <div class="color-picker-box">
+                    <div class="color-row">
+                        <label for="neonColor">لون النيون:</label>
+                        <input type="color" id="neonColor" value="#a855f7">
+                        <span id="colorHex">#a855f7</span>
+                    </div>
+
+                    <div class="color-presets">
+                        <button class="preset-btn" style="--c:#a855f7" data-color="#a855f7" title="بنفسجي ملكي"></button>
+                        <button class="preset-btn" style="--c:#ef4444" data-color="#ef4444" title="أحمر ناري"></button>
+                        <button class="preset-btn" style="--c:#3b82f6" data-color="#3b82f6" title="أزرق نيون"></button>
+                        <button class="preset-btn" style="--c:#10b981" data-color="#10b981" title="أخضر زمردي"></button>
+                        <button class="preset-btn" style="--c:#f59e0b" data-color="#f59e0b" title="برتقالي"></button>
+                        <button class="preset-btn" style="--c:#ec4899" data-color="#ec4899" title="وردي"></button>
+                        <button class="preset-btn" style="--c:#06b6d4" data-color="#06b6d4" title="سماوي سايبر"></button>
+                        <button class="preset-btn" style="--c:#eab308" data-color="#eab308" title="أصفر ذهبي"></button>
+                    </div>
+
+                    <div class="slider-group mt-3">
+                        <div class="slider-header">
+                            <label>📏 حجم الهدايا والخط:</label>
+                            <span class="slider-badge" id="scaleValue">100%</span>
+                        </div>
+                        <input type="range" id="scaleSlider" min="70" max="140" step="5" value="100">
+                    </div>
+
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <label>💡 قوة توهج النيون (Glow):</label>
+                            <span class="slider-badge" id="glowValue">15 px</span>
+                        </div>
+                        <input type="range" id="glowSlider" min="5" max="30" step="1" value="15">
+                    </div>
+
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <label>🎬 تأثير الحركة (Animation):</label>
+                            <select id="animTypeSelect" class="form-select">
+                                <option value="slide">انزلاق سلس (Slide In/Out)</option>
+                                <option value="fade">تلاشي لطيف (Fade)</option>
+                                <option value="bounce">قفزة حيوية (Bounce)</option>
+                                <option value="pulse">نبض مستمر (Pulse)</option>
+                                <option value="none">ثابت بدون حركة (Static)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mini Live Preview -->
+            <div class="panel-card preview-card">
+                <div class="card-header-flex">
+                    <h2 class="card-title">
+                        <span>👁️ معاينة حية لشاشة البث</span>
+                    </h2>
+                    <a id="previewExternalLink" href="#" target="_blank" class="preview-external-btn">فتح في نافذة كاملة ↗</a>
+                </div>
+                <div class="preview-screen-wrapper">
+                    <div class="preview-screen" id="previewScreen">
+                        <div class="preview-overlay-content" id="previewOverlayContent">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+                </div>
+                <p class="preview-note">✨ هذه المعاينة تحاكي تماماً شكل الـ Overlay على شاشة TikTok Live Studio أو OBS في الوقت الفعلي.</p>
+            </div>
+        </section>
+
+        <!-- Left Column: Gift Management -->
+        <section class="panel-section gifts-panel">
+            
+            <!-- Add Gifts Form -->
+            <div class="panel-card add-gift-card">
+                <h2 class="card-title">
+                    <span>➕ إضافة هدايا جديدة</span>
+                </h2>
+
+                <div class="tabs-nav">
+                    <button class="tab-btn active" data-tab="uploadTab">📁 رفع من جهازك</button>
+                    <button class="tab-btn" data-tab="urlTab">🔗 رابط صورة مباشر</button>
+                    <button class="tab-btn" data-tab="libraryTab">🌟 مكتبة هدايا تيك توك</button>
+                </div>
+
+                <!-- Tab 1: File Upload -->
+                <div class="tab-content active" id="uploadTab">
+                    <div class="upload-dropzone" onclick="document.getElementById('fileInput').click()" id="dropZone">
+                        <span class="dropzone-icon">📤</span>
+                        <h3>اضغط لاختيار صورة أو اسحبها هنا</h3>
+                        <p>يمكنك اختيار صورة واحدة أو عدة صور معاً (PNG, WEBP, JPG, GIF)</p>
+                        <input type="file" id="fileInput" accept="image/*" multiple hidden>
+                    </div>
+
+                    <!-- Pending preview list -->
+                    <div id="pendingBox" class="pending-box"></div>
+
+                    <button id="saveAllGiftsBtn" class="btn-save-all" style="display:none" onclick="savePendingGifts()">
+                        💾 حفظ وإضافة كل الصور
+                    </button>
+                </div>
+
+                <!-- Tab 2: Image URL -->
+                <div class="tab-content" id="urlTab">
+                    <p class="tab-hint">💡 <strong>ميزة دائمة:</strong> الروابط المباشرة (مثل روابط تيك توك أو ديسكورد أو Imgur) لا تحذف أبداً حتى بعد إعادة تشغيل ريندر!</p>
+                    <div class="url-input-group">
+                        <input type="text" id="giftUrlInput" placeholder="https://example.com/gift-icon.png" class="form-input">
+                        <input type="text" id="giftUrlName" placeholder="✍️ اسم الهدية (مثلاً: نيزك، تيربو)" class="form-input">
+                    </div>
+                    <div id="urlPreviewBox" class="url-preview-box" style="display:none">
+                        <img id="urlPreviewImg" src="" alt="معاينة">
+                        <span id="urlPreviewName"></span>
+                    </div>
+                    <button class="btn-primary mt-2" onclick="addGiftByUrl()">
+                        ➕ إضافة الهدية
+                    </button>
+                </div>
+
+                <!-- Tab 3: Built-in Library -->
+                <div class="tab-content" id="libraryTab">
+                    <p class="tab-hint">اختر أي هدية شائعة لإضافتها فوراً بنقرة واحدة:</p>
+                    <div class="library-grid" id="libraryGrid">
+                        <!-- Populated via JS with popular TikTok icons -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Gifts List -->
+            <div class="panel-card current-gifts-card">
+                <div class="card-header-flex">
+                    <h2 class="card-title">
+                        <span>📋 الهدايا الحالية في الـ Overlay</span>
+                    </h2>
+                    <span class="count-badge" id="giftsCountBadge">0 هدية</span>
+                </div>
+
+                <p class="list-instructions">
+                    💡 يمكنك تعديل الاسم مباشرة (يحفظ تلقائياً) واستخدام أزرار ⬆️ ⬇️ لتحريك وترتيب الهدايا.
+                </p>
+
+                <div id="giftsList" class="gifts-list">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Modal: OBS / TikTok Live Studio Link -->
+    <div class="modal-backdrop" id="obsModal">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeObsModal()">✕</button>
+            <h3 class="modal-title">📺 رابط الـ Overlay المخصص للبث</h3>
+            <p>أضف هذا الرابط كمصدر متصفح (Browser Source) في برنامج البث:</p>
+            
+            <div class="copy-box">
+                <input type="text" id="fullOverlayUrl" readonly>
+                <button class="btn-copy" onclick="copyOverlayUrl()">📋 نسخ الرابط</button>
+            </div>
+
+            <div class="obs-instructions">
+                <h4>📌 إعدادات Browser Source الموصى بها:</h4>
+                <ul>
+                    <li><strong>العرض (Width):</strong> 1920 (أو 1080 للبث العمودي)</li>
+                    <li><strong>الارتفاع (Height):</strong> 1080 (أو 1920 للبث العمودي)</li>
+                    <li><strong>Shutdown source when not visible:</strong> معطل (Disabled)</li>
+                    <li><strong>Refresh browser when scene becomes active:</strong> معطل</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeObsModal()">إغلاق</button>
+                <a id="openOverlayBtn" href="#" target="_blank" class="btn-primary">👁️ فتح الـ Overlay للتجربة</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Cloud Storage & Render Config -->
+    <div class="modal-backdrop" id="cloudModal">
+        <div class="modal-box modal-wide">
+            <button class="modal-close" onclick="closeCloudModal()">✕</button>
+            <h3 class="modal-title">☁️ إعدادات الحفظ الدائم على Render</h3>
+            
+            <div class="cloud-info-box">
+                <p><strong>لماذا تُحذف الصور عند إعادة تشغيل ريندر؟</strong></p>
+                <p>استضافة Render في خطتها المجانية تستخدم أقراصاً مؤقتة (Ephemeral Containers)، وعند كل ريستارت أو دخول السيرفر في وضع النوم يعود الملف إلى حالته الأصلية وتُمسح الصور المخزنة في مجلد المشروع.</p>
+                <p class="highlight-text">💡 <strong>الحل الجذري والسهل:</strong> ربط خدمة تخزين سحابية مجانية 100% مثل <strong>Cloudinary</strong> أو <strong>ImgBB</strong> أو استخدام <strong>MongoDB Atlas</strong> لحفظ البيانات!</p>
+            </div>
+
+            <div class="config-tabs">
+                <div class="config-step">
+                    <h4>🌟 الطريقة 1 (الأفضل والموصى بها): Cloudinary مجاني 25GB</h4>
+                    <ol>
+                        <li>أنشئ حساباً مجانياً من <a href="https://cloudinary.com" target="_blank">Cloudinary.com</a>.</li>
+                        <li>انسخ الـ <strong>Cloud Name</strong> و <strong>API Key</strong> و <strong>API Secret</strong> من لوحة التحكم.</li>
+                        <li>في حسابك على <a href="https://dashboard.render.com" target="_blank">Render.com</a>، افتح مشروعك، ثم اذهب إلى <strong>Environment</strong> وأضف:
+                            <pre>CLOUDINARY_CLOUD_NAME=اسم_حسابك
+CLOUDINARY_API_KEY=مفتاح_api
+CLOUDINARY_API_SECRET=الرمز_السري</pre>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="config-step">
+                    <h4>⚡ الطريقة 2: ImgBB (مفتاح مجاني خلال 10 ثوانٍ)</h4>
+                    <p>احصل على مفتاح مجاني بدون بطاقة ائتمان من <a href="https://api.imgbb.com" target="_blank">api.imgbb.com</a> ثم أضف في ريندر:</p>
+                    <pre>IMGBB_API_KEY=مفتاحك_هنا</pre>
+                </div>
+
+                <div class="config-step" style="border: 1px solid #10b981; background: rgba(16, 185, 129, 0.1);">
+                    <h4 style="color: #a7f3d0;">⚡ ميزة منع النوم 24/7 (مفعلة تلقائياً في الكود بدون أي تسجيل!)</h4>
+                    <p>لقد قمنا ببرمجة نظام <strong>Anti-Sleep Keep-Alive</strong> داخل السيرفر مباشرة؛ بمجرد رفع المشروع على Render، يكتشف السيرفر رابطه تلقائياً ويرسل نبضة تنشيط كل 8 دقائق، مما يمنع الخادم من النوم نهائياً ويجعله شغالاً 24 ساعة طوال الشهر بدون أن تضطر للتسجيل في أي موقع خارجي!</p>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeCloudModal()">حسناً، فهمت</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Backup & Restore -->
+    <div class="modal-backdrop" id="backupModal">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeBackupModal()">✕</button>
+            <h3 class="modal-title">💾 النسخ الاحتياطي واستعادة البيانات</h3>
+            <p>احتفظ بنسخة من جميع الهدايا وإعداداتها لاستعادتها في أي وقت بضغطة زر:</p>
+
+            <div class="backup-actions-grid">
+                <div class="backup-action-card">
+                    <h4>📥 تحميل نسخة احتياطية (JSON)</h4>
+                    <p>تنزيل ملف يحتوي على كل الهدايا والألوان والإزاحات.</p>
+                    <a href="/api/backup" download="gifts-overlay-backup.json" class="btn-primary">
+                        💾 تحميل ملف النسخة الاحتياطية
+                    </a>
+                </div>
+
+                <div class="backup-action-card">
+                    <h4>📤 استعادة من ملف</h4>
+                    <p>ارفع ملف JSON سبق تحميله لاستعادة كل الهدايا فوراً.</p>
+                    <input type="file" id="restoreFileInput" accept=".json" hidden>
+                    <button class="btn-secondary" onclick="document.getElementById('restoreFileInput').click()">
+                        📂 اختيار ملف للاستعادة
+                    </button>
+                </div>
+            </div>
+
+            <div class="local-restore-box mt-3" id="localRestoreBox" style="display:none">
+                <p>🔄 <strong>تم العثور على نسخة محفوظة تلقائياً في متصفحك!</strong></p>
+                <button class="btn-neon" onclick="restoreFromLocal()">استعادة من ذاكرة المتصفح</button>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeBackupModal()">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Last Supporter Configuration -->
+    <div class="modal-backdrop" id="supporterModal">
+        <div class="modal-box modal-wide">
+            <button class="modal-close" onclick="closeSupporterModal()">✕</button>
+            <h3 class="modal-title">👑 إطار آخر داعم للبث (Last Supporter Frame) 🔥</h3>
+            <p>إطار مخصص فخم لعرض آخر داعم في البث المباشر مع تأثيرات النار المشتعلة، أنترو الدخول المتفجر، وأوترو الخروج:</p>
+
+            <div class="supporter-settings-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin:15px 0;">
+                <div>
+                    <label style="font-size:13px;font-weight:bold;color:#c4b5fd;display:block;margin-bottom:6px;">
+                        👤 اسم المستخدم في TikAlert:
+                    </label>
+                    <input type="text" id="supporterUsername" value="mezo" class="form-input" placeholder="اسم حسابك">
+                </div>
+                <div>
+                    <label style="font-size:13px;font-weight:bold;color:#c4b5fd;display:block;margin-bottom:6px;">
+                        🏷️ نص العنوان الملكي:
+                    </label>
+                    <input type="text" id="supporterTitle" value="آخر داعم للبث" class="form-input" placeholder="مثال: داعم البث الأخير">
+                </div>
+                <div>
+                    <label style="font-size:13px;font-weight:bold;color:#c4b5fd;display:block;margin-bottom:6px;">
+                        🎨 ثيم وشكل الإطار:
+                    </label>
+                    <select id="supporterTheme" class="form-select">
+                        <option value="fire">🔥 نار وبركان مشتعل (Fire Flame)</option>
+                        <option value="gold">👑 ذهب ملكي فخم (Royal Gold)</option>
+                        <option value="neon">⚡ نيون سايبر (Cyberpunk Neon)</option>
+                        <option value="galaxy">🌌 مجرة كونية (Cosmic Galaxy)</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:13px;font-weight:bold;color:#c4b5fd;display:block;margin-bottom:6px;">
+                        🎬 حركة وتأثير الأنترو (Intro):
+                    </label>
+                    <select id="supporterIntro" class="form-select">
+                        <option value="burst">💥 انفجار ناري عنيف (Fire Burst)</option>
+                        <option value="slide">🚀 انزلاق ثلاثي الأبعاد (3D Slide)</option>
+                        <option value="burn">🔥 احتراق وظهور (Flame Burn)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="background:rgba(25,30,55,0.7);padding:14px;border-radius:12px;border:1px solid rgba(255,69,0,0.3);margin:15px 0;">
+                <p style="font-size:13px;color:#fca5a5;margin-bottom:8px;">📺 <strong>رابط الـ Browser Source لبرنامج OBS / TikTok Live Studio:</strong></p>
+                <div class="copy-box" style="margin:0 0 10px 0;">
+                    <input type="text" id="supporterObsUrl" readonly>
+                    <button class="btn-copy" onclick="copySupporterUrl()">📋 نسخ الرابط</button>
+                </div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <a id="testSupporterBtn" href="#" target="_blank" class="btn-primary" style="text-decoration:none;">
+                        👁️ فتح الإطار وتجربة التأثيرات
+                    </a>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeSupporterModal()">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/control.js"></script>
+</body>
+</html>

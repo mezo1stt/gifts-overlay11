@@ -1,0 +1,24 @@
+name: 24/7 Keep Awake (Anti-Sleep for Render)
+
+on:
+  schedule:
+    # Runs every 10 minutes to keep Render active 24/7
+    - cron: '*/10 * * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub Actions tab
+
+jobs:
+  keep-awake:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Render Overlay App
+        run: |
+          echo "Sending 24/7 Keep-Alive heartbeat..."
+          APP_URL="${{ secrets.RENDER_APP_URL }}"
+          if [ -z "$APP_URL" ]; then
+            echo "No RENDER_APP_URL secret set. Trying default domain or skipping."
+            curl -s -I "https://gifts-overlay.onrender.com/api/status" || true
+          else
+            echo "Pinging $APP_URL"
+            curl -s -I "$APP_URL/api/status" || true
+          fi
+          echo "Keep-alive ping sent successfully!"
