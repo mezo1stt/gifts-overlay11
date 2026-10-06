@@ -1,5 +1,7 @@
 require('dotenv').config();
 const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
@@ -7,6 +9,8 @@ const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: '*' } });
 const PORT = process.env.PORT || 3001;
 
 // Paths & Directories
@@ -267,6 +271,10 @@ app.get('/fire', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'fire.html'));
 });
 
+app.get('/fire-text', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'fire-text.html'));
+});
+
 // Device board UID helper
 app.get('/api/device-board', (req, res) => {
     const ip = req.ip || req.connection.remoteAddress || 'default';
@@ -278,23 +286,28 @@ app.get('/api/device-board', (req, res) => {
 function getDefaultFireSettings() {
     return {
         text: 'رابط الدعم بالبايو 🔥',
-        color: '#A00000',
-        shine_color: '#FF3333',
-        font_size: 58,
-        shine_speed: 4,
+        color: '#ff1e00',
+        shine_color: '#ffd700',
+        font_size: 64,
         font_family: 'Cairo',
-        widget_type: 'both',
-        direction: 'right-left',
+        letter_spacing: 2,
+        animation_style: 'energy_slash', // 'energy_slash', 'volcano_magma', 'fire_burst', 'blaze_flame', 'laser_sweep', 'pulse_glow'
+        display_mode: 'continuous',      // 'continuous', 'cycle'
+        banner_style: 'transparent',     // 'transparent', 'glass', 'magma'
+        intro_style: 'burst',            // 'burst', 'volcano', 'slide', 'burn', 'fade'
+        outro_style: 'burn',             // 'burn', 'slide', 'melt', 'fade'
         intro_duration: 2.5,
-        hold_duration: 3.0,
+        hold_duration: 4.0,
         outro_duration: 2.5,
-        shadow_strength: 40,
+        loop_interval: 8,
         neon_enabled: 1,
-        neon_strength: 85,
-        intro_style: 'burst',   // 'burst', 'slide', 'burn', 'volcano', 'fade'
-        outro_style: 'burn',    // 'burn', 'slide', 'melt', 'fade'
-        flame_particles: true,  // realistic rising sparks & flames
-        sound_enabled: true
+        neon_strength: 95,
+        flame_particles: true,           // realistic rising sparks & flames
+        sound_enabled: true,
+        position_v: 'center',            // 'top', 'center', 'bottom'
+        position_h: 'center',            // 'right', 'center', 'left'
+        offset_y: 0,
+        scale: 100
     };
 }
 
@@ -303,7 +316,10 @@ app.get('/api/fire-settings/:uid', (req, res) => {
     const uid = req.params.uid;
     const data = readData();
     const board = data[uid] || getDefaultBoard(uid);
-    const settings = board.fireSettings || getDefaultFireSettings();
+    const settings = {
+        ...getDefaultFireSettings(),
+        ...(board.fireSettings || {})
+    };
     res.set('Cache-Control', 'no-store');
     res.json({ success: true, settings });
 });
@@ -320,7 +336,82 @@ app.post('/api/fire-settings/:uid', (req, res) => {
     };
 
     writeData(data);
+
+    // Real-time broadcast to OBS and preview clients
+    io.emit('fire_settings_update', { uid, settings: data[uid].fireSettings });
+
     res.json({ success: true, settings: data[uid].fireSettings });
+});
+
+// ================= SUPPORT LINK (TIKOVERLAY 3D LIQUID FIRE) ROUTES ================= //
+
+function getDefaultSupportLinkSettings() {
+    return {
+        mode: 'text',
+        text: 'رابط الدعم بالبايو 🔥',
+        accentColor: '#ff1e00',
+        secondaryColor: '#ffd700',
+        fontFamily: 'Cairo',
+        fontSize: 72,
+        scale: 1.0,
+        offsetY: 0,
+        vAlign: 'center',
+        hAlign: 'center',
+        sparks: true,
+        glowIntensity: 100,
+        subtitle: ''
+    };
+}
+
+// Exact TikOverlay compatibility route
+app.get('/widgets/support-link/index.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'widgets', 'support-link', 'index.html'));
+});
+
+app.get('/widgets/support-link', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'widgets', 'support-link', 'index.html'));
+});
+
+app.get('/support-link.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'support-link.html'));
+});
+
+app.get('/support-link', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'support-link.html'));
+});
+
+// TikOverlay native settings endpoint
+app.get('/api/widget/support-link/settings', (req, res) => {
+    const uid = req.query.uid || 'board_XXXX';
+    const data = readData();
+    const board = data[uid] || getDefaultBoard(uid);
+    const settings = board.supportLink || getDefaultSupportLinkSettings();
+    res.set('Cache-Control', 'no-store');
+    res.json({ success: true, settings });
+});
+
+// Support Link Settings by UID
+app.get('/api/support-link/:uid', (req, res) => {
+    const uid = req.params.uid;
+    const data = readData();
+    const board = data[uid] || getDefaultBoard(uid);
+    const settings = board.supportLink || getDefaultSupportLinkSettings();
+    res.set('Cache-Control', 'no-store');
+    res.json({ success: true, settings });
+});
+
+app.post('/api/support-link/:uid', (req, res) => {
+    const uid = req.params.uid;
+    const data = readData();
+    if (!data[uid]) data[uid] = getDefaultBoard(uid);
+
+    data[uid].supportLink = {
+        ...(data[uid].supportLink || getDefaultSupportLinkSettings()),
+        ...req.body
+    };
+
+    writeData(data);
+    res.json({ success: true, settings: data[uid].supportLink });
 });
 
 // System Status & Storage Diagnostics
@@ -652,7 +743,7 @@ app.put('/api/gifts/:uid/reorder', (req, res) => {
     res.json({ success: true, gifts: reordered });
 });
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`🚀 Server is running on port ${PORT}`);
     console.log(`📡 Storage Mode: ${isCloudinaryConfigured() ? 'Cloudinary (Cloud)' : (process.env.IMGBB_API_KEY ? 'ImgBB (Cloud)' : 'Local Disk')}`);
     startKeepAlive();

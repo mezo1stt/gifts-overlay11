@@ -13,6 +13,11 @@ localStorage.setItem('gifts_last_uid', uid);
 const uidInput = document.getElementById('uidInput');
 uidInput.value = uid;
 
+const btnGoToFirePage = document.getElementById('btnGoToFirePage');
+if (btnGoToFirePage) {
+    btnGoToFirePage.href = `/fire.html?uid=${encodeURIComponent(uid)}`;
+}
+
 document.getElementById('switchUidBtn').addEventListener('click', switchBoard);
 uidInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') switchBoard();
@@ -719,29 +724,6 @@ document.querySelectorAll('.modal-backdrop').forEach(modal => {
 function escapeHtml(str) {
     if (!str) return '';
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
-
-// ================= Fire Widget Modal Logic ================= //
-function openFireModal() {
-    const fireUrl = `${window.location.origin}/fire-text.html?uid=${encodeURIComponent(uid)}`;
-    document.getElementById('fireWidgetObsUrl').value = fireUrl;
-    document.getElementById('openFireTextBtn').href = fireUrl;
-    document.getElementById('fireModal').classList.add('open');
-}
-function closeFireModal() {
-    document.getElementById('fireModal').classList.remove('open');
-}
-
-function copyFireWidgetUrl() {
-    const input = document.getElementById('fireWidgetObsUrl');
-    input.select();
-    input.setSelectionRange(0, 99999);
-    navigator.clipboard.writeText(input.value).then(() => {
-        alert('✅ تم نسخ رابط شريط النص الناري! الصقه في Browser Source داخل TikTok Live Studio أو OBS.');
-    }).catch(() => {
-        document.execCommand('copy');
-        alert('✅ تم نسخ الرابط!');
-    });
 }
 
 // ================= Initial Load ================= //

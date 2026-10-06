@@ -35,9 +35,9 @@
                     <span class="status-dot"></span>
                     <span id="storageStatusText">جاري الفحص...</span>
                 </div>
-                <button class="btn-action btn-fire-nav" onclick="openFireModal()">
-                    🔥 شريط النص الناري (Fire Widget)
-                </button>
+                <a href="/fire.html" id="btnGoToFirePage" class="btn-action btn-fire-nav" style="text-decoration:none; display:flex; align-items:center; gap:6px; background:linear-gradient(135deg, #ff4500, #ff8c00); box-shadow:0 0 15px rgba(255, 69, 0, 0.4); border-color:#ffd700;">
+                    🔥 شريط النص الناري (Fire Text) ↗
+                </a>
                 <button class="btn-action btn-obs" onclick="openObsModal()">
                     📺 رابط الـ Overlay
                 </button>
@@ -359,39 +359,6 @@ CLOUDINARY_API_SECRET=الرمز_السري</pre>
 
             <div class="modal-footer">
                 <button class="btn-secondary" onclick="closeBackupModal()">إغلاق</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal: Fire Widget (شريط النص الناري) -->
-    <div class="modal-backdrop" id="fireModal">
-        <div class="modal-box">
-            <button class="modal-close" onclick="closeFireModal()">✕</button>
-            <h3 class="modal-title">🔥 شريط النص الناري (Fire Widget)</h3>
-            <p>شريط نصي مشتعل يظهر على شاشة البث (OBS / TikTok Live Studio) مع تأثيرات النار، الانفجار الناري (Intro)، والاحتراق (Outro):</p>
-
-            <div style="background:rgba(25,30,55,0.7);padding:16px;border-radius:12px;border:1px solid rgba(255,69,0,0.3);margin:15px 0;">
-                <p style="font-size:13px;color:#fca5a5;margin-bottom:8px;">📺 <strong>رابط الـ Browser Source لبرنامج OBS / TikTok Live Studio:</strong></p>
-                <div class="copy-box" style="margin:0 0 12px 0;">
-                    <input type="text" id="fireWidgetObsUrl" readonly>
-                    <button class="btn-copy" onclick="copyFireWidgetUrl()">📋 نسخ الرابط</button>
-                </div>
-                <div style="display:flex;gap:10px;flex-wrap:wrap;">
-                    <a href="/fire.html" class="btn-primary" style="text-decoration:none;">
-                        ⚙️ فتح صفحة إعدادات وتخصيص النص الناري
-                    </a>
-                    <a id="openFireTextBtn" href="#" target="_blank" class="btn-secondary" style="text-decoration:none;">
-                        👁️ فتح شاشة العرض
-                    </a>
-                </div>
-            </div>
-
-            <div class="modal-footer">
-                <button class="btn-secondary" onclick="closeFireModal()">إغلاق</button>
-            </div>
-        </div>
-    </div>
-
     <script src="/control.js"></script>
 </body>
 </html>
