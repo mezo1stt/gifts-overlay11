@@ -26,11 +26,11 @@
 
         :root {
             --frame-color: #b594f8;
-            --glow-color: rgba(181, 148, 248, 0.6);
+            --glow-color: rgba(181, 148, 248, 0.7);
             --hue-deg: 0deg;
             --sat-val: 100%;
             --bri-val: 100%;
-            --glow-px: 15px;
+            --glow-px: 18px;
         }
 
         /* Master Frame Stage */
@@ -45,7 +45,7 @@
             transition: transform 0.2s ease;
         }
 
-        /* 1. Video Frame Layer (For Sakura / Custom Video) */
+        /* 1. Video Frame Layer (For Sakura & Custom Video) */
         .frame-video-layer {
             position: absolute;
             inset: 0;
@@ -69,80 +69,183 @@
             display: none;
         }
 
-        /* Cyber Neon Frame */
-        .frame-cyber-neon {
-            border: 3px solid var(--frame-color);
-            border-radius: 20px;
-            box-shadow: 
-                0 0 25px var(--glow-color),
-                inset 0 0 15px var(--glow-color);
-            background: linear-gradient(135deg, rgba(10, 15, 30, 0.75), rgba(5, 5, 12, 0.85));
-            clip-path: polygon(
-                30px 0%, calc(100% - 30px) 0%, 100% 30px, 
-                100% calc(100% - 30px), calc(100% - 30px) 100%, 
-                30px 100%, 0% calc(100% - 30px), 0% 30px
-            );
-        }
-        .frame-cyber-neon::before {
-            content: '';
+        /* Common animated elements inside procedural frames */
+        .procedural-frame-box {
             position: absolute;
-            top: 6px; left: 6px; right: 6px; bottom: 6px;
-            border: 1px dashed rgba(255, 255, 255, 0.35);
-            border-radius: 14px;
+            top: 20px;
+            bottom: 20px;
+            left: 50px;
+            right: 50px;
+            border-radius: 24px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 var(--glow-px) var(--glow-color), inset 0 0 15px var(--glow-color);
+            transition: all 0.3s ease;
+        }
+
+        /* Sweeping light beam */
+        .frame-light-sweep {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+            transform: skewX(-25deg);
+            animation: sweepLight 4s infinite linear;
             pointer-events: none;
         }
 
-        /* Royal Gold & Fire Frame */
-        .frame-gold-fire {
+        @keyframes sweepLight {
+            0% { left: -100%; }
+            40%, 100% { left: 200%; }
+        }
+
+        /* Particles Layer */
+        .particles-field {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .float-spark {
+            position: absolute;
+            border-radius: 50%;
+            background: var(--frame-color);
+            box-shadow: 0 0 10px var(--glow-color);
+            opacity: 0;
+            animation: floatSparkle 3.5s infinite ease-in-out;
+        }
+
+        .float-spark:nth-child(1) { width: 6px; height: 6px; left: 15%; top: 75%; animation-delay: 0s; }
+        .float-spark:nth-child(2) { width: 8px; height: 8px; left: 28%; top: 80%; animation-delay: 0.7s; }
+        .float-spark:nth-child(3) { width: 5px; height: 5px; left: 45%; top: 70%; animation-delay: 1.4s; }
+        .float-spark:nth-child(4) { width: 9px; height: 9px; left: 62%; top: 82%; animation-delay: 2.1s; }
+        .float-spark:nth-child(5) { width: 6px; height: 6px; left: 78%; top: 75%; animation-delay: 0.4s; }
+        .float-spark:nth-child(6) { width: 7px; height: 7px; left: 90%; top: 80%; animation-delay: 1.8s; }
+
+        @keyframes floatSparkle {
+            0% { transform: translateY(0) scale(0.6); opacity: 0; }
+            40% { opacity: 0.9; }
+            80% { opacity: 0.6; }
+            100% { transform: translateY(-70px) scale(1.3); opacity: 0; }
+        }
+
+        /* Wing Accents (Left & Right Badges) */
+        .side-crest {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 52px;
+            height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            z-index: 5;
+            filter: drop-shadow(0 0 12px var(--glow-color));
+            animation: crestGlow 2.5s infinite alternate ease-in-out;
+        }
+        .side-crest.left { left: 16px; }
+        .side-crest.right { right: 16px; }
+
+        @keyframes crestGlow {
+            0% { transform: translateY(-50%) scale(0.95); filter: drop-shadow(0 0 8px var(--glow-color)); }
+            100% { transform: translateY(-50%) scale(1.08); filter: drop-shadow(0 0 18px var(--frame-color)); }
+        }
+
+        /* --- STYLES: --- */
+
+        /* 1. Cyber Neon Frame */
+        .frame-cyber-neon .procedural-frame-box {
+            border: 2.5px solid var(--frame-color);
+            background: linear-gradient(135deg, rgba(8, 12, 24, 0.88), rgba(4, 6, 15, 0.94));
+            clip-path: polygon(
+                32px 0%, calc(100% - 32px) 0%, 100% 32px, 
+                100% calc(100% - 32px), calc(100% - 32px) 100%, 
+                32px 100%, 0% calc(100% - 32px), 0% 32px
+            );
+            animation: cyberPulse 3s infinite alternate;
+        }
+
+        .frame-cyber-neon .procedural-frame-box::after {
+            content: '';
+            position: absolute;
+            inset: 8px;
+            border: 1px dashed rgba(255, 255, 255, 0.35);
+            pointer-events: none;
+            border-radius: 12px;
+        }
+
+        @keyframes cyberPulse {
+            0% { box-shadow: 0 0 15px var(--glow-color), inset 0 0 10px var(--glow-color); }
+            100% { box-shadow: 0 0 35px var(--frame-color), inset 0 0 25px var(--frame-color); }
+        }
+
+        /* 2. Royal Gold & Fire Frame */
+        .frame-gold-fire .procedural-frame-box {
             border: 3px solid var(--frame-color);
             border-radius: 28px;
-            box-shadow: 
-                0 0 30px var(--glow-color),
-                0 0 60px rgba(255, 120, 0, 0.4),
-                inset 0 0 20px var(--glow-color);
-            background: linear-gradient(135deg, rgba(30, 15, 5, 0.85), rgba(15, 8, 2, 0.9));
+            background: linear-gradient(135deg, rgba(28, 14, 4, 0.9), rgba(14, 7, 2, 0.95));
+            animation: fireAura 2.2s infinite alternate ease-in-out;
         }
 
-        /* Crystal Ice Frame */
-        .frame-crystal-ice {
+        @keyframes fireAura {
+            0% { box-shadow: 0 0 20px var(--glow-color), 0 0 40px rgba(255, 120, 0, 0.3), inset 0 0 15px var(--glow-color); }
+            100% { box-shadow: 0 0 45px var(--frame-color), 0 0 80px var(--glow-color), inset 0 0 30px var(--frame-color); }
+        }
+
+        /* 3. Crystal Ice Frame */
+        .frame-crystal-ice .procedural-frame-box {
             border: 2.5px solid var(--frame-color);
+            border-radius: 26px;
+            background: linear-gradient(135deg, rgba(12, 28, 50, 0.85), rgba(6, 16, 32, 0.92));
+            backdrop-filter: blur(12px);
+            animation: iceShine 3s infinite alternate;
+        }
+
+        @keyframes iceShine {
+            0% { box-shadow: 0 0 18px var(--glow-color), inset 0 0 20px rgba(255, 255, 255, 0.25); }
+            100% { box-shadow: 0 0 38px var(--frame-color), inset 0 0 35px rgba(255, 255, 255, 0.45); }
+        }
+
+        /* 4. Emerald Nature Frame */
+        .frame-emerald-nature .procedural-frame-box {
+            border: 3px solid var(--frame-color);
             border-radius: 24px;
-            box-shadow: 
-                0 0 25px var(--glow-color),
-                inset 0 0 20px rgba(255, 255, 255, 0.3);
-            background: linear-gradient(135deg, rgba(10, 25, 45, 0.75), rgba(5, 15, 25, 0.85));
-            backdrop-filter: blur(10px);
+            background: linear-gradient(135deg, rgba(6, 30, 18, 0.88), rgba(2, 16, 10, 0.94));
+            animation: emeraldBreathe 3.5s infinite alternate ease-in-out;
         }
 
-        /* Emerald Nature Frame */
-        .frame-emerald-nature {
-            border: 3px solid var(--frame-color);
-            border-radius: 22px;
-            box-shadow: 
-                0 0 28px var(--glow-color),
-                inset 0 0 16px rgba(34, 255, 136, 0.35);
-            background: linear-gradient(135deg, rgba(5, 25, 15, 0.8), rgba(2, 12, 8, 0.9));
+        @keyframes emeraldBreathe {
+            0% { box-shadow: 0 0 18px var(--glow-color), inset 0 0 14px var(--glow-color); }
+            100% { box-shadow: 0 0 38px var(--frame-color), inset 0 0 28px var(--frame-color); }
         }
 
-        /* Crimson Dragon Frame */
-        .frame-crimson-dragon {
+        /* 5. Crimson Dragon Frame */
+        .frame-crimson-dragon .procedural-frame-box {
             border: 3px solid var(--frame-color);
-            border-radius: 20px;
-            box-shadow: 
-                0 0 32px var(--glow-color),
-                inset 0 0 22px rgba(255, 42, 74, 0.4);
-            background: linear-gradient(135deg, rgba(35, 5, 10, 0.85), rgba(15, 2, 5, 0.92));
+            background: linear-gradient(135deg, rgba(38, 6, 12, 0.9), rgba(16, 2, 6, 0.96));
             clip-path: polygon(
-                40px 0%, calc(100% - 40px) 0%, 100% 25px, 
-                100% calc(100% - 25px), calc(100% - 40px) 100%, 
-                40px 100%, 0% calc(100% - 25px), 0% 25px
+                42px 0%, calc(100% - 42px) 0%, 100% 28px, 
+                100% calc(100% - 28px), calc(100% - 42px) 100%, 
+                42px 100%, 0% calc(100% - 28px), 0% 28px
             );
+            animation: dragonWrath 2.4s infinite alternate;
+        }
+
+        @keyframes dragonWrath {
+            0% { box-shadow: 0 0 22px var(--glow-color), inset 0 0 18px var(--glow-color); }
+            100% { box-shadow: 0 0 48px var(--frame-color), inset 0 0 36px var(--frame-color); }
         }
 
         /* 3. The Widget Content Container (Embedded TikAlert Iframe) */
         .widget-content-slot {
             position: absolute;
-            z-index: 1;
+            z-index: 10; /* Strictly on top of all frames */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -171,10 +274,10 @@
         <!-- 1. Video Layer (For Sakura & Custom Video) -->
         <video id="frameVideo" class="frame-video-layer" src="/videos/sakura_frame.webm" autoplay loop muted playsinline></video>
 
-        <!-- 2. Procedural CSS Layer -->
+        <!-- 2. Procedural Animated Frames Layer -->
         <div id="frameCss" class="frame-css-layer"></div>
 
-        <!-- 3. Nested TikAlert Widget Iframe -->
+        <!-- 3. Nested TikAlert Widget Iframe (Always in front) -->
         <div class="widget-content-slot" id="widgetSlot">
             <iframe id="widgetIframe" class="widget-iframe" src="https://tikalert-eg.com/last-supporter/widget?username=mezo" allowtransparency="true" scrolling="no"></iframe>
         </div>
@@ -192,6 +295,30 @@
         const iframeEl = document.getElementById('widgetIframe');
 
         let currentConfig = null;
+
+        function renderProceduralFrameContent(style) {
+            let leftIcon = '⚡', rightIcon = '⚡';
+            if (style === 'gold_fire') { leftIcon = '🔥'; rightIcon = '👑'; }
+            else if (style === 'crystal_ice') { leftIcon = '💎'; rightIcon = '❄️'; }
+            else if (style === 'emerald_nature') { leftIcon = '🌿'; rightIcon = '✨'; }
+            else if (style === 'crimson_dragon') { leftIcon = '🐉'; rightIcon = '⚔️'; }
+
+            cssEl.innerHTML = `
+                <div class="procedural-frame-box">
+                    <div class="frame-light-sweep"></div>
+                    <div class="particles-field">
+                        <span class="float-spark"></span>
+                        <span class="float-spark"></span>
+                        <span class="float-spark"></span>
+                        <span class="float-spark"></span>
+                        <span class="float-spark"></span>
+                        <span class="float-spark"></span>
+                    </div>
+                </div>
+                <div class="side-crest left">${leftIcon}</div>
+                <div class="side-crest right">${rightIcon}</div>
+            `;
+        }
 
         function applyFrameConfig(cfg) {
             if (!cfg) return;
@@ -215,24 +342,22 @@
             document.documentElement.style.setProperty('--hue-deg', `${hue}deg`);
             document.documentElement.style.setProperty('--sat-val', `${sat}%`);
             document.documentElement.style.setProperty('--bri-val', `${bri}%`);
-            document.documentElement.style.setProperty('--glow-px', `${15 * glow}px`);
+            document.documentElement.style.setProperty('--glow-px', `${18 * glow}px`);
 
             // Apply Stage Scale & Offset
             stageEl.style.transform = `scale(${scale}) translate(${offX}px, ${offY}px)`;
 
-            // Adjust Slot Dimensions
-            slotEl.style.width = `${slotW}px`;
-            slotEl.style.height = `${slotH}px`;
-
-            // Adjust Slot Offset for specific frames (e.g. Sakura has flowers on right and $ on left)
+            // Adjust Slot Dimensions & Positioning
             if (style === 'sakura') {
-                slotEl.style.left = '52%';
-                slotEl.style.top = '51%';
-                slotEl.style.width = '780px';
-                slotEl.style.height = '130px';
+                slotEl.style.left = '51.5%';
+                slotEl.style.top = '50.5%';
+                slotEl.style.width = '790px';
+                slotEl.style.height = '135px';
             } else {
                 slotEl.style.left = '50%';
                 slotEl.style.top = '50%';
+                slotEl.style.width = `${slotW}px`;
+                slotEl.style.height = `${slotH}px`;
             }
 
             // Switch Frame Layers
@@ -251,7 +376,7 @@
                     videoEl.play().catch(() => {});
                 }
             } else {
-                // Procedural CSS Frames
+                // Procedural Animated CSS Frames
                 videoEl.style.display = 'none';
                 cssEl.style.display = 'block';
                 cssEl.className = 'frame-css-layer';
@@ -262,6 +387,8 @@
                 else if (style === 'emerald_nature') cssEl.classList.add('frame-emerald-nature');
                 else if (style === 'crimson_dragon') cssEl.classList.add('frame-crimson-dragon');
                 else cssEl.classList.add('frame-cyber-neon');
+
+                renderProceduralFrameContent(style);
             }
 
             // Update Iframe URL if changed

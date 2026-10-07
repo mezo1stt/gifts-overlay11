@@ -732,7 +732,7 @@
                             
                             <!-- Fire Text Content -->
                             <div class="panel-card">
-                                <h3 class="card-title"><span>🔥 تخصيص شريط رابط الدعم (Support Bio)</span></h3>
+                                <h3 class="card-title"><span>📝 تخصيص نص (متغير) / شريط الدعم المتحرك</span></h3>
 
                                 <div class="form-group">
                                     <label for="fireTextInput">✍️ النص المعروض في الشريط:</label>
@@ -1039,11 +1039,13 @@
                                     <div class="mt-3" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                                         <span style="font-size:12px; color:#94a3b8; font-weight:800;">ألوان سريعة:</span>
                                         <button type="button" class="chip" onclick="applyFrameColorPreset('#b594f8', 0)">🌸 بنفسجي ساكورا</button>
-                                        <button type="button" class="chip" onclick="applyFrameColorPreset('#00f0ff', 180)">⚡ أزرق سيبراني</button>
-                                        <button type="button" class="chip" onclick="applyFrameColorPreset('#ff2a55', 330)">🔴 أحمر ناري</button>
-                                        <button type="button" class="chip" onclick="applyFrameColorPreset('#22ff88', 90)">🟢 أخضر زمردي</button>
-                                        <button type="button" class="chip" onclick="applyFrameColorPreset('#ffd700', 45)">🟡 ذهبي إمبراطوري</button>
-                                        <button type="button" class="chip" onclick="applyFrameColorPreset('#ff758c', 300)">💖 وردي نيون</button>
+                                        <button type="button" class="chip" onclick="applyFrameColorPreset('#00f0ff', 290)">⚡ أزرق سيبراني</button>
+                                        <button type="button" class="chip" onclick="applyFrameColorPreset('#ff2a55', 98)">🔴 أحمر ناري</button>
+                                        <button type="button" class="chip" onclick="applyFrameColorPreset('#22ff88', 258)">🟢 أخضر زمردي</button>
+                                        <button type="button" class="chip" onclick="applyFrameColorPreset('#ffd700', 161)">🟡 ذهبي إمبراطوري</button>
+                                        <button type="button" class="chip" onclick="applyFrameColorPreset('#ff758c', 85)">💖 وردي نيون</button>
+                                        <button type="button" class="chip" onclick="applyFrameColorPreset('#9333ea', 20)">🟣 بنفسجي ملكي</button>
+                                        <button type="button" class="chip" onclick="applyFrameColorPreset('#f97316', 135)">🟠 برتقالي شمسي</button>
                                     </div>
                                 </div>
 
@@ -1056,13 +1058,20 @@
                                     </p>
 
                                     <!-- Frame Sizing / Zoom / Offsets -->
-                                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-top:12px;">
+                                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:12px; margin-top:12px;">
                                         <div>
                                             <div style="display:flex; justify-content:space-between;">
                                                 <label for="supporterFrameScale">حجم الإطار (Scale):</label>
                                                 <span id="supporterFrameScaleVal" style="font-size:11.5px; color:var(--gold); font-weight:800;">100%</span>
                                             </div>
                                             <input type="range" id="supporterFrameScale" min="50" max="150" value="100" style="width:100%;" oninput="onSupporterFrameScaleChange(this.value)">
+                                        </div>
+                                        <div>
+                                            <div style="display:flex; justify-content:space-between;">
+                                                <label for="supporterFrameOffsetX">إزاحة أفقية (X):</label>
+                                                <span id="supporterFrameOffsetXVal" style="font-size:11.5px; color:var(--gold); font-weight:800;">0px</span>
+                                            </div>
+                                            <input type="range" id="supporterFrameOffsetX" min="-120" max="120" value="0" style="width:100%;" oninput="onSupporterFrameOffsetChange('x', this.value)">
                                         </div>
                                         <div>
                                             <div style="display:flex; justify-content:space-between;">
@@ -1869,11 +1878,14 @@
                 <div style="position:relative; flex:1; min-width:200px;">
                     <input type="text" id="visualGiftSearchInput" class="form-input" placeholder="🔍 ابحث عن هدية بالاسم (وردة، نيزك، دونات، أسد...)" oninput="filterVisualGiftsList(this.value)">
                 </div>
-                <div class="price-chips-row" style="margin:0;">
-                    <button type="button" class="chip active" onclick="filterVisualGiftsByPrice('all', this)">الكل</button>
-                    <button type="button" class="chip" onclick="filterVisualGiftsByPrice('popular', this)">المشهورة 🔥</button>
-                    <button type="button" class="chip" onclick="filterVisualGiftsByPrice('1-100', this)">1 - 99 💎</button>
-                    <button type="button" class="chip" onclick="filterVisualGiftsByPrice('100+', this)">100+ 👑</button>
+                <div class="price-chips-row" style="margin:0; display:flex; flex-wrap:wrap; gap:6px;">
+                    <button type="button" class="chip active" onclick="filterVisualGiftsByPrice('all', this)">الكل (700+) 🌟</button>
+                    <button type="button" class="chip" onclick="filterVisualGiftsByPrice('1', this)">1 عملة 🪙</button>
+                    <button type="button" class="chip" onclick="filterVisualGiftsByPrice('lt10', this)">2 - 9 🪙</button>
+                    <button type="button" class="chip" onclick="filterVisualGiftsByPrice('lt100', this)">10 - 99 💎</button>
+                    <button type="button" class="chip" onclick="filterVisualGiftsByPrice('lt1000', this)">100 - 999 🚀</button>
+                    <button type="button" class="chip" onclick="filterVisualGiftsByPrice('lt10000', this)">1,000 - 9,999 👑</button>
+                    <button type="button" class="chip" onclick="filterVisualGiftsByPrice('gt10000', this)">10,000+ 🪐</button>
                 </div>
             </div>
 

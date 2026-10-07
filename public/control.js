@@ -859,7 +859,8 @@ async function loadTiktokGiftsCatalog() {
     try {
         const res = await fetch('/api/tiktok-gifts');
         if (res.ok) {
-            allTiktokGifts = await res.json();
+            const rawGifts = await res.json();
+            allTiktokGifts = Array.isArray(rawGifts) ? rawGifts.sort((a, b) => (a.coins || 1) - (b.coins || 1)) : [];
             renderTiktokGiftsCatalog();
             renderMutualExclusionGrid();
         }
@@ -922,8 +923,8 @@ function renderTiktokGiftsCatalog() {
         return;
     }
 
-    // Render up to 250 items for rapid scrolling
-    const itemsToRender = filtered.slice(0, 250);
+    // Render all items sorted ascending by coins
+    const itemsToRender = filtered;
 
     itemsToRender.forEach(gift => {
         const card = document.createElement('div');
@@ -1822,6 +1823,8 @@ function renderMutualExclusionGrid() {
             }
         });
     }
+    // Sort strictly from 1 coin to highest
+    librarySource.sort((a, b) => (a.coins || 1) - (b.coins || 1));
 
     // Filter by search & price
     let filtered = librarySource;
@@ -3282,41 +3285,70 @@ function renderVisualGiftsGallery() {
     const countEl = document.getElementById('visualGiftPickerCount');
     if (!grid) return;
 
-    // Collect all gifts: POPULAR_GIFTS + allTiktokGifts deduplicated
+    // Collect all gifts: allTiktokGifts (707 gifts) + POPULAR_GIFTS deduplicated
     const giftList = [];
     const seenImages = new Set();
 
-    POPULAR_GIFTS.forEach(g => {
-        const norm = normalizeImgPath(g.image);
-        if (!seenImages.has(norm)) {
-            seenImages.add(norm);
-            giftList.push({ name: g.name, image: g.image, diamonds: 1, popular: true });
-        }
-    });
-
-    if (Array.isArray(allTiktokGifts)) {
+    // 1. Add official TikTok gifts
+    if (Array.isArray(allTiktokGifts) && allTiktokGifts.length > 0) {
         allTiktokGifts.forEach(g => {
             const norm = normalizeImgPath(g.image);
             if (!seenImages.has(norm)) {
                 seenImages.add(norm);
+                const coins = g.coins || g.diamonds || 1;
                 giftList.push({
                     name: g.name,
                     image: g.image,
-                    diamonds: g.diamonds || g.coins || 1,
-                    popular: (g.diamonds || 0) >= 100
+                    diamonds: coins,
+                    coins: coins,
+                    popular: coins >= 100
                 });
             }
         });
     }
 
+    // 2. Also add popular gifts if not already present
+    POPULAR_GIFTS.forEach(g => {
+        const norm = normalizeImgPath(g.image);
+        if (!seenImages.has(norm)) {
+            seenImages.add(norm);
+            const coins = g.diamonds || g.coins || 1;
+            giftList.push({
+                name: g.name,
+                image: g.image,
+                diamonds: coins,
+                coins: coins,
+                popular: true
+            });
+        }
+    });
+
+    // 3. Sort strictly by price ascending: from 1 coin to highest!
+    giftList.sort((a, b) => (a.diamonds || 1) - (b.diamonds || 1));
+
     // Filter by search query
     let filtered = giftList;
     if (visualGiftSearchQuery) {
-        filtered = filtered.filter(g => (g.name || '').toLowerCase().includes(visualGiftSearchQuery));
+        filtered = filtered.filter(g =>
+            (g.name || '').toLowerCase().includes(visualGiftSearchQuery) ||
+            String(g.diamonds || '').includes(visualGiftSearchQuery)
+        );
     }
 
     // Filter by price chip
-    if (visualGiftPriceFilter === 'popular') {
+    if (visualGiftPriceFilter === '1') {
+        filtered = filtered.filter(g => (g.diamonds || 1) === 1);
+    } else if (visualGiftPriceFilter === 'lt10') {
+        filtered = filtered.filter(g => (g.diamonds || 1) >= 2 && (g.diamonds || 1) < 10);
+    } else if (visualGiftPriceFilter === 'lt100') {
+        filtered = filtered.filter(g => (g.diamonds || 1) >= 10 && (g.diamonds || 1) < 100);
+    } else if (visualGiftPriceFilter === 'lt1000') {
+        filtered = filtered.filter(g => (g.diamonds || 1) >= 100 && (g.diamonds || 1) < 1000);
+    } else if (visualGiftPriceFilter === 'lt10000') {
+        filtered = filtered.filter(g => (g.diamonds || 1) >= 1000 && (g.diamonds || 1) < 10000);
+    } else if (visualGiftPriceFilter === 'gt10000') {
+        filtered = filtered.filter(g => (g.diamonds || 1) >= 10000);
+    } else if (visualGiftPriceFilter === 'popular') {
         filtered = filtered.filter(g => g.popular);
     } else if (visualGiftPriceFilter === '1-100') {
         filtered = filtered.filter(g => (g.diamonds || 1) < 100);
@@ -3324,8 +3356,8 @@ function renderVisualGiftsGallery() {
         filtered = filtered.filter(g => (g.diamonds || 1) >= 100);
     }
 
-    // Limit to 120 items for snappy performance
-    const displayList = filtered.slice(0, 120);
+    // Show ALL matching gifts (no artificial slicing cap!)
+    const displayList = filtered;
 
     grid.innerHTML = '';
     const currentSelectedImg = (activeCardSlotIndex !== null && cardsBoardConfig[cardsActiveTargetTeam]?.cards[activeCardSlotIndex])
@@ -3341,15 +3373,15 @@ function renderVisualGiftsGallery() {
         card.onclick = () => selectVisualGift(g.name, g.image);
 
         card.innerHTML = `
-            <img src="${normImg}" alt="${escapeHtml(g.name)}" onerror="this.src='/images/rose.png'">
+            <img src="${normImg}" loading="lazy" alt="${escapeHtml(g.name)}" onerror="this.src='/images/rose.png'">
             <span class="v-gift-name" title="${escapeHtml(g.name)}">${escapeHtml(g.name)}</span>
-            <span class="v-gift-coins">${g.diamonds ? g.diamonds + ' 💎' : '🔥 مميزة'}</span>
+            <span class="v-gift-coins">🪙 ${(g.diamonds || 1).toLocaleString()}</span>
         `;
         grid.appendChild(card);
     });
 
     if (countEl) {
-        countEl.textContent = `تم العثور على ${filtered.length} هدية بالصور (معروض ${displayList.length})`;
+        countEl.textContent = `تم العثور على ${displayList.length} من أصل ${giftList.length} هدية (مرتبة من 1 عملة إلى أعلى سعر 💎)`;
     }
 }
 
@@ -3436,6 +3468,11 @@ function syncSupporterFrameUI() {
     if (scaleEl) scaleEl.value = supporterFrameConfig.frameScale || 100;
     if (scaleVal) scaleVal.textContent = `${supporterFrameConfig.frameScale || 100}%`;
 
+    const offXEl = document.getElementById('supporterFrameOffsetX');
+    const offXVal = document.getElementById('supporterFrameOffsetXVal');
+    if (offXEl) offXEl.value = supporterFrameConfig.offsetX || 0;
+    if (offXVal) offXVal.textContent = `${supporterFrameConfig.offsetX || 0}px`;
+
     const offYEl = document.getElementById('supporterFrameOffsetY');
     const offYVal = document.getElementById('supporterFrameOffsetYVal');
     if (offYEl) offYEl.value = supporterFrameConfig.offsetY || 0;
@@ -3443,6 +3480,27 @@ function syncSupporterFrameUI() {
 
     // 4. Update Preview Simulator Iframe
     updateSupporterFramePreview();
+}
+
+function hexToHsl(hex) {
+    if (!hex) return { h: 0, s: 100, l: 50 };
+    hex = hex.replace('#', '');
+    if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+    const r = parseInt(hex.substring(0, 2), 16) / 255;
+    const g = parseInt(hex.substring(2, 4), 16) / 255;
+    const b = parseInt(hex.substring(4, 6), 16) / 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h = 0, s = 0, l = (max + min) / 2;
+    if (max !== min) {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+            case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+            case g: h = ((b - r) / d + 2) / 6; break;
+            case b: h = ((r - g) / d + 4) / 6; break;
+        }
+    }
+    return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
 }
 
 function selectSupporterFrameStyle(style) {
@@ -3456,11 +3514,21 @@ function selectSupporterFrameStyle(style) {
 
 function onSupporterFrameColorChange(val) {
     supporterFrameConfig.frameColor = val;
+    // Base video hue is lilac (~250deg). Calculate delta rotation needed to shift lilac to target color:
+    const hsl = hexToHsl(val);
+    const deltaHue = Math.round((hsl.h - 250 + 360) % 360);
+    supporterFrameConfig.hueRotate = deltaHue;
+
     const colHex = document.getElementById('supporterFrameColorHex');
     if (colHex) {
         colHex.textContent = val;
         colHex.style.color = val;
     }
+    const hueInput = document.getElementById('supporterFrameHue');
+    const hueVal = document.getElementById('supporterFrameHueVal');
+    if (hueInput) hueInput.value = deltaHue;
+    if (hueVal) hueVal.textContent = `${deltaHue}°`;
+
     updateSupporterFramePreview();
     saveSupporterFrameConfigAction(true);
 }
@@ -3492,8 +3560,14 @@ function onSupporterFrameGlowChange(val) {
 
 function applyFrameColorPreset(hex, hue) {
     supporterFrameConfig.frameColor = hex;
-    supporterFrameConfig.hueRotate = hue;
+    if (hue !== undefined && hue !== null) {
+        supporterFrameConfig.hueRotate = hue;
+    } else {
+        const hsl = hexToHsl(hex);
+        supporterFrameConfig.hueRotate = Math.round((hsl.h - 250 + 360) % 360);
+    }
     syncSupporterFrameUI();
+    updateSupporterFramePreview();
     saveSupporterFrameConfigAction(true);
 }
 
@@ -3515,6 +3589,10 @@ function onSupporterFrameOffsetChange(axis, val) {
         supporterFrameConfig.offsetY = parseInt(val) || 0;
         const offYVal = document.getElementById('supporterFrameOffsetYVal');
         if (offYVal) offYVal.textContent = `${val}px`;
+    } else if (axis === 'x') {
+        supporterFrameConfig.offsetX = parseInt(val) || 0;
+        const offXVal = document.getElementById('supporterFrameOffsetXVal');
+        if (offXVal) offXVal.textContent = `${val}px`;
     }
     updateSupporterFramePreview();
     saveSupporterFrameConfigAction(true);
