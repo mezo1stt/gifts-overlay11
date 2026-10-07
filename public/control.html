@@ -54,11 +54,18 @@
                     <span class="nav-badge hot">جديد 👑</span>
                 </button>
 
-                <!-- 3. رابط آخر داعم (الشريط الناري) -->
+                <!-- 3. نص (متغير) -->
                 <button class="nav-item" data-tab="fireSection">
-                    <span class="nav-icon">🔥</span>
-                    <span class="nav-label">رابط آخر داعم (ناري)</span>
-                    <span class="nav-badge fire">بركاني</span>
+                    <span class="nav-icon">📝</span>
+                    <span class="nav-label">نص (متغير)</span>
+                    <span class="nav-badge fire">ديناميكي</span>
+                </button>
+
+                <!-- 4. إطارات آخر داعم -->
+                <button class="nav-item" data-tab="lastSupporterFramesSection">
+                    <span class="nav-icon">👑</span>
+                    <span class="nav-label">إطارات آخر داعم</span>
+                    <span class="nav-badge hot">جديد</span>
                 </button>
 
                 <!-- 4. بنرات الكاميرا (صفحة مخصصة) -->
@@ -450,6 +457,21 @@
                                         </div>
                                     </div>
 
+                                    <div class="team-gifts-search-filter-bar mt-2 mb-2">
+                                        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                                            <input type="text" id="teamGiftsSearchInput" class="form-input" style="flex:1; min-width:200px;" placeholder="🔍 بحث في جميع هدايا تيك توك بالاسم أو النقاط..." oninput="onTeamGiftsSearchInput(this.value)">
+                                            <span class="count-badge" id="teamGiftsFilteredCount">عرض جميع الهدايا</span>
+                                        </div>
+                                        <div class="chips-container mt-2" id="teamGiftsPriceChips">
+                                            <button type="button" class="chip active" onclick="setTeamGiftsPriceFilter('all')">الكل 🌟</button>
+                                            <button type="button" class="chip" onclick="setTeamGiftsPriceFilter('1')">1 نقطة 🪙</button>
+                                            <button type="button" class="chip" onclick="setTeamGiftsPriceFilter('lt10')">2 - 9 🪙</button>
+                                            <button type="button" class="chip" onclick="setTeamGiftsPriceFilter('lt100')">10 - 99 💎</button>
+                                            <button type="button" class="chip" onclick="setTeamGiftsPriceFilter('lt1000')">100 - 999 🚀</button>
+                                            <button type="button" class="chip" onclick="setTeamGiftsPriceFilter('gt1000')">1,000+ 👑</button>
+                                        </div>
+                                    </div>
+
                                     <div class="exclusion-grid-chips" id="teamGiftsLibraryGrid">
                                         <!-- Dynamically generated with badges & mutual exclusion checks -->
                                     </div>
@@ -598,9 +620,16 @@
                                     </div>
 
                                     <div class="team-assigned-box mt-3">
-                                        <div class="slider-header" style="display:flex; justify-content:space-between; align-items:center;">
+                                        <div class="slider-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
                                             <label>🃏 بطاقات وجنود الأحمر (<span id="cardsRedCount">5</span>):</label>
-                                            <button type="button" onclick="addNewCardSlot('teamRed')" style="font-size:11px; padding:3px 8px; background:rgba(255,42,74,0.2); border:1px solid #ff2a4a; color:#fff; border-radius:6px; cursor:pointer;">➕ إضافة بطاقة</button>
+                                            <div style="display:flex; gap:6px; align-items:center;">
+                                                <button type="button" onclick="addNewCardSlot('teamRed')" class="btn-mini" style="background:rgba(255,42,74,0.25); border:1px solid #ff2a4a; color:#fff;" title="إضافة بطاقة افتراضية">➕ إضافة بطاقة</button>
+                                                <label class="btn-mini" style="background:rgba(56,189,248,0.25); border:1px solid #38bdf8; color:#38bdf8; cursor:pointer;" title="إضافة بطاقة بصورة خاصة من جهازك مباشرة">
+                                                    <span>📷 بطاقة بصورتي</span>
+                                                    <input type="file" accept="image/*" style="display:none;" onchange="addNewCardWithCustomImage('teamRed', this.files[0])">
+                                                </label>
+                                                <button type="button" onclick="clearTeamCards('teamRed')" class="btn-mini del" title="حذف جميع بطاقات هذا الفريق">🗑️ تفريغ</button>
+                                            </div>
                                         </div>
                                         <div class="cards-deck-items-list mt-2" id="cardsRedDeckList">
                                             <!-- Dynamically generated -->
@@ -630,9 +659,16 @@
                                     </div>
 
                                     <div class="team-assigned-box mt-3">
-                                        <div class="slider-header" style="display:flex; justify-content:space-between; align-items:center;">
+                                        <div class="slider-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
                                             <label>🃏 بطاقات وجنود الأزرق (<span id="cardsBlueCount">5</span>):</label>
-                                            <button type="button" onclick="addNewCardSlot('teamBlue')" style="font-size:11px; padding:3px 8px; background:rgba(0,180,216,0.2); border:1px solid #00b4d8; color:#fff; border-radius:6px; cursor:pointer;">➕ إضافة بطاقة</button>
+                                            <div style="display:flex; gap:6px; align-items:center;">
+                                                <button type="button" onclick="addNewCardSlot('teamBlue')" class="btn-mini" style="background:rgba(0,180,216,0.25); border:1px solid #00b4d8; color:#fff;" title="إضافة بطاقة افتراضية">➕ إضافة بطاقة</button>
+                                                <label class="btn-mini" style="background:rgba(56,189,248,0.25); border:1px solid #38bdf8; color:#38bdf8; cursor:pointer;" title="إضافة بطاقة بصورة خاصة من جهازك مباشرة">
+                                                    <span>📷 بطاقة بصورتي</span>
+                                                    <input type="file" accept="image/*" style="display:none;" onchange="addNewCardWithCustomImage('teamBlue', this.files[0])">
+                                                </label>
+                                                <button type="button" onclick="clearTeamCards('teamBlue')" class="btn-mini del" title="حذف جميع بطاقات هذا الفريق">🗑️ تفريغ</button>
+                                            </div>
                                         </div>
                                         <div class="cards-deck-items-list mt-2" id="cardsBlueDeckList">
                                             <!-- Dynamically generated -->
@@ -877,6 +913,193 @@
                     </div>
                 </section>
 
+                <!-- ================= SECTION: LAST SUPPORTER FRAMES (إطارات آخر داعم) ================= -->
+                <section class="tab-section" id="lastSupporterFramesSection">
+                    <div class="dashboard-grid">
+                        
+                        <!-- Left Column: Controls & Customization -->
+                        <div class="panel-section control-panel" style="max-width: 100%;">
+                            <div class="panel-card">
+                                <div class="card-header-flex">
+                                    <h3 class="card-title"><span>👑 إطارات وتأثيرات آخر داعم (Last Supporter Streamer Frames)</span></h3>
+                                    <div class="header-badges-row">
+                                        <span class="exclusion-badge" style="background:linear-gradient(135deg, #a855f7, #ec4899); color:#fff;">✨ إطار فيديو وبث مباشر</span>
+                                    </div>
+                                </div>
+                                <p style="font-size:13px; color:#cbd5e1; margin-top:6px;">
+                                    اختر إطار البث المباشر المناسب لستريمك، قم بتغيير لونه وتوهجه وأبعاده فورياً. الإطار يلتف تلقائياً حول ودجت آخر داعم الرسمي ويوفر لك رابطاً واحداً لـ OBS دون الحاجة لتغيير رابط الدعم!
+                                </p>
+
+                                <!-- Frame Presets Selector -->
+                                <div class="form-group mt-3">
+                                    <label style="font-weight:900; font-size:13.5px; color:#f1f5f9;">🎨 اختر تصميم الإطار:</label>
+                                    <div class="frames-preset-grid mt-2" id="framesPresetGrid">
+                                        <!-- Frame 1: Sakura Blossom (WebM Video) -->
+                                        <div class="frame-preset-card active" data-framestyle="sakura" onclick="selectSupporterFrameStyle('sakura')">
+                                            <div class="frame-preset-badge">متحرك 🌸</div>
+                                            <img src="/frame_preview.png" alt="أزهار الساكورا الملكي" class="frame-preset-thumb">
+                                            <span class="frame-preset-name">أزهار الساكورا الملكي (Sakura)</span>
+                                        </div>
+
+                                        <!-- Frame 2: Cyber Neon -->
+                                        <div class="frame-preset-card" data-framestyle="cyber_neon" onclick="selectSupporterFrameStyle('cyber_neon')">
+                                            <div class="frame-preset-badge">نيون ⚡</div>
+                                            <div class="frame-preset-mini-demo cyber-demo"></div>
+                                            <span class="frame-preset-name">النيون السيبراني (Cyberpunk)</span>
+                                        </div>
+
+                                        <!-- Frame 3: Royal Gold & Fire -->
+                                        <div class="frame-preset-card" data-framestyle="gold_fire" onclick="selectSupporterFrameStyle('gold_fire')">
+                                            <div class="frame-preset-badge">ملكي 🔥</div>
+                                            <div class="frame-preset-mini-demo gold-demo"></div>
+                                            <span class="frame-preset-name">اللهب الذهبي الملكي (Royal Gold)</span>
+                                        </div>
+
+                                        <!-- Frame 4: Crystal Frost -->
+                                        <div class="frame-preset-card" data-framestyle="crystal_ice" onclick="selectSupporterFrameStyle('crystal_ice')">
+                                            <div class="frame-preset-badge">ماسي 💎</div>
+                                            <div class="frame-preset-mini-demo ice-demo"></div>
+                                            <span class="frame-preset-name">الكريستال الماسي (Crystal Ice)</span>
+                                        </div>
+
+                                        <!-- Frame 5: Emerald Nature -->
+                                        <div class="frame-preset-card" data-framestyle="emerald_nature" onclick="selectSupporterFrameStyle('emerald_nature')">
+                                            <div class="frame-preset-badge">سحري 🌿</div>
+                                            <div class="frame-preset-mini-demo emerald-demo"></div>
+                                            <span class="frame-preset-name">الغابة الزمردية (Emerald Glow)</span>
+                                        </div>
+
+                                        <!-- Frame 6: Crimson Dragon -->
+                                        <div class="frame-preset-card" data-framestyle="crimson_dragon" onclick="selectSupporterFrameStyle('crimson_dragon')">
+                                            <div class="frame-preset-badge">قتالي 🐉</div>
+                                            <div class="frame-preset-mini-demo crimson-demo"></div>
+                                            <span class="frame-preset-name">التنين القرمزي (Crimson Dragon)</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Custom Frame Video Upload -->
+                                <div class="form-group mt-3" style="background:rgba(255,255,255,0.03); border:1px dashed rgba(255,255,255,0.15); border-radius:14px; padding:12px;">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                                        <div>
+                                            <h4 style="font-size:13px; color:#fff;">📁 رفع إطار فيديو أو صورة خاصة بك (.webm / .png / .gif):</h4>
+                                            <p style="font-size:11.5px; color:#94a3b8;">يمكنك رفع أي إطار فيديو شفاف من جهازك ليتم استخدامه مباشرة.</p>
+                                        </div>
+                                        <label class="btn-primary" style="cursor:pointer; display:inline-flex; align-items:center; gap:6px; font-size:12.5px; padding:8px 16px;">
+                                            <span>📤 اختيار ملف الإطار</span>
+                                            <input type="file" id="supporterFrameMediaUpload" accept="video/webm,video/mp4,image/png,image/gif,image/webp" style="display:none;" onchange="uploadCustomFrameMedia(this.files[0])">
+                                        </label>
+                                    </div>
+                                    <div id="customFrameUploadedInfo" style="margin-top:8px; font-size:12px; color:#38bdf8; display:none;"></div>
+                                </div>
+
+                                <!-- Color & Lighting Customization Controls ("وكل اطار يمكن تغير لونه") -->
+                                <div class="form-group mt-4">
+                                    <h4 style="font-size:14px; color:#fff; margin-bottom:10px;">🎨 تخصيص لون وإضاءة الإطار ("تغيير لون كل إطار"):</h4>
+                                    
+                                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:14px;">
+                                        <!-- Color Picker -->
+                                        <div>
+                                            <label for="supporterFrameColor">لون التوهج والإطار:</label>
+                                            <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
+                                                <input type="color" id="supporterFrameColor" value="#b594f8" style="width:44px; height:36px; border-radius:8px; border:1px solid #444; cursor:pointer;" onchange="onSupporterFrameColorChange(this.value)">
+                                                <span id="supporterFrameColorHex" style="font-size:13px; font-weight:800; color:#b594f8;">#b594f8</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Hue Rotation Slider -->
+                                        <div>
+                                            <div style="display:flex; justify-content:space-between;">
+                                                <label for="supporterFrameHue">تدرج اللون (Hue Shift):</label>
+                                                <span id="supporterFrameHueVal" style="font-size:12px; color:#ffd700; font-weight:800;">0°</span>
+                                            </div>
+                                            <input type="range" id="supporterFrameHue" min="0" max="360" value="0" style="width:100%; margin-top:6px;" oninput="onSupporterFrameHueChange(this.value)">
+                                        </div>
+
+                                        <!-- Saturation Slider -->
+                                        <div>
+                                            <div style="display:flex; justify-content:space-between;">
+                                                <label for="supporterFrameSat">تشبع الألوان (Saturation):</label>
+                                                <span id="supporterFrameSatVal" style="font-size:12px; color:#ffd700; font-weight:800;">100%</span>
+                                            </div>
+                                            <input type="range" id="supporterFrameSat" min="0" max="250" value="100" style="width:100%; margin-top:6px;" oninput="onSupporterFrameSatChange(this.value)">
+                                        </div>
+
+                                        <!-- Glow Intensity Slider -->
+                                        <div>
+                                            <div style="display:flex; justify-content:space-between;">
+                                                <label for="supporterFrameGlow">قوة النيون والتوهج:</label>
+                                                <span id="supporterFrameGlowVal" style="font-size:12px; color:#ffd700; font-weight:800;">100%</span>
+                                            </div>
+                                            <input type="range" id="supporterFrameGlow" min="0" max="300" value="100" style="width:100%; margin-top:6px;" oninput="onSupporterFrameGlowChange(this.value)">
+                                        </div>
+                                    </div>
+
+                                    <!-- Quick Preset Color Palettes -->
+                                    <div class="mt-3" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                                        <span style="font-size:12px; color:#94a3b8; font-weight:800;">ألوان سريعة:</span>
+                                        <button type="button" class="chip" onclick="applyFrameColorPreset('#b594f8', 0)">🌸 بنفسجي ساكورا</button>
+                                        <button type="button" class="chip" onclick="applyFrameColorPreset('#00f0ff', 180)">⚡ أزرق سيبراني</button>
+                                        <button type="button" class="chip" onclick="applyFrameColorPreset('#ff2a55', 330)">🔴 أحمر ناري</button>
+                                        <button type="button" class="chip" onclick="applyFrameColorPreset('#22ff88', 90)">🟢 أخضر زمردي</button>
+                                        <button type="button" class="chip" onclick="applyFrameColorPreset('#ffd700', 45)">🟡 ذهبي إمبراطوري</button>
+                                        <button type="button" class="chip" onclick="applyFrameColorPreset('#ff758c', 300)">💖 وردي نيون</button>
+                                    </div>
+                                </div>
+
+                                <!-- Last Supporter Widget URL & Sizing Settings -->
+                                <div class="form-group mt-4" style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:14px;">
+                                    <h4 style="font-size:13.5px; color:#fff; margin-bottom:8px;">🔗 رابط ودجت آخر داعم (داخلي):</h4>
+                                    <input type="text" id="supporterFrameWidgetUrl" class="form-input" value="https://tikalert-eg.com/last-supporter/widget?username=mezo" placeholder="https://tikalert-eg.com/last-supporter/widget?username=mezo" oninput="onSupporterFrameWidgetUrlChange(this.value)">
+                                    <p style="font-size:11.5px; color:#94a3b8; margin-top:4px;">
+                                        💡 الرابط الافتراضي محدد تلقائياً لحسابك. لن تحتاج لتغييره في OBS مجدداً!
+                                    </p>
+
+                                    <!-- Frame Sizing / Zoom / Offsets -->
+                                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-top:12px;">
+                                        <div>
+                                            <div style="display:flex; justify-content:space-between;">
+                                                <label for="supporterFrameScale">حجم الإطار (Scale):</label>
+                                                <span id="supporterFrameScaleVal" style="font-size:11.5px; color:var(--gold); font-weight:800;">100%</span>
+                                            </div>
+                                            <input type="range" id="supporterFrameScale" min="50" max="150" value="100" style="width:100%;" oninput="onSupporterFrameScaleChange(this.value)">
+                                        </div>
+                                        <div>
+                                            <div style="display:flex; justify-content:space-between;">
+                                                <label for="supporterFrameOffsetY">إزاحة عمودية (Y):</label>
+                                                <span id="supporterFrameOffsetYVal" style="font-size:11.5px; color:var(--gold); font-weight:800;">0px</span>
+                                            </div>
+                                            <input type="range" id="supporterFrameOffsetY" min="-100" max="100" value="0" style="width:100%;" oninput="onSupporterFrameOffsetChange('y', this.value)">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Live Preview Simulator -->
+                                <div class="form-group mt-4">
+                                    <label style="font-weight:900; font-size:13.5px; color:#fff;">👁️ معاينة مباشرة لإطار آخر داعم:</label>
+                                    <div class="supporter-frame-preview-box mt-2" style="background:#070a14; border:1.5px solid rgba(255,42,74,0.35); border-radius:16px; overflow:hidden;">
+                                        <iframe id="supporterFramePreviewFrame" src="/supporter-frame-overlay.html" style="width:100%; height:260px; border:none; background:transparent;" scrolling="no"></iframe>
+                                    </div>
+                                </div>
+
+                                <!-- Actions Bar -->
+                                <div class="form-actions mt-3" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                                    <button class="btn-primary" onclick="saveSupporterFrameConfigAction()">
+                                        💾 حفظ ونشر إعدادات الإطار فوراً لـ OBS
+                                    </button>
+                                    <button class="btn-obs-action" onclick="copyCurrentOverlayUrl('supporterFrame')">
+                                        📋 نسخ رابط الإطار الموحد لـ OBS
+                                    </button>
+                                    <a id="supporterFrameOpenLink" href="/supporter-frame-overlay.html" target="_blank" class="btn-open-preview">
+                                        👁️ فتح في نافذة مستقلة
+                                    </a>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                 <!-- ================= SECTION 3: بنرات الكاميرا (CAMERA FRAMES) ================= -->
                 <section class="tab-section" id="cameraSection">
                     <div class="dashboard-grid">
@@ -1087,9 +1310,12 @@
                                 <div class="scoreboard-teams-manage mt-3">
                                     
                                     <!-- Team A -->
-                                    <div class="team-manage-box team-a-box">
+                                    <div class="team-manage-box team-a-box" id="sbBoxA">
                                         <div class="team-manage-header">
-                                            <span class="team-tag red">الفريق الأحمر</span>
+                                            <div style="display:flex; align-items:center; gap:8px;">
+                                                <span class="team-tag" id="sbTagA" style="background:#ff2a4a; color:#fff;">الفريق 1</span>
+                                                <input type="color" id="sbColorA" value="#ff2a4a" title="تحديد لون الفريق 1" onchange="onSbColorChange('a', this.value)" style="width:34px; height:28px; border-radius:6px; border:1px solid rgba(255,255,255,0.2); cursor:pointer;">
+                                            </div>
                                             <input type="text" id="sbTeamAName" class="team-name-input" value="المخربين">
                                         </div>
                                         <div class="score-number-display" id="sbScoreADisplay">0</div>
@@ -1108,9 +1334,12 @@
                                     </div>
 
                                     <!-- Team B -->
-                                    <div class="team-manage-box team-b-box">
+                                    <div class="team-manage-box team-b-box" id="sbBoxB">
                                         <div class="team-manage-header">
-                                            <span class="team-tag green">الفريق الأخضر</span>
+                                            <div style="display:flex; align-items:center; gap:8px;">
+                                                <span class="team-tag" id="sbTagB" style="background:#22ff88; color:#000;">الفريق 2</span>
+                                                <input type="color" id="sbColorB" value="#22ff88" title="تحديد لون الفريق 2" onchange="onSbColorChange('b', this.value)" style="width:34px; height:28px; border-radius:6px; border:1px solid rgba(255,255,255,0.2); cursor:pointer;">
+                                            </div>
                                             <input type="text" id="sbTeamBName" class="team-name-input" value="المساعدين">
                                         </div>
                                         <div class="score-number-display" id="sbScoreBDisplay">0</div>
@@ -1128,6 +1357,16 @@
                                         </div>
                                     </div>
 
+                                </div>
+
+                                <!-- Quick Color Palettes for Scoreboard ("خليني احدد لون الفريقين") -->
+                                <div class="sb-palettes-row mt-2" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:8px 12px; background:rgba(0,0,0,0.25); border-radius:10px;">
+                                    <span style="font-size:12px; font-weight:800; color:#cbd5e1;">🎨 ألوان جاهزة للفرق:</span>
+                                    <button type="button" class="chip" onclick="applySbPalette('#ff2a4a', '#22ff88')">🔴 أحمر vs أخضر 🟢</button>
+                                    <button type="button" class="chip" onclick="applySbPalette('#ff2a4a', '#00b4d8')">🔴 أحمر vs أزرق 🔵</button>
+                                    <button type="button" class="chip" onclick="applySbPalette('#ff9f1c', '#2ec4b6')">🟠 برتقالي vs فيروزي 🌊</button>
+                                    <button type="button" class="chip" onclick="applySbPalette('#ffd700', '#a855f7')">🟡 ذهبي vs بنفسجي 🟣</button>
+                                    <button type="button" class="chip" onclick="applySbPalette('#ff007f', '#00f0ff')">💖 نيون وردي vs سماوي ⚡</button>
                                 </div>
 
                                 <div class="score-reset-bar mt-3">
@@ -1506,19 +1745,35 @@
                     </div>
                 </div>
 
-                <!-- 2. رابط آخر داعم (الشريط الناري) -->
+                <!-- 2. نص (متغير) -->
                 <div class="obs-link-card">
                     <div class="obs-link-meta">
-                        <span class="obs-icon">🔥</span>
+                        <span class="obs-icon">📝</span>
                         <div>
-                            <h4>رابط آخر داعم (الشريط الناري البركاني)</h4>
-                            <p>شريط النص الناري المتحرك مع حمم بركانية وشرارات</p>
+                            <h4>نص (متغير) (الشريط الديناميكي والدخان)</h4>
+                            <p>شريط النص المتحرك والدخان المتغير للبايو والروابط</p>
                         </div>
                     </div>
                     <div class="obs-copy-row">
                         <input type="text" id="linkFireUrl" readonly>
                         <button class="btn-copy" onclick="copyInput('linkFireUrl')">📋 نسخ</button>
                         <a id="openFireUrl" href="#" target="_blank" class="btn-open-preview">👁️ فتح</a>
+                    </div>
+                </div>
+
+                <!-- 2.5 إطارات آخر داعم الموحدة -->
+                <div class="obs-link-card">
+                    <div class="obs-link-meta">
+                        <span class="obs-icon">👑</span>
+                        <div>
+                            <h4>إطارات آخر داعم (Last Supporter Frame)</h4>
+                            <p>رابط إطار البث المباشر (فيديو ساكورا والنيون) محاوط لودجت آخر داعم</p>
+                        </div>
+                    </div>
+                    <div class="obs-copy-row">
+                        <input type="text" id="linkSupporterFrameUrl" readonly>
+                        <button class="btn-copy" onclick="copyInput('linkSupporterFrameUrl')">📋 نسخ</button>
+                        <a id="openSupporterFrameUrl" href="#" target="_blank" class="btn-open-preview">👁️ فتح</a>
                     </div>
                 </div>
 

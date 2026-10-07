@@ -3351,3 +3351,114 @@ input[type="range"] {
     color: var(--gold);
     margin-top: 2px;
 }
+
+/* ================= LAST SUPPORTER FRAMES PRESETS ================= */
+.frames-preset-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.frame-preset-card {
+    position: relative;
+    background: rgba(255, 255, 255, 0.04);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    padding: 12px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.22s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    text-align: center;
+    overflow: hidden;
+}
+
+.frame-preset-card:hover {
+    border-color: rgba(255, 215, 0, 0.5);
+    background: rgba(255, 255, 255, 0.07);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+}
+
+.frame-preset-card.active {
+    border-color: #ffd700;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(168, 85, 247, 0.15));
+    box-shadow: 0 0 16px rgba(255, 215, 0, 0.4);
+}
+
+.frame-preset-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(255, 215, 0, 0.6);
+    color: var(--gold);
+    font-size: 10px;
+    font-weight: 900;
+    border-radius: 6px;
+    padding: 2px 6px;
+}
+
+.frame-preset-thumb {
+    width: 100%;
+    height: 48px;
+    object-fit: contain;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.frame-preset-mini-demo {
+    width: 100%;
+    height: 48px;
+    border-radius: 8px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.frame-preset-mini-demo.cyber-demo {
+    background: linear-gradient(135deg, #091220, #040810);
+    border: 2px solid #00f0ff;
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+}
+
+.frame-preset-mini-demo.gold-demo {
+    background: linear-gradient(135deg, #2a1600, #140b00);
+    border: 2px solid #ffd700;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.frame-preset-mini-demo.ice-demo {
+    background: linear-gradient(135deg, #081a28, #040d14);
+    border: 2px solid #a5f3fc;
+    box-shadow: 0 0 10px rgba(165, 243, 252, 0.5);
+}
+
+.frame-preset-mini-demo.emerald-demo {
+    background: linear-gradient(135deg, #062012, #020d07);
+    border: 2px solid #22ff88;
+    box-shadow: 0 0 10px rgba(34, 255, 136, 0.5);
+}
+
+.frame-preset-mini-demo.crimson-demo {
+    background: linear-gradient(135deg, #2a050d, #140206);
+    border: 2px solid #ff2a4a;
+    box-shadow: 0 0 10px rgba(255, 42, 74, 0.5);
+}
+
+.frame-preset-name {
+    font-size: 11.5px;
+    font-weight: 800;
+    color: #f1f5f9;
+}
+
+.supporter-frame-preview-box {
+    background: #070a14;
+    border: 1.5px solid rgba(255, 42, 74, 0.35);
+    border-radius: 16px;
+    overflow: hidden;
+}

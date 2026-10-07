@@ -201,10 +201,14 @@ function getScoreboard(boardId = 'default') {
             team_b_name: 'المساعدين',
             team_a_score: 0,
             team_b_score: 0,
+            team_a_color: '#ff2a4a',
+            team_b_color: '#22ff88',
             updated_at: Date.now()
         };
         saveScoreboards();
     }
+    if (!scoreboards[boardId].team_a_color) scoreboards[boardId].team_a_color = '#ff2a4a';
+    if (!scoreboards[boardId].team_b_color) scoreboards[boardId].team_b_color = '#22ff88';
     return scoreboards[boardId];
 }
 
@@ -215,6 +219,8 @@ function updateScoreboard(boardId, updates) {
     if (updates.team_b_name !== undefined) sb.team_b_name = String(updates.team_b_name).trim();
     if (updates.team_a_score !== undefined) sb.team_a_score = Math.max(0, parseInt(updates.team_a_score) || 0);
     if (updates.team_b_score !== undefined) sb.team_b_score = Math.max(0, parseInt(updates.team_b_score) || 0);
+    if (updates.team_a_color !== undefined) sb.team_a_color = String(updates.team_a_color).trim();
+    if (updates.team_b_color !== undefined) sb.team_b_color = String(updates.team_b_color).trim();
     sb.updated_at = Date.now();
     saveScoreboards();
     return sb;

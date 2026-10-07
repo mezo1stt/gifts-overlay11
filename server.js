@@ -322,6 +322,27 @@ function getDefaultCardsBoard(uid = 'default') {
     };
 }
 
+function getDefaultSupporterFrame(uid = 'default') {
+    return {
+        uid: uid,
+        frameStyle: 'sakura', // 'sakura', 'cyber_neon', 'gold_fire', 'crystal_ice', 'emerald_nature', 'crimson_dragon', 'custom'
+        frameColor: '#b594f8',
+        hueRotate: 0,
+        saturation: 100,
+        brightness: 100,
+        glowIntensity: 1.0,
+        widgetUrl: 'https://tikalert-eg.com/last-supporter/widget?username=mezo',
+        frameScale: 100,
+        iframeWidth: 800,
+        iframeHeight: 140,
+        offsetX: 0,
+        offsetY: 0,
+        customMediaUrl: '',
+        customMediaType: 'video',
+        updatedAt: Date.now()
+    };
+}
+
 // ================= ROUTES ================= //
 
 // Control Panel
@@ -1054,6 +1075,48 @@ app.post('/api/upload-card-image', upload.single('cardImage'), async (req, res) 
     } catch (e) {
         console.error('Upload card image error:', e);
         res.status(500).json({ error: 'فشل رفع صورة البطاقة' });
+    }
+});
+
+// ================= LAST SUPPORTER FRAMES ENDPOINTS ================= //
+app.get('/api/supporter-frame/:uid', (req, res) => {
+    const uid = req.params.uid || 'default';
+    const data = readData();
+    const def = getDefaultSupporterFrame(uid);
+    const frame = (data[uid] && data[uid].supporterFrame) ? { ...def, ...data[uid].supporterFrame } : def;
+    res.json({ success: true, frame });
+});
+
+app.post('/api/supporter-frame/:uid', (req, res) => {
+    const uid = req.params.uid || 'default';
+    const data = readData();
+    if (!data[uid]) data[uid] = getDefaultBoard(uid);
+    const def = getDefaultSupporterFrame(uid);
+    const current = (data[uid] && data[uid].supporterFrame) ? { ...def, ...data[uid].supporterFrame } : def;
+    const updates = req.body || {};
+    data[uid].supporterFrame = {
+        ...current,
+        ...updates,
+        updatedAt: Date.now()
+    };
+    writeData(data);
+    io.emit('supporter_frame_update', { uid, frame: data[uid].supporterFrame });
+    res.json({ success: true, frame: data[uid].supporterFrame });
+});
+
+app.post('/api/upload-frame-media', upload.single('frameMedia'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'لم يتم تحديد ملف إطار' });
+        }
+        const savedMedia = await saveUploadedFile(req.file);
+        const finalUrl = (savedMedia.startsWith('http://') || savedMedia.startsWith('https://') || savedMedia.startsWith('/'))
+            ? savedMedia
+            : `/images/${savedMedia}`;
+        res.json({ success: true, url: finalUrl });
+    } catch (e) {
+        console.error('Upload frame media error:', e);
+        res.status(500).json({ error: 'فشل رفع ملف الإطار: ' + e.message });
     }
 });
 

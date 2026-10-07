@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Last Supporter Frame Overlay | إطار آخر داعم</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Changa:wght@700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: transparent !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Cairo', 'Changa', sans-serif;
+            user-select: none;
+        }
+
+        :root {
+            --frame-color: #b594f8;
+            --glow-color: rgba(181, 148, 248, 0.6);
+            --hue-deg: 0deg;
+            --sat-val: 100%;
+            --bri-val: 100%;
+            --glow-px: 15px;
+        }
+
+        /* Master Frame Stage */
+        .supporter-stage {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 1200px;
+            height: 225px;
+            max-width: 100vw;
+            transition: transform 0.2s ease;
+        }
+
+        /* 1. Video Frame Layer (For Sakura / Custom Video) */
+        .frame-video-layer {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            pointer-events: none;
+            z-index: 2;
+            filter: hue-rotate(var(--hue-deg)) saturate(var(--sat-val)) brightness(var(--bri-val)) drop-shadow(0 0 var(--glow-px) var(--glow-color));
+            transition: filter 0.25s ease;
+        }
+
+        /* 2. Procedural CSS / SVG Frame Layer */
+        .frame-css-layer {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+            display: none;
+        }
+
+        /* Cyber Neon Frame */
+        .frame-cyber-neon {
+            border: 3px solid var(--frame-color);
+            border-radius: 20px;
+            box-shadow: 
+                0 0 25px var(--glow-color),
+                inset 0 0 15px var(--glow-color);
+            background: linear-gradient(135deg, rgba(10, 15, 30, 0.75), rgba(5, 5, 12, 0.85));
+            clip-path: polygon(
+                30px 0%, calc(100% - 30px) 0%, 100% 30px, 
+                100% calc(100% - 30px), calc(100% - 30px) 100%, 
+                30px 100%, 0% calc(100% - 30px), 0% 30px
+            );
+        }
+        .frame-cyber-neon::before {
+            content: '';
+            position: absolute;
+            top: 6px; left: 6px; right: 6px; bottom: 6px;
+            border: 1px dashed rgba(255, 255, 255, 0.35);
+            border-radius: 14px;
+            pointer-events: none;
+        }
+
+        /* Royal Gold & Fire Frame */
+        .frame-gold-fire {
+            border: 3px solid var(--frame-color);
+            border-radius: 28px;
+            box-shadow: 
+                0 0 30px var(--glow-color),
+                0 0 60px rgba(255, 120, 0, 0.4),
+                inset 0 0 20px var(--glow-color);
+            background: linear-gradient(135deg, rgba(30, 15, 5, 0.85), rgba(15, 8, 2, 0.9));
+        }
+
+        /* Crystal Ice Frame */
+        .frame-crystal-ice {
+            border: 2.5px solid var(--frame-color);
+            border-radius: 24px;
+            box-shadow: 
+                0 0 25px var(--glow-color),
+                inset 0 0 20px rgba(255, 255, 255, 0.3);
+            background: linear-gradient(135deg, rgba(10, 25, 45, 0.75), rgba(5, 15, 25, 0.85));
+            backdrop-filter: blur(10px);
+        }
+
+        /* Emerald Nature Frame */
+        .frame-emerald-nature {
+            border: 3px solid var(--frame-color);
+            border-radius: 22px;
+            box-shadow: 
+                0 0 28px var(--glow-color),
+                inset 0 0 16px rgba(34, 255, 136, 0.35);
+            background: linear-gradient(135deg, rgba(5, 25, 15, 0.8), rgba(2, 12, 8, 0.9));
+        }
+
+        /* Crimson Dragon Frame */
+        .frame-crimson-dragon {
+            border: 3px solid var(--frame-color);
+            border-radius: 20px;
+            box-shadow: 
+                0 0 32px var(--glow-color),
+                inset 0 0 22px rgba(255, 42, 74, 0.4);
+            background: linear-gradient(135deg, rgba(35, 5, 10, 0.85), rgba(15, 2, 5, 0.92));
+            clip-path: polygon(
+                40px 0%, calc(100% - 40px) 0%, 100% 25px, 
+                100% calc(100% - 25px), calc(100% - 40px) 100%, 
+                40px 100%, 0% calc(100% - 25px), 0% 25px
+            );
+        }
+
+        /* 3. The Widget Content Container (Embedded TikAlert Iframe) */
+        .widget-content-slot {
+            position: absolute;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 820px;
+            height: 140px;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            overflow: hidden;
+            pointer-events: auto;
+        }
+
+        .widget-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: transparent;
+            overflow: hidden;
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="supporter-stage" id="supporterStage">
+        <!-- 1. Video Layer (For Sakura & Custom Video) -->
+        <video id="frameVideo" class="frame-video-layer" src="/videos/sakura_frame.webm" autoplay loop muted playsinline></video>
+
+        <!-- 2. Procedural CSS Layer -->
+        <div id="frameCss" class="frame-css-layer"></div>
+
+        <!-- 3. Nested TikAlert Widget Iframe -->
+        <div class="widget-content-slot" id="widgetSlot">
+            <iframe id="widgetIframe" class="widget-iframe" src="https://tikalert-eg.com/last-supporter/widget?username=mezo" allowtransparency="true" scrolling="no"></iframe>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const uid = params.get('uid') || 'default';
+
+        const stageEl = document.getElementById('supporterStage');
+        const videoEl = document.getElementById('frameVideo');
+        const cssEl = document.getElementById('frameCss');
+        const slotEl = document.getElementById('widgetSlot');
+        const iframeEl = document.getElementById('widgetIframe');
+
+        let currentConfig = null;
+
+        function applyFrameConfig(cfg) {
+            if (!cfg) return;
+            currentConfig = cfg;
+
+            const style = cfg.frameStyle || 'sakura';
+            const color = cfg.frameColor || '#b594f8';
+            const hue = cfg.hueRotate !== undefined ? cfg.hueRotate : 0;
+            const sat = cfg.saturation !== undefined ? cfg.saturation : 100;
+            const bri = cfg.brightness !== undefined ? cfg.brightness : 100;
+            const glow = cfg.glowIntensity !== undefined ? cfg.glowIntensity : 1.0;
+            const scale = (cfg.frameScale || 100) / 100;
+            const offX = cfg.offsetX || 0;
+            const offY = cfg.offsetY || 0;
+            const slotW = cfg.iframeWidth || 820;
+            const slotH = cfg.iframeHeight || 140;
+
+            // Apply CSS Variables
+            document.documentElement.style.setProperty('--frame-color', color);
+            document.documentElement.style.setProperty('--glow-color', color);
+            document.documentElement.style.setProperty('--hue-deg', `${hue}deg`);
+            document.documentElement.style.setProperty('--sat-val', `${sat}%`);
+            document.documentElement.style.setProperty('--bri-val', `${bri}%`);
+            document.documentElement.style.setProperty('--glow-px', `${15 * glow}px`);
+
+            // Apply Stage Scale & Offset
+            stageEl.style.transform = `scale(${scale}) translate(${offX}px, ${offY}px)`;
+
+            // Adjust Slot Dimensions
+            slotEl.style.width = `${slotW}px`;
+            slotEl.style.height = `${slotH}px`;
+
+            // Adjust Slot Offset for specific frames (e.g. Sakura has flowers on right and $ on left)
+            if (style === 'sakura') {
+                slotEl.style.left = '52%';
+                slotEl.style.top = '51%';
+                slotEl.style.width = '780px';
+                slotEl.style.height = '130px';
+            } else {
+                slotEl.style.left = '50%';
+                slotEl.style.top = '50%';
+            }
+
+            // Switch Frame Layers
+            if (style === 'sakura') {
+                videoEl.style.display = 'block';
+                cssEl.style.display = 'none';
+                if (!videoEl.src.includes('sakura_frame.webm')) {
+                    videoEl.src = '/videos/sakura_frame.webm';
+                    videoEl.play().catch(() => {});
+                }
+            } else if (style === 'custom' && cfg.customMediaUrl) {
+                videoEl.style.display = 'block';
+                cssEl.style.display = 'none';
+                if (!videoEl.src.includes(cfg.customMediaUrl)) {
+                    videoEl.src = cfg.customMediaUrl;
+                    videoEl.play().catch(() => {});
+                }
+            } else {
+                // Procedural CSS Frames
+                videoEl.style.display = 'none';
+                cssEl.style.display = 'block';
+                cssEl.className = 'frame-css-layer';
+
+                if (style === 'cyber_neon') cssEl.classList.add('frame-cyber-neon');
+                else if (style === 'gold_fire') cssEl.classList.add('frame-gold-fire');
+                else if (style === 'crystal_ice') cssEl.classList.add('frame-crystal-ice');
+                else if (style === 'emerald_nature') cssEl.classList.add('frame-emerald-nature');
+                else if (style === 'crimson_dragon') cssEl.classList.add('frame-crimson-dragon');
+                else cssEl.classList.add('frame-cyber-neon');
+            }
+
+            // Update Iframe URL if changed
+            const targetUrl = cfg.widgetUrl || 'https://tikalert-eg.com/last-supporter/widget?username=mezo';
+            if (iframeEl.src !== targetUrl) {
+                iframeEl.src = targetUrl;
+            }
+        }
+
+        async function fetchConfig() {
+            try {
+                const res = await fetch(`/api/supporter-frame/${uid}`);
+                const data = await res.json();
+                if (data.success && data.frame) {
+                    applyFrameConfig(data.frame);
+                }
+            } catch (e) {
+                console.error('Failed to load supporter frame config:', e);
+            }
+        }
+
+        fetchConfig();
+
+        // Socket IO Real-time Updates
+        try {
+            const socket = io();
+            socket.on('supporter_frame_update', (data) => {
+                if (data && (data.uid === uid || uid === 'default')) {
+                    applyFrameConfig(data.frame);
+                }
+            });
+        } catch (e) {}
+    </script>
+</body>
+</html>

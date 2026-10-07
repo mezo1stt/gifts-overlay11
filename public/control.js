@@ -121,6 +121,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadTeamGiftsData();
     loadCardsData();
     loadFireData();
+    loadSupporterFrameConfig();
     loadCameraData();
     loadScoreboardData();
     loadRaceState();
@@ -140,9 +141,10 @@ const NAV_TAB_TITLES = {
     giftsSection: '🎁 هدايا التيك توك 1 · لوحة التحكم التفاعلية',
     teamGiftsSection: '⚔️ هدايا تيك توك 2 · أوفرلاي الفرق المتنافسة (ممنوع تكرار الصور)',
     cardsGiftsSection: '🃏 هدايا تيك توك 3 (بطاقات وجنود اللعبة) · إعدادات البطاقات والنيون',
-    fireSection: '🔥 رابط آخر داعم (الشريط الناري) · إعدادات البث',
+    fireSection: '📝 نص (متغير) · شريط النصوص والدخان والبانرات الديناميكية',
+    lastSupporterFramesSection: '👑 إطارات آخر داعم · إطارات فيديو أزهار الساكورا والنيون الموحدة لـ OBS',
     cameraSection: '📷 بنرات الكاميرا · 10 أنماط إطارات نيون للبث',
-    scoreboardSection: '⚡ لوحة النتائج (Scoreboard) · نقاط الفرق والتحديات والتراجر',
+    scoreboardSection: '⚡ لوحة النتائج (Scoreboard) · نقاط وألوان الفرق والتحديات',
     raceSection: '⚔️ صراع الحكام 👑 · نظام تسجيل انتصارات الحكام والمتسابقين في روبلوكس وتيك توك',
     accountSection: '👤 إدارة الحساب والمستخدمين · قاعدة البيانات'
 };
@@ -1493,6 +1495,21 @@ async function loadScoreboardData() {
             const b = data.board;
             document.getElementById('sbTitleInput').value = b.title || '🏆 تحدي الأساطير 🏆';
             document.getElementById('sbTeamAName').value = b.team_a_name || 'المخربين';
+            document.getElementById('sbTeamBName').value = b.team_b_name || 'المساعدين';
+
+            if (b.team_a_color) {
+                const colA = document.getElementById('sbColorA');
+                const tagA = document.getElementById('sbTagA');
+                if (colA) colA.value = b.team_a_color;
+                if (tagA) tagA.style.background = b.team_a_color;
+            }
+            if (b.team_b_color) {
+                const colB = document.getElementById('sbColorB');
+                const tagB = document.getElementById('sbTagB');
+                if (colB) colB.value = b.team_b_color;
+                if (tagB) tagB.style.background = b.team_b_color;
+            }
+
             const scA = b.team_a_score || 0;
             const scB = b.team_b_score || 0;
             document.getElementById('sbScoreADisplay').textContent = scA >= 1000 ? scA.toLocaleString() : scA;
@@ -1546,7 +1563,7 @@ async function setSbDirectScore(team) {
             const scB = data.board.team_b_score || 0;
             document.getElementById('sbScoreADisplay').textContent = scA >= 1000 ? scA.toLocaleString() : scA;
             document.getElementById('sbScoreBDisplay').textContent = scB >= 1000 ? scB.toLocaleString() : scB;
-            showToast(`⚡ تم ضبط نتيجة الفريق ${team === 'a' ? 'الأحمر' : 'الأخضر'} على: ${val.toLocaleString()}`, 'success');
+            showToast(`⚡ تم ضبط نتيجة الفريق ${team === 'a' ? 'الأول' : 'الثاني'} على: ${val.toLocaleString()}`, 'success');
             input.value = '';
         }
     } catch (e) {
@@ -1571,18 +1588,49 @@ async function saveSbTitles() {
     const title = document.getElementById('sbTitleInput').value.trim();
     const a = document.getElementById('sbTeamAName').value.trim();
     const b = document.getElementById('sbTeamBName').value.trim();
+    const colorA = document.getElementById('sbColorA')?.value || '#ff2a4a';
+    const colorB = document.getElementById('sbColorB')?.value || '#22ff88';
 
     try {
         const res = await fetch(`/api/scoreboard/${currentUid}/update`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ title, team_a_name: a, team_b_name: b })
+            body: JSON.stringify({
+                title,
+                team_a_name: a,
+                team_b_name: b,
+                team_a_color: colorA,
+                team_b_color: colorB
+            })
         });
         const data = await res.json();
         if (data.success) {
-            showToast('⚡ تم تحديث أسماء الفرق وعنوان لوحة النتائج!', 'success');
+            showToast('⚡ تم تحديث أسماء وألوان الفرق وعنوان لوحة النتائج!', 'success');
         }
     } catch (e) {}
+}
+
+function onSbColorChange(team, color) {
+    if (team === 'a') {
+        const tag = document.getElementById('sbTagA');
+        if (tag) tag.style.background = color;
+    } else {
+        const tag = document.getElementById('sbTagB');
+        if (tag) tag.style.background = color;
+    }
+    saveSbTitles();
+}
+
+function applySbPalette(colA, colB) {
+    const elA = document.getElementById('sbColorA');
+    const elB = document.getElementById('sbColorB');
+    const tagA = document.getElementById('sbTagA');
+    const tagB = document.getElementById('sbTagB');
+    if (elA) elA.value = colA;
+    if (elB) elB.value = colB;
+    if (tagA) tagA.style.background = colA;
+    if (tagB) tagB.style.background = colB;
+    saveSbTitles();
 }
 
 function copyTriggerLink(team, val) {
@@ -1724,8 +1772,24 @@ function renderTeamGiftsUI() {
     renderMutualExclusionGrid();
 }
 
+let teamGiftsSearchQuery = '';
+let teamGiftsPriceFilter = 'all';
+
+function onTeamGiftsSearchInput(val) {
+    teamGiftsSearchQuery = (val || '').trim().toLowerCase();
+    renderMutualExclusionGrid();
+}
+
+function setTeamGiftsPriceFilter(filter) {
+    teamGiftsPriceFilter = filter;
+    document.querySelectorAll('#teamGiftsPriceChips .chip').forEach(c => c.classList.remove('active'));
+    if (window.event && window.event.target) window.event.target.classList.add('active');
+    renderMutualExclusionGrid();
+}
+
 function renderMutualExclusionGrid() {
     const grid = document.getElementById('teamGiftsLibraryGrid');
+    const countBadge = document.getElementById('teamGiftsFilteredCount');
     if (!grid) return;
 
     grid.innerHTML = '';
@@ -1733,20 +1797,64 @@ function renderMutualExclusionGrid() {
     const t1Images = new Set((currentTeamGifts.team1?.gifts || []).map(g => normalizeImgPath(g.image)));
     const t2Images = new Set((currentTeamGifts.team2?.gifts || []).map(g => normalizeImgPath(g.image)));
 
-    const librarySource = [...POPULAR_GIFTS];
-    if (allTiktokGifts && allTiktokGifts.length > 0) {
-        const seenNorms = new Set(POPULAR_GIFTS.map(g => normalizeImgPath(g.image)));
-        for (const g of allTiktokGifts) {
-            const n = normalizeImgPath(g.image);
-            if (!seenNorms.has(n)) {
-                seenNorms.add(n);
-                librarySource.push({ name: g.name, image: g.image });
-            }
-            if (librarySource.length >= 80) break;
+    // Collect ALL gifts deduplicated
+    const librarySource = [];
+    const seenNorms = new Set();
+
+    POPULAR_GIFTS.forEach(g => {
+        const norm = normalizeImgPath(g.image);
+        if (!seenNorms.has(norm)) {
+            seenNorms.add(norm);
+            librarySource.push({ name: g.name, image: g.image, coins: g.coins || 1 });
         }
+    });
+
+    if (Array.isArray(allTiktokGifts) && allTiktokGifts.length > 0) {
+        allTiktokGifts.forEach(g => {
+            const norm = normalizeImgPath(g.image);
+            if (!seenNorms.has(norm)) {
+                seenNorms.add(norm);
+                librarySource.push({
+                    name: g.name,
+                    image: g.image,
+                    coins: g.coins || g.diamonds || 1
+                });
+            }
+        });
     }
 
-    librarySource.forEach(gift => {
+    // Filter by search & price
+    let filtered = librarySource;
+    if (teamGiftsPriceFilter === '1') {
+        filtered = filtered.filter(g => g.coins === 1);
+    } else if (teamGiftsPriceFilter === 'lt10') {
+        filtered = filtered.filter(g => g.coins > 1 && g.coins < 10);
+    } else if (teamGiftsPriceFilter === 'lt100') {
+        filtered = filtered.filter(g => g.coins >= 10 && g.coins < 100);
+    } else if (teamGiftsPriceFilter === 'lt1000') {
+        filtered = filtered.filter(g => g.coins >= 100 && g.coins < 1000);
+    } else if (teamGiftsPriceFilter === 'gt1000') {
+        filtered = filtered.filter(g => g.coins >= 1000);
+    }
+
+    if (teamGiftsSearchQuery) {
+        filtered = filtered.filter(g =>
+            (g.name || '').toLowerCase().includes(teamGiftsSearchQuery) ||
+            String(g.coins).includes(teamGiftsSearchQuery)
+        );
+    }
+
+    if (countBadge) {
+        countBadge.textContent = `معروض ${filtered.length} من أصل ${librarySource.length} هدية`;
+    }
+
+    if (filtered.length === 0) {
+        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #94a3b8; padding: 25px;">لا توجد هدايا مطابقة لبحثك</div>';
+        return;
+    }
+
+    // Render chips
+    filtered.forEach(gift => {
         const norm = normalizeImgPath(gift.image);
         const inTeam1 = t1Images.has(norm);
         const inTeam2 = t2Images.has(norm);
@@ -1779,7 +1887,10 @@ function renderMutualExclusionGrid() {
 
         chip.innerHTML = `
             <img src="${gift.image}" alt="${escapeHtml(gift.name)}" onerror="this.src='/images/rose.png'">
-            <span>${escapeHtml(gift.name)} ${statusBadge}</span>
+            <div style="display:flex; flex-direction:column; min-width:0; overflow:hidden;">
+                <span style="font-weight:800; font-size:11.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(gift.name)}</span>
+                <span style="font-size:9.5px; color:var(--gold);">${gift.coins} 🪙 ${statusBadge}</span>
+            </div>
         `;
 
         chip.onclick = () => {
@@ -1963,6 +2074,11 @@ function openAllObsModal() {
     const openCards = document.getElementById('openCardsUrl');
     if (openCards) openCards.href = `${origin}/cards-overlay.html?uid=${currentUid}`;
 
+    const linkSupporter = document.getElementById('linkSupporterFrameUrl');
+    if (linkSupporter) linkSupporter.value = `${origin}/supporter-frame-overlay.html?uid=${currentUid}`;
+    const openSupporter = document.getElementById('openSupporterFrameUrl');
+    if (openSupporter) openSupporter.href = `${origin}/supporter-frame-overlay.html?uid=${currentUid}`;
+
     document.getElementById('allObsModal').classList.add('open');
 }
 
@@ -1988,12 +2104,13 @@ function copyCurrentOverlayUrl(type) {
     else if (type === 'team2') url = `${origin}/overlay-team.html?team=2&uid=${currentUid}`;
     else if (type === 'cards') url = `${origin}/cards-overlay.html?uid=${currentUid}`;
     else if (type === 'fire') url = `${origin}/fire-text.html?uid=${currentUid}`;
+    else if (type === 'supporterFrame') url = `${origin}/supporter-frame-overlay.html?uid=${currentUid}`;
     else if (type === 'camera') url = `${origin}/camera-overlay.html?uid=${currentUid}`;
     else if (type === 'scoreboard') url = `${origin}/scoreboard-overlay.html?id=${currentUid}`;
     else if (type === 'race') url = `${origin}/race-overlay.html`;
 
     navigator.clipboard.writeText(url);
-    const labelMap = { race: 'صراع الحكام', cards: 'بطاقات تيك توك 3', fire: 'الشريط الناري', camera: 'إطار الكاميرا', scoreboard: 'لوحة النتائج' };
+    const labelMap = { race: 'صراع الحكام', cards: 'بطاقات تيك توك 3', fire: 'نص (متغير)', supporterFrame: 'إطار آخر داعم', camera: 'إطار الكاميرا', scoreboard: 'لوحة النتائج' };
     showToast(`📺 تم نسخ رابط (${labelMap[type] || type}) بنجاح!`, 'copy');
 }
 
@@ -2006,6 +2123,13 @@ function setupSocket() {
             if (!data || !data.uid || data.uid === currentUid) {
                 const sim = document.getElementById('cardsSimIframe');
                 if (sim) sim.src = `/cards-overlay.html?uid=${currentUid}&t=${Date.now()}`;
+            }
+        });
+
+        socket.on('supporter_frame_update', (data) => {
+            if (data && (data.uid === currentUid || data.uid === 'default')) {
+                supporterFrameConfig = { ...supporterFrameConfig, ...data.frame };
+                syncSupporterFrameUI();
             }
         });
 
@@ -2806,6 +2930,17 @@ function renderTeamCardsDeck(teamKey, listContainerId, countDisplayId) {
     if (countDisplay) countDisplay.textContent = team.cards.length;
     listContainer.innerHTML = '';
 
+    if (team.cards.length === 0) {
+        listContainer.innerHTML = `
+            <div style="text-align:center; padding:25px 12px; color:#94a3b8; background:rgba(0,0,0,0.35); border:1.5px dashed rgba(255,255,255,0.14); border-radius:12px; margin:8px 0;">
+                <div style="font-size:22px; margin-bottom:4px;">📭</div>
+                <div style="font-weight:800; font-size:12.5px; color:#fff;">لا توجد بطاقات في هذا الفريق حالياً</div>
+                <div style="font-size:11px; color:#cbd5e1; margin-top:3px;">اضغط <strong>➕ إضافة بطاقة</strong> أو <strong>📷 بطاقة بصورتي</strong> للبدء بصورك الخاصة!</div>
+            </div>
+        `;
+        return;
+    }
+
     team.cards.forEach((card, idx) => {
         const item = document.createElement('div');
         item.className = 'card-deck-slot-item';
@@ -2869,9 +3004,7 @@ function renderTeamCardsDeck(teamKey, listContainerId, countDisplayId) {
                 </div>
             </div>
 
-            ${team.cards.length > 1 ? `
-                <button type="button" class="btn-slot-del" onclick="deleteCardSlot('${teamKey}', ${idx})" title="حذف هذه البطاقة">✕</button>
-            ` : ''}
+            <button type="button" class="btn-slot-del" onclick="deleteCardSlot('${teamKey}', ${idx})" title="حذف هذه البطاقة">✕</button>
         `;
 
         listContainer.appendChild(item);
@@ -2970,11 +3103,56 @@ function addNewCardSlot(teamKey = 'teamRed') {
 }
 
 function deleteCardSlot(teamKey, idx) {
-    if (!cardsBoardConfig[teamKey] || cardsBoardConfig[teamKey].cards.length <= 1) return;
+    if (!cardsBoardConfig[teamKey] || !cardsBoardConfig[teamKey].cards[idx]) return;
     cardsBoardConfig[teamKey].cards.splice(idx, 1);
     renderCardsDeckList();
     saveCardsBoardConfig(true);
     showToast('تم حذف خانة البطاقة.', 'info');
+}
+
+async function addNewCardWithCustomImage(teamKey, file) {
+    if (!file) return;
+    if (!cardsBoardConfig[teamKey]) return;
+    try {
+        const formData = new FormData();
+        formData.append('cardImage', file);
+        showToast('⏳ جاري رفع صورتك الخاصة للبطاقة...', 'info');
+        const res = await fetch('/api/upload-card-image', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+        if (data.success && data.url) {
+            const teamCards = cardsBoardConfig[teamKey].cards;
+            const nextId = (teamCards.length ? Math.max(...teamCards.map(c => c.id || 0)) : 0) + 1;
+            teamCards.push({
+                id: nextId,
+                cardType: 'custom',
+                customImage: data.url,
+                count: 1,
+                giftName: 'وردة',
+                giftImage: '/images/rose.png'
+            });
+            renderCardsDeckList();
+            saveCardsBoardConfig(true);
+            showToast('✅ تمت إضافة بطاقتك بصورتك الخاصة بنجاح!', 'success');
+        } else {
+            showToast('فشل رفع الصورة: ' + (data.error || 'خطأ'), 'error');
+        }
+    } catch (e) {
+        showToast('خطأ أثناء رفع صورة البطاقة', 'error');
+    }
+}
+
+function clearTeamCards(teamKey) {
+    if (!cardsBoardConfig[teamKey]) return;
+    const teamTitle = cardsBoardConfig[teamKey].title || (teamKey === 'teamRed' ? 'الفريق الأحمر' : 'الفريق الأزرق');
+    if (confirm(`هل أنت متأكد من مسح جميع بطاقات ${teamTitle}؟ ستتمكن بعدها من إضافة صورك الخاصة.`)) {
+        cardsBoardConfig[teamKey].cards = [];
+        renderCardsDeckList();
+        saveCardsBoardConfig(true);
+        showToast(`🗑️ تم مسح جميع بطاقات ${teamTitle}. يمكنك الآن إضافة صورك الخاصة!`, 'info');
+    }
 }
 
 function toggleCardsNeon(enabled) {
@@ -3188,5 +3366,219 @@ function selectVisualGift(giftName, giftImage) {
     saveCardsBoardConfig(true);
     const teamLabel = cardsActiveTargetTeam === 'teamRed' ? 'الفريق الأحمر' : 'الفريق الأزرق';
     showToast(`تم اختيار هدية (${giftName}) لـ ${teamLabel} للبطاقة رقم ${activeCardSlotIndex + 1}! ✨`, 'success');
+}
+
+// ================= SECTION: LAST SUPPORTER FRAMES (إطارات آخر داعم) ================= //
+let supporterFrameConfig = {
+    frameStyle: 'sakura',
+    frameColor: '#b594f8',
+    hueRotate: 0,
+    saturation: 100,
+    brightness: 100,
+    glowIntensity: 1.0,
+    widgetUrl: 'https://tikalert-eg.com/last-supporter/widget?username=mezo',
+    frameScale: 100,
+    offsetX: 0,
+    offsetY: 0,
+    customMediaUrl: ''
+};
+
+async function loadSupporterFrameConfig() {
+    try {
+        const res = await fetch(`/api/supporter-frame/${currentUid}`);
+        const data = await res.json();
+        if (data.success && data.frame) {
+            supporterFrameConfig = { ...supporterFrameConfig, ...data.frame };
+            syncSupporterFrameUI();
+        }
+    } catch (e) {
+        console.error('Failed to load supporter frame config:', e);
+    }
+}
+
+function syncSupporterFrameUI() {
+    // 1. Style Cards
+    document.querySelectorAll('#framesPresetGrid .frame-preset-card').forEach(card => {
+        card.classList.toggle('active', card.dataset.framestyle === supporterFrameConfig.frameStyle);
+    });
+
+    // 2. Colors & Sliders
+    const colEl = document.getElementById('supporterFrameColor');
+    const colHex = document.getElementById('supporterFrameColorHex');
+    if (colEl) colEl.value = supporterFrameConfig.frameColor || '#b594f8';
+    if (colHex) {
+        colHex.textContent = supporterFrameConfig.frameColor || '#b594f8';
+        colHex.style.color = supporterFrameConfig.frameColor || '#b594f8';
+    }
+
+    const hueEl = document.getElementById('supporterFrameHue');
+    const hueVal = document.getElementById('supporterFrameHueVal');
+    if (hueEl) hueEl.value = supporterFrameConfig.hueRotate || 0;
+    if (hueVal) hueVal.textContent = `${supporterFrameConfig.hueRotate || 0}°`;
+
+    const satEl = document.getElementById('supporterFrameSat');
+    const satVal = document.getElementById('supporterFrameSatVal');
+    if (satEl) satEl.value = supporterFrameConfig.saturation !== undefined ? supporterFrameConfig.saturation : 100;
+    if (satVal) satVal.textContent = `${supporterFrameConfig.saturation !== undefined ? supporterFrameConfig.saturation : 100}%`;
+
+    const glowEl = document.getElementById('supporterFrameGlow');
+    const glowVal = document.getElementById('supporterFrameGlowVal');
+    const glowPct = Math.round((supporterFrameConfig.glowIntensity !== undefined ? supporterFrameConfig.glowIntensity : 1.0) * 100);
+    if (glowEl) glowEl.value = glowPct;
+    if (glowVal) glowVal.textContent = `${glowPct}%`;
+
+    // 3. Widget URL & Transform
+    const urlEl = document.getElementById('supporterFrameWidgetUrl');
+    if (urlEl) urlEl.value = supporterFrameConfig.widgetUrl || 'https://tikalert-eg.com/last-supporter/widget?username=mezo';
+
+    const scaleEl = document.getElementById('supporterFrameScale');
+    const scaleVal = document.getElementById('supporterFrameScaleVal');
+    if (scaleEl) scaleEl.value = supporterFrameConfig.frameScale || 100;
+    if (scaleVal) scaleVal.textContent = `${supporterFrameConfig.frameScale || 100}%`;
+
+    const offYEl = document.getElementById('supporterFrameOffsetY');
+    const offYVal = document.getElementById('supporterFrameOffsetYVal');
+    if (offYEl) offYEl.value = supporterFrameConfig.offsetY || 0;
+    if (offYVal) offYVal.textContent = `${supporterFrameConfig.offsetY || 0}px`;
+
+    // 4. Update Preview Simulator Iframe
+    updateSupporterFramePreview();
+}
+
+function selectSupporterFrameStyle(style) {
+    supporterFrameConfig.frameStyle = style;
+    document.querySelectorAll('#framesPresetGrid .frame-preset-card').forEach(card => {
+        card.classList.toggle('active', card.dataset.framestyle === style);
+    });
+    updateSupporterFramePreview();
+    saveSupporterFrameConfigAction(true);
+}
+
+function onSupporterFrameColorChange(val) {
+    supporterFrameConfig.frameColor = val;
+    const colHex = document.getElementById('supporterFrameColorHex');
+    if (colHex) {
+        colHex.textContent = val;
+        colHex.style.color = val;
+    }
+    updateSupporterFramePreview();
+    saveSupporterFrameConfigAction(true);
+}
+
+function onSupporterFrameHueChange(val) {
+    supporterFrameConfig.hueRotate = parseInt(val) || 0;
+    const hueVal = document.getElementById('supporterFrameHueVal');
+    if (hueVal) hueVal.textContent = `${val}°`;
+    updateSupporterFramePreview();
+    saveSupporterFrameConfigAction(true);
+}
+
+function onSupporterFrameSatChange(val) {
+    supporterFrameConfig.saturation = parseInt(val) || 100;
+    const satVal = document.getElementById('supporterFrameSatVal');
+    if (satVal) satVal.textContent = `${val}%`;
+    updateSupporterFramePreview();
+    saveSupporterFrameConfigAction(true);
+}
+
+function onSupporterFrameGlowChange(val) {
+    const num = parseInt(val) || 100;
+    supporterFrameConfig.glowIntensity = num / 100;
+    const glowVal = document.getElementById('supporterFrameGlowVal');
+    if (glowVal) glowVal.textContent = `${num}%`;
+    updateSupporterFramePreview();
+    saveSupporterFrameConfigAction(true);
+}
+
+function applyFrameColorPreset(hex, hue) {
+    supporterFrameConfig.frameColor = hex;
+    supporterFrameConfig.hueRotate = hue;
+    syncSupporterFrameUI();
+    saveSupporterFrameConfigAction(true);
+}
+
+function onSupporterFrameWidgetUrlChange(val) {
+    supporterFrameConfig.widgetUrl = val.trim();
+    updateSupporterFramePreview();
+}
+
+function onSupporterFrameScaleChange(val) {
+    supporterFrameConfig.frameScale = parseInt(val) || 100;
+    const scaleVal = document.getElementById('supporterFrameScaleVal');
+    if (scaleVal) scaleVal.textContent = `${val}%`;
+    updateSupporterFramePreview();
+    saveSupporterFrameConfigAction(true);
+}
+
+function onSupporterFrameOffsetChange(axis, val) {
+    if (axis === 'y') {
+        supporterFrameConfig.offsetY = parseInt(val) || 0;
+        const offYVal = document.getElementById('supporterFrameOffsetYVal');
+        if (offYVal) offYVal.textContent = `${val}px`;
+    }
+    updateSupporterFramePreview();
+    saveSupporterFrameConfigAction(true);
+}
+
+async function uploadCustomFrameMedia(file) {
+    if (!file) return;
+    try {
+        const formData = new FormData();
+        formData.append('frameMedia', file);
+        showToast('⏳ جاري رفع ملف الإطار...', 'info');
+        const res = await fetch('/api/upload-frame-media', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+        if (data.success && data.url) {
+            supporterFrameConfig.customMediaUrl = data.url;
+            supporterFrameConfig.frameStyle = 'custom';
+            const info = document.getElementById('customFrameUploadedInfo');
+            if (info) {
+                info.style.display = 'block';
+                info.textContent = `✅ تم رفع الإطار بنجاح: ${data.url}`;
+            }
+            syncSupporterFrameUI();
+            saveSupporterFrameConfigAction(false);
+            showToast('✅ تم تفعيل إطارك المرفوع بنجاح!', 'success');
+        } else {
+            showToast('فشل رفع ملف الإطار', 'error');
+        }
+    } catch (e) {
+        showToast('خطأ أثناء رفع ملف الإطار', 'error');
+    }
+}
+
+function updateSupporterFramePreview() {
+    const iframe = document.getElementById('supporterFramePreviewFrame');
+    if (!iframe || !iframe.contentWindow) return;
+    try {
+        if (typeof iframe.contentWindow.applyFrameConfig === 'function') {
+            iframe.contentWindow.applyFrameConfig(supporterFrameConfig);
+        }
+    } catch (e) {}
+}
+
+let saveSupporterFrameTimeout = null;
+async function saveSupporterFrameConfigAction(silent = false) {
+    if (silent) {
+        if (saveSupporterFrameTimeout) clearTimeout(saveSupporterFrameTimeout);
+        saveSupporterFrameTimeout = setTimeout(() => saveSupporterFrameConfigAction(false), 500);
+        return;
+    }
+    try {
+        const res = await fetch(`/api/supporter-frame/${currentUid}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(supporterFrameConfig)
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast('👑 تم حفظ إعدادات إطار آخر داعم ونشرها لـ OBS بنجاح!', 'success');
+        }
+    } catch (e) {
+        showToast('خطأ أثناء حفظ إعدادات الإطار', 'error');
+    }
 }
 
