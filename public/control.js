@@ -2812,32 +2812,52 @@ function renderTeamCardsDeck(teamKey, listContainerId, countDisplayId) {
         item.setAttribute('data-slot-index', idx);
         item.setAttribute('data-team', teamKey);
 
-        const cardSrc = `/images/mcroyale/${card.cardType || 'skeleton_bandana'}.png`;
+        const cardSrc = card.customImage ? normalizeImgPath(card.customImage) : `/images/mcroyale/${card.cardType || 'skeleton_bandana'}.png`;
         const giftSrc = normalizeImgPath(card.giftImage || '/images/rose.png');
 
         item.innerHTML = `
+            <!-- Order Arrows (رفع بطاقة فوق أو تنزيل تحت زي هدايا تيك توك 1) -->
+            <div class="card-slot-order-col">
+                <button type="button" class="btn-card-arrow up" onclick="moveCardSlot('${teamKey}', ${idx}, -1)" ${idx === 0 ? 'disabled' : ''} title="رفع بطاقة لأعلى ⬆️">⬆️</button>
+                <button type="button" class="btn-card-arrow down" onclick="moveCardSlot('${teamKey}', ${idx}, 1)" ${idx === team.cards.length - 1 ? 'disabled' : ''} title="تنزيل بطاقة لأسفل ⬇️">⬇️</button>
+            </div>
+
             <span class="card-slot-idx">#${idx + 1}</span>
+
             <div class="card-slot-avatar-wrap">
                 <img class="card-slot-avatar-img" src="${cardSrc}" alt="Character" id="${teamKey}_slotAvatar_${idx}" onerror="this.src='/images/mcroyale/skeleton_bandana.png'">
                 <img class="card-slot-badge-preview" src="${giftSrc}" alt="Gift" id="${teamKey}_slotBadge_${idx}" onerror="this.src='/images/rose.png'">
             </div>
+
             <div class="card-slot-controls-wrap">
-                <!-- Character select -->
+                <!-- Character & Custom Image Select -->
                 <div class="card-slot-field">
-                    <label>شخصية البطاقة:</label>
-                    <select onchange="onCardTypeChange('${teamKey}', ${idx}, this.value)">
-                        ${MCROYALE_CHARACTERS.map(c => `
-                            <option value="${c.id}" ${c.id === (card.cardType || 'skeleton_bandana') ? 'selected' : ''}>
-                                ${c.name}
-                            </option>
-                        `).join('')}
-                    </select>
+                    <label>شخصية أو صورة البطاقة:</label>
+                    <div style="display:flex; gap:6px; align-items:center;">
+                        <select style="flex:1;" onchange="onCardTypeChange('${teamKey}', ${idx}, this.value)">
+                            ${MCROYALE_CHARACTERS.map(c => `
+                                <option value="${c.id}" ${(!card.customImage && c.id === (card.cardType || 'skeleton_bandana')) ? 'selected' : ''}>
+                                    ${c.name}
+                                </option>
+                            `).join('')}
+                            ${card.customImage ? `<option value="custom" selected>🖼️ صورة مخصصة (مرفوعة)</option>` : ''}
+                        </select>
+                        <label class="btn-card-custom-img" title="رفع صورة مخصصة لهذه البطاقة من جهازك">
+                            <span>📷 رفع</span>
+                            <input type="file" accept="image/*" style="display:none;" onchange="uploadCardCustomImage('${teamKey}', ${idx}, this.files[0])">
+                        </label>
+                        ${card.customImage ? `
+                            <button type="button" class="btn-card-reset-img" onclick="resetCardCustomImage('${teamKey}', ${idx})" title="استعادة الشخصية الافتراضية">↺</button>
+                        ` : ''}
+                    </div>
                 </div>
+
                 <!-- Troop Count -->
                 <div class="card-slot-field">
                     <label>عدد الجنود (X):</label>
                     <input type="number" min="1" max="999" value="${card.count || 1}" class="mcroyale-count-badge-input" onchange="onCardCountChange('${teamKey}', ${idx}, this.value)">
                 </div>
+
                 <!-- Visual Gift Trigger -->
                 <div class="card-slot-field">
                     <label>صورة هدية تيك توك المرتبطة:</label>
@@ -2848,6 +2868,7 @@ function renderTeamCardsDeck(teamKey, listContainerId, countDisplayId) {
                     </button>
                 </div>
             </div>
+
             ${team.cards.length > 1 ? `
                 <button type="button" class="btn-slot-del" onclick="deleteCardSlot('${teamKey}', ${idx})" title="حذف هذه البطاقة">✕</button>
             ` : ''}
@@ -2857,28 +2878,68 @@ function renderTeamCardsDeck(teamKey, listContainerId, countDisplayId) {
     });
 }
 
-function onCardsTeamColorChange(teamKey, color) {
-    if (!cardsBoardConfig[teamKey]) return;
-    cardsBoardConfig[teamKey].color = color;
-    const hexSpan = document.getElementById(teamKey === 'teamRed' ? 'cardsTeamRedColorHex' : 'cardsTeamBlueColorHex');
-    if (hexSpan) {
-        hexSpan.textContent = color;
-        hexSpan.style.color = color;
-    }
+function moveCardSlot(teamKey, idx, direction) {
+    const team = cardsBoardConfig[teamKey];
+    if (!team || !Array.isArray(team.cards)) return;
+    const targetIdx = idx + direction;
+    if (targetIdx < 0 || targetIdx >= team.cards.length) return;
+
+    const temp = team.cards[idx];
+    team.cards[idx] = team.cards[targetIdx];
+    team.cards[targetIdx] = temp;
+
+    renderCardsDeckList();
     saveCardsBoardConfig(true);
+    showToast('تمت إعادة ترتيب البطاقات بنجاح! 🔄', 'info');
 }
 
-function onCardsTeamTitleChange(teamKey, val) {
-    if (!cardsBoardConfig[teamKey]) return;
-    cardsBoardConfig[teamKey].title = val;
+async function uploadCardCustomImage(teamKey, idx, file) {
+    if (!file) return;
+    const team = cardsBoardConfig[teamKey];
+    if (!team || !team.cards[idx]) return;
+
+    showToast('جاري رفع صورة البطاقة... ⏳', 'info');
+    const formData = new FormData();
+    formData.append('cardImage', file);
+
+    try {
+        const res = await fetch('/api/upload-card-image', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+        if (data.success && data.url) {
+            team.cards[idx].customImage = data.url;
+            renderCardsDeckList();
+            saveCardsBoardConfig(true);
+            showToast('تم حفظ صورة البطاقة بنجاح! 🖼️✨', 'success');
+        } else {
+            showToast('فشل رفع الصورة: ' + (data.error || 'خطأ غير معروف'), 'error');
+        }
+    } catch (e) {
+        console.error('Upload failed:', e);
+        showToast('حدث خطأ في الاتصال أثناء رفع الصورة', 'error');
+    }
+}
+
+function resetCardCustomImage(teamKey, idx) {
+    const team = cardsBoardConfig[teamKey];
+    if (!team || !team.cards[idx]) return;
+    delete team.cards[idx].customImage;
+    renderCardsDeckList();
     saveCardsBoardConfig(true);
+    showToast('تمت استعادة صورة الشخصية الافتراضية.', 'info');
 }
 
 function onCardTypeChange(teamKey, idx, val) {
     if (!cardsBoardConfig[teamKey] || !cardsBoardConfig[teamKey].cards[idx]) return;
-    cardsBoardConfig[teamKey].cards[idx].cardType = val;
+    if (val !== 'custom') {
+        delete cardsBoardConfig[teamKey].cards[idx].customImage;
+        cardsBoardConfig[teamKey].cards[idx].cardType = val;
+    }
     const avatar = document.getElementById(`${teamKey}_slotAvatar_${idx}`);
     if (avatar) avatar.src = `/images/mcroyale/${val}.png`;
+    renderCardsDeckList();
     saveCardsBoardConfig(true);
 }
 

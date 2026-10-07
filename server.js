@@ -1040,6 +1040,23 @@ app.post('/api/gifts/:uid', upload.single('imageFile'), async (req, res) => {
     }
 });
 
+// Upload Custom Card Image for TikTok Cards 3
+app.post('/api/upload-card-image', upload.single('cardImage'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'لم يتم إرسال ملف' });
+        }
+        const savedImg = await saveUploadedFile(req.file);
+        const finalUrl = (savedImg.startsWith('http://') || savedImg.startsWith('https://') || savedImg.startsWith('/'))
+            ? savedImg
+            : `/images/${savedImg}`;
+        res.json({ success: true, url: finalUrl });
+    } catch (e) {
+        console.error('Upload card image error:', e);
+        res.status(500).json({ error: 'فشل رفع صورة البطاقة' });
+    }
+});
+
 // Bulk Upload Gifts (Multiple Files or Array of {name, imageUrl})
 app.post('/api/gifts/:uid/bulk', upload.array('images', 30), async (req, res) => {
     try {

@@ -103,17 +103,17 @@ function renderCardsToColumn(columnEl, cards, giftPos, teamColor) {
     if (!columnEl) return;
 
     const currentKey = Array.from(columnEl.children).map(c => c.getAttribute('data-card-key')).join('|');
-    const newKey = cards.map(c => `${c.id}_${c.cardType}_${c.count}_${c.giftImage}_${giftPos}_${teamColor}`).join('|');
+    const newKey = cards.map(c => `${c.id}_${c.cardType}_${c.customImage || ''}_${c.count}_${c.giftImage}_${giftPos}_${teamColor}`).join('|');
 
     if (currentKey !== newKey) {
         columnEl.innerHTML = '';
         cards.forEach(card => {
             const item = document.createElement('div');
             item.className = 'card-unit-item';
-            item.setAttribute('data-card-key', `${card.id}_${card.cardType}_${card.count}_${card.giftImage}_${giftPos}_${teamColor}`);
+            item.setAttribute('data-card-key', `${card.id}_${card.cardType}_${c = card.customImage || ''}_${card.count}_${card.giftImage}_${giftPos}_${teamColor}`);
             item.setAttribute('data-card-id', card.id);
 
-            const cardSrc = `/images/mcroyale/${card.cardType || 'skeleton_bandana'}.png`;
+            const cardSrc = card.customImage ? getImageSrc(card.customImage) : `/images/mcroyale/${card.cardType || 'skeleton_bandana'}.png`;
             const giftSrc = getImageSrc(card.giftImage);
 
             item.innerHTML = `
