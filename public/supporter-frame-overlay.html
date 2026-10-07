@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Last Supporter Frame Overlay | إطار آخر داعم</title>
+    <title>Last Supporter Overlay | إطار آخر داعم الموحد</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Changa:wght@700;800;900&display=swap" rel="stylesheet">
     <style>
         * {
@@ -30,11 +30,25 @@
             --hue-deg: 0deg;
             --sat-val: 100%;
             --bri-val: 100%;
-            --glow-px: 18px;
+            --glow-px: 16px;
         }
 
-        /* Master Frame Stage */
+        /* 
+           Unified Stage & Master Wrap 
+           Both the Video Frame and the TikAlert Widget are strictly inside #masterWrap
+           so they MOVE TOGETHER and SCALE TOGETHER as one single atomic unit!
+        */
         .supporter-stage {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+        }
+
+        .supporter-master-wrap {
             position: relative;
             display: flex;
             align-items: center;
@@ -42,244 +56,67 @@
             width: 1200px;
             height: 225px;
             max-width: 100vw;
-            transition: transform 0.2s ease;
+            transition: transform 0.15s ease-out;
+            pointer-events: auto;
         }
 
-        /* 1. Video Frame Layer (For Sakura & Custom Video) */
-        .frame-video-layer {
+        /* 1. Video Frame Layer (Behind Widget) */
+        .frame-video-element {
             position: absolute;
             inset: 0;
             width: 100%;
             height: 100%;
             object-fit: contain;
             pointer-events: none;
-            z-index: 2;
+            z-index: 1;
             filter: hue-rotate(var(--hue-deg)) saturate(var(--sat-val)) brightness(var(--bri-val)) drop-shadow(0 0 var(--glow-px) var(--glow-color));
-            transition: filter 0.25s ease;
+            transition: filter 0.2s ease;
         }
 
-        /* 2. Procedural CSS / SVG Frame Layer */
-        .frame-css-layer {
+        /* 
+           2. The TikAlert Widget Slot (Strictly Layered Directly On Top of the Frame)
+           z-index: 20 ensures the widget is ALWAYS on top of the frame video.
+           filter: none ensures the widget text/effects are NOT distorted by video hue rotation.
+        */
+        .supporter-widget-slot {
             position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 2;
-            display: none;
-        }
-
-        /* Common animated elements inside procedural frames */
-        .procedural-frame-box {
-            position: absolute;
-            top: 20px;
-            bottom: 20px;
-            left: 50px;
-            right: 50px;
-            border-radius: 24px;
-            overflow: hidden;
+            z-index: 20;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 0 var(--glow-px) var(--glow-color), inset 0 0 15px var(--glow-color);
-            transition: all 0.3s ease;
-        }
-
-        /* Sweeping light beam */
-        .frame-light-sweep {
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 60%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent);
-            transform: skewX(-25deg);
-            animation: sweepLight 4s infinite linear;
-            pointer-events: none;
-        }
-
-        @keyframes sweepLight {
-            0% { left: -100%; }
-            40%, 100% { left: 200%; }
-        }
-
-        /* Particles Layer */
-        .particles-field {
-            position: absolute;
-            inset: 0;
-            overflow: hidden;
-            pointer-events: none;
-        }
-
-        .float-spark {
-            position: absolute;
-            border-radius: 50%;
-            background: var(--frame-color);
-            box-shadow: 0 0 10px var(--glow-color);
-            opacity: 0;
-            animation: floatSparkle 3.5s infinite ease-in-out;
-        }
-
-        .float-spark:nth-child(1) { width: 6px; height: 6px; left: 15%; top: 75%; animation-delay: 0s; }
-        .float-spark:nth-child(2) { width: 8px; height: 8px; left: 28%; top: 80%; animation-delay: 0.7s; }
-        .float-spark:nth-child(3) { width: 5px; height: 5px; left: 45%; top: 70%; animation-delay: 1.4s; }
-        .float-spark:nth-child(4) { width: 9px; height: 9px; left: 62%; top: 82%; animation-delay: 2.1s; }
-        .float-spark:nth-child(5) { width: 6px; height: 6px; left: 78%; top: 75%; animation-delay: 0.4s; }
-        .float-spark:nth-child(6) { width: 7px; height: 7px; left: 90%; top: 80%; animation-delay: 1.8s; }
-
-        @keyframes floatSparkle {
-            0% { transform: translateY(0) scale(0.6); opacity: 0; }
-            40% { opacity: 0.9; }
-            80% { opacity: 0.6; }
-            100% { transform: translateY(-70px) scale(1.3); opacity: 0; }
-        }
-
-        /* Wing Accents (Left & Right Badges) */
-        .side-crest {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 52px;
-            height: 90px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 26px;
-            z-index: 5;
-            filter: drop-shadow(0 0 12px var(--glow-color));
-            animation: crestGlow 2.5s infinite alternate ease-in-out;
-        }
-        .side-crest.left { left: 16px; }
-        .side-crest.right { right: 16px; }
-
-        @keyframes crestGlow {
-            0% { transform: translateY(-50%) scale(0.95); filter: drop-shadow(0 0 8px var(--glow-color)); }
-            100% { transform: translateY(-50%) scale(1.08); filter: drop-shadow(0 0 18px var(--frame-color)); }
-        }
-
-        /* --- STYLES: --- */
-
-        /* 1. Cyber Neon Frame */
-        .frame-cyber-neon .procedural-frame-box {
-            border: 2.5px solid var(--frame-color);
-            background: linear-gradient(135deg, rgba(8, 12, 24, 0.88), rgba(4, 6, 15, 0.94));
-            clip-path: polygon(
-                32px 0%, calc(100% - 32px) 0%, 100% 32px, 
-                100% calc(100% - 32px), calc(100% - 32px) 100%, 
-                32px 100%, 0% calc(100% - 32px), 0% 32px
-            );
-            animation: cyberPulse 3s infinite alternate;
-        }
-
-        .frame-cyber-neon .procedural-frame-box::after {
-            content: '';
-            position: absolute;
-            inset: 8px;
-            border: 1px dashed rgba(255, 255, 255, 0.35);
-            pointer-events: none;
-            border-radius: 12px;
-        }
-
-        @keyframes cyberPulse {
-            0% { box-shadow: 0 0 15px var(--glow-color), inset 0 0 10px var(--glow-color); }
-            100% { box-shadow: 0 0 35px var(--frame-color), inset 0 0 25px var(--frame-color); }
-        }
-
-        /* 2. Royal Gold & Fire Frame */
-        .frame-gold-fire .procedural-frame-box {
-            border: 3px solid var(--frame-color);
-            border-radius: 28px;
-            background: linear-gradient(135deg, rgba(28, 14, 4, 0.9), rgba(14, 7, 2, 0.95));
-            animation: fireAura 2.2s infinite alternate ease-in-out;
-        }
-
-        @keyframes fireAura {
-            0% { box-shadow: 0 0 20px var(--glow-color), 0 0 40px rgba(255, 120, 0, 0.3), inset 0 0 15px var(--glow-color); }
-            100% { box-shadow: 0 0 45px var(--frame-color), 0 0 80px var(--glow-color), inset 0 0 30px var(--frame-color); }
-        }
-
-        /* 3. Crystal Ice Frame */
-        .frame-crystal-ice .procedural-frame-box {
-            border: 2.5px solid var(--frame-color);
-            border-radius: 26px;
-            background: linear-gradient(135deg, rgba(12, 28, 50, 0.85), rgba(6, 16, 32, 0.92));
-            backdrop-filter: blur(12px);
-            animation: iceShine 3s infinite alternate;
-        }
-
-        @keyframes iceShine {
-            0% { box-shadow: 0 0 18px var(--glow-color), inset 0 0 20px rgba(255, 255, 255, 0.25); }
-            100% { box-shadow: 0 0 38px var(--frame-color), inset 0 0 35px rgba(255, 255, 255, 0.45); }
-        }
-
-        /* 4. Emerald Nature Frame */
-        .frame-emerald-nature .procedural-frame-box {
-            border: 3px solid var(--frame-color);
-            border-radius: 24px;
-            background: linear-gradient(135deg, rgba(6, 30, 18, 0.88), rgba(2, 16, 10, 0.94));
-            animation: emeraldBreathe 3.5s infinite alternate ease-in-out;
-        }
-
-        @keyframes emeraldBreathe {
-            0% { box-shadow: 0 0 18px var(--glow-color), inset 0 0 14px var(--glow-color); }
-            100% { box-shadow: 0 0 38px var(--frame-color), inset 0 0 28px var(--frame-color); }
-        }
-
-        /* 5. Crimson Dragon Frame */
-        .frame-crimson-dragon .procedural-frame-box {
-            border: 3px solid var(--frame-color);
-            background: linear-gradient(135deg, rgba(38, 6, 12, 0.9), rgba(16, 2, 6, 0.96));
-            clip-path: polygon(
-                42px 0%, calc(100% - 42px) 0%, 100% 28px, 
-                100% calc(100% - 28px), calc(100% - 42px) 100%, 
-                42px 100%, 0% calc(100% - 28px), 0% 28px
-            );
-            animation: dragonWrath 2.4s infinite alternate;
-        }
-
-        @keyframes dragonWrath {
-            0% { box-shadow: 0 0 22px var(--glow-color), inset 0 0 18px var(--glow-color); }
-            100% { box-shadow: 0 0 48px var(--frame-color), inset 0 0 36px var(--frame-color); }
-        }
-
-        /* 3. The Widget Content Container (Embedded TikAlert Iframe) */
-        .widget-content-slot {
-            position: absolute;
-            z-index: 10; /* Strictly on top of all frames */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 820px;
-            height: 140px;
-            left: 50%;
-            top: 50%;
+            width: 800px;
+            height: 135px;
+            left: 51.5%;
+            top: 50.5%;
             transform: translate(-50%, -50%);
             overflow: hidden;
             pointer-events: auto;
+            filter: none !important;
         }
 
-        .widget-iframe {
+        .supporter-widget-iframe {
             width: 100%;
             height: 100%;
             border: none;
-            background: transparent;
+            background: transparent !important;
             overflow: hidden;
             pointer-events: auto;
+            filter: none !important;
         }
     </style>
 </head>
 <body>
 
     <div class="supporter-stage" id="supporterStage">
-        <!-- 1. Video Layer (For Sakura & Custom Video) -->
-        <video id="frameVideo" class="frame-video-layer" src="/videos/sakura_frame.webm" autoplay loop muted playsinline></video>
+        <!-- Master Wrap: Frame Video + TikAlert Widget locked together -->
+        <div class="supporter-master-wrap" id="masterWrap">
+            <!-- 1. Real Video Frame (Sakura / Fire / Golden / Banner) -->
+            <video id="frameVideo" class="frame-video-element" src="/videos/sakura_frame.webm" autoplay loop muted playsinline></video>
 
-        <!-- 2. Procedural Animated Frames Layer -->
-        <div id="frameCss" class="frame-css-layer"></div>
-
-        <!-- 3. Nested TikAlert Widget Iframe (Always in front) -->
-        <div class="widget-content-slot" id="widgetSlot">
-            <iframe id="widgetIframe" class="widget-iframe" src="https://tikalert-eg.com/last-supporter/widget?username=mezo" allowtransparency="true" scrolling="no"></iframe>
+            <!-- 2. TikAlert Live Widget (Directly ON TOP of the frame bar) -->
+            <div class="supporter-widget-slot" id="widgetSlot">
+                <iframe id="widgetIframe" class="supporter-widget-iframe" src="https://tikalert-eg.com/last-supporter/widget?username=mezo" allowtransparency="true" scrolling="no"></iframe>
+            </div>
         </div>
     </div>
 
@@ -288,41 +125,20 @@
         const params = new URLSearchParams(window.location.search);
         const uid = params.get('uid') || 'default';
 
-        const stageEl = document.getElementById('supporterStage');
+        const masterWrapEl = document.getElementById('masterWrap');
         const videoEl = document.getElementById('frameVideo');
-        const cssEl = document.getElementById('frameCss');
         const slotEl = document.getElementById('widgetSlot');
         const iframeEl = document.getElementById('widgetIframe');
 
-        let currentConfig = null;
-
-        function renderProceduralFrameContent(style) {
-            let leftIcon = '⚡', rightIcon = '⚡';
-            if (style === 'gold_fire') { leftIcon = '🔥'; rightIcon = '👑'; }
-            else if (style === 'crystal_ice') { leftIcon = '💎'; rightIcon = '❄️'; }
-            else if (style === 'emerald_nature') { leftIcon = '🌿'; rightIcon = '✨'; }
-            else if (style === 'crimson_dragon') { leftIcon = '🐉'; rightIcon = '⚔️'; }
-
-            cssEl.innerHTML = `
-                <div class="procedural-frame-box">
-                    <div class="frame-light-sweep"></div>
-                    <div class="particles-field">
-                        <span class="float-spark"></span>
-                        <span class="float-spark"></span>
-                        <span class="float-spark"></span>
-                        <span class="float-spark"></span>
-                        <span class="float-spark"></span>
-                        <span class="float-spark"></span>
-                    </div>
-                </div>
-                <div class="side-crest left">${leftIcon}</div>
-                <div class="side-crest right">${rightIcon}</div>
-            `;
-        }
+        const FRAME_VIDEO_MAP = {
+            'sakura': '/videos/sakura_frame.webm',
+            'fire_bar': '/videos/fire_bar.webm',
+            'golden_flame': '/videos/golden_flame_bar.webm',
+            'stream_banner': '/videos/stream_banner_wide.webm'
+        };
 
         function applyFrameConfig(cfg) {
             if (!cfg) return;
-            currentConfig = cfg;
 
             const style = cfg.frameStyle || 'sakura';
             const color = cfg.frameColor || '#b594f8';
@@ -333,26 +149,60 @@
             const scale = (cfg.frameScale || 100) / 100;
             const offX = cfg.offsetX || 0;
             const offY = cfg.offsetY || 0;
-            const slotW = cfg.iframeWidth || 820;
-            const slotH = cfg.iframeHeight || 140;
+            const slotW = cfg.iframeWidth || 800;
+            const slotH = cfg.iframeHeight || 135;
 
-            // Apply CSS Variables
+            // 1. Apply Dynamic Colors to Video Frame
             document.documentElement.style.setProperty('--frame-color', color);
             document.documentElement.style.setProperty('--glow-color', color);
             document.documentElement.style.setProperty('--hue-deg', `${hue}deg`);
             document.documentElement.style.setProperty('--sat-val', `${sat}%`);
             document.documentElement.style.setProperty('--bri-val', `${bri}%`);
-            document.documentElement.style.setProperty('--glow-px', `${18 * glow}px`);
+            document.documentElement.style.setProperty('--glow-px', `${16 * glow}px`);
 
-            // Apply Stage Scale & Offset
-            stageEl.style.transform = `scale(${scale}) translate(${offX}px, ${offY}px)`;
+            // 2. Move & Scale Frame and Widget TOGETHER as one single unit
+            masterWrapEl.style.transform = `translate(${offX}px, ${offY}px) scale(${scale})`;
 
-            // Adjust Slot Dimensions & Positioning
+            // 3. Switch Video Source based on selected real frame
+            let targetVideoSrc = FRAME_VIDEO_MAP[style] || '/videos/sakura_frame.webm';
+            if (style === 'custom' && cfg.customMediaUrl) {
+                targetVideoSrc = cfg.customMediaUrl;
+            }
+
+            if (!videoEl.src.includes(targetVideoSrc)) {
+                videoEl.src = targetVideoSrc;
+                videoEl.play().catch(() => {});
+            }
+
+            // 4. Align Widget Slot onto the banner bar of the selected frame
             if (style === 'sakura') {
+                masterWrapEl.style.width = '1200px';
+                masterWrapEl.style.height = '225px';
                 slotEl.style.left = '51.5%';
                 slotEl.style.top = '50.5%';
                 slotEl.style.width = '790px';
                 slotEl.style.height = '135px';
+            } else if (style === 'fire_bar') {
+                masterWrapEl.style.width = '1200px';
+                masterWrapEl.style.height = '200px';
+                slotEl.style.left = '50%';
+                slotEl.style.top = '50%';
+                slotEl.style.width = '820px';
+                slotEl.style.height = '130px';
+            } else if (style === 'golden_flame') {
+                masterWrapEl.style.width = '1100px';
+                masterWrapEl.style.height = '180px';
+                slotEl.style.left = '50%';
+                slotEl.style.top = '50%';
+                slotEl.style.width = '760px';
+                slotEl.style.height = '120px';
+            } else if (style === 'stream_banner') {
+                masterWrapEl.style.width = '1200px';
+                masterWrapEl.style.height = '220px';
+                slotEl.style.left = '50%';
+                slotEl.style.top = '50%';
+                slotEl.style.width = '850px';
+                slotEl.style.height = '140px';
             } else {
                 slotEl.style.left = '50%';
                 slotEl.style.top = '50%';
@@ -360,38 +210,7 @@
                 slotEl.style.height = `${slotH}px`;
             }
 
-            // Switch Frame Layers
-            if (style === 'sakura') {
-                videoEl.style.display = 'block';
-                cssEl.style.display = 'none';
-                if (!videoEl.src.includes('sakura_frame.webm')) {
-                    videoEl.src = '/videos/sakura_frame.webm';
-                    videoEl.play().catch(() => {});
-                }
-            } else if (style === 'custom' && cfg.customMediaUrl) {
-                videoEl.style.display = 'block';
-                cssEl.style.display = 'none';
-                if (!videoEl.src.includes(cfg.customMediaUrl)) {
-                    videoEl.src = cfg.customMediaUrl;
-                    videoEl.play().catch(() => {});
-                }
-            } else {
-                // Procedural Animated CSS Frames
-                videoEl.style.display = 'none';
-                cssEl.style.display = 'block';
-                cssEl.className = 'frame-css-layer';
-
-                if (style === 'cyber_neon') cssEl.classList.add('frame-cyber-neon');
-                else if (style === 'gold_fire') cssEl.classList.add('frame-gold-fire');
-                else if (style === 'crystal_ice') cssEl.classList.add('frame-crystal-ice');
-                else if (style === 'emerald_nature') cssEl.classList.add('frame-emerald-nature');
-                else if (style === 'crimson_dragon') cssEl.classList.add('frame-crimson-dragon');
-                else cssEl.classList.add('frame-cyber-neon');
-
-                renderProceduralFrameContent(style);
-            }
-
-            // Update Iframe URL if changed
+            // 5. Ensure Widget URL is always loaded in the iframe
             const targetUrl = cfg.widgetUrl || 'https://tikalert-eg.com/last-supporter/widget?username=mezo';
             if (iframeEl.src !== targetUrl) {
                 iframeEl.src = targetUrl;
@@ -412,7 +231,7 @@
 
         fetchConfig();
 
-        // Socket IO Real-time Updates
+        // Socket IO Real-time Updates from Control Panel
         try {
             const socket = io();
             socket.on('supporter_frame_update', (data) => {
