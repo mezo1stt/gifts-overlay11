@@ -119,6 +119,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 4. Load Data for All Sections
     loadGiftsData();
     loadTeamGiftsData();
+    loadCardsData();
     loadFireData();
     loadCameraData();
     loadScoreboardData();
@@ -135,34 +136,59 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // ================= SIDEBAR NAVIGATION ================= //
+const NAV_TAB_TITLES = {
+    giftsSection: '🎁 هدايا التيك توك 1 · لوحة التحكم التفاعلية',
+    teamGiftsSection: '⚔️ هدايا تيك توك 2 · أوفرلاي الفرق المتنافسة (ممنوع تكرار الصور)',
+    cardsGiftsSection: '🃏 هدايا تيك توك 3 (بطاقات وجنود اللعبة) · إعدادات البطاقات والنيون',
+    fireSection: '🔥 رابط آخر داعم (الشريط الناري) · إعدادات البث',
+    cameraSection: '📷 بنرات الكاميرا · 10 أنماط إطارات نيون للبث',
+    scoreboardSection: '⚡ لوحة النتائج (Scoreboard) · نقاط الفرق والتحديات والتراجر',
+    raceSection: '⚔️ صراع الحكام 👑 · نظام تسجيل انتصارات الحكام والمتسابقين في روبلوكس وتيك توك',
+    accountSection: '👤 إدارة الحساب والمستخدمين · قاعدة البيانات'
+};
+
+function switchMainTab(targetTab) {
+    if (!targetTab) return;
+    const navItems = document.querySelectorAll('.nav-item');
+
+    // Switch active classes
+    navItems.forEach(i => {
+        if (i.dataset.tab === targetTab) i.classList.add('active');
+        else i.classList.remove('active');
+    });
+
+    document.querySelectorAll('.tab-section').forEach(sec => sec.classList.remove('active'));
+    const activeSec = document.getElementById(targetTab);
+    if (activeSec) activeSec.classList.add('active');
+
+    currentTab = targetTab;
+    const titleEl = document.getElementById('activePageTitle');
+    if (titleEl && NAV_TAB_TITLES[targetTab]) titleEl.textContent = NAV_TAB_TITLES[targetTab];
+
+    // Persist active tab across refreshes
+    try {
+        localStorage.setItem('active_control_tab', targetTab);
+        if (window.history && window.history.replaceState) {
+            window.history.replaceState(null, '', `#${targetTab}`);
+        }
+    } catch (e) {}
+
+    // Force instant scroll to top on window, document, and wrapper containers - completely eliminate scrolling!
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    const mainWrap = document.querySelector('.main-wrapper');
+    if (mainWrap) mainWrap.scrollTop = 0;
+    const pageContent = document.querySelector('.page-content-area');
+    if (pageContent) pageContent.scrollTop = 0;
+}
+
 function setupSidebarNav() {
     const navItems = document.querySelectorAll('.nav-item');
-    const titles = {
-        giftsSection: '🎁 هدايا التيك توك 1 · لوحة التحكم التفاعلية',
-        teamGiftsSection: '⚔️ هدايا تيك توك 2 · أوفرلاي الفرق المتنافسة (ممنوع تكرار الصور)',
-        fireSection: '🔥 رابط آخر داعم (الشريط الناري) · إعدادات البث',
-        cameraSection: '📷 بنرات الكاميرا · 10 أنماط إطارات نيون للبث',
-        scoreboardSection: '⚡ لوحة النتائج (Scoreboard) · نقاط الفرق والتحديات والتراجر',
-        raceSection: '⚔️ صراع الحكام 👑 · نظام تسجيل انتصارات الحكام والمتسابقين في روبلوكس وتيك توك',
-        accountSection: '👤 إدارة الحساب والمستخدمين · قاعدة البيانات'
-    };
-
     navItems.forEach(item => {
         item.addEventListener('click', () => {
             const targetTab = item.dataset.tab;
-            if (!targetTab) return;
-
-            // Switch active classes
-            navItems.forEach(i => i.classList.remove('active'));
-            item.classList.add('active');
-
-            document.querySelectorAll('.tab-section').forEach(sec => sec.classList.remove('active'));
-            const activeSec = document.getElementById(targetTab);
-            if (activeSec) activeSec.classList.add('active');
-
-            currentTab = targetTab;
-            const titleEl = document.getElementById('activePageTitle');
-            if (titleEl && titles[targetTab]) titleEl.textContent = titles[targetTab];
+            if (targetTab) switchMainTab(targetTab);
         });
     });
 
@@ -174,6 +200,12 @@ function setupSidebarNav() {
             sidebar.classList.toggle('collapsed');
         });
     }
+
+    // Restore saved tab or hash
+    const hashTab = window.location.hash ? window.location.hash.substring(1) : null;
+    const savedTab = localStorage.getItem('active_control_tab');
+    const initialTab = (hashTab && document.getElementById(hashTab)) ? hashTab : ((savedTab && document.getElementById(savedTab)) ? savedTab : 'giftsSection');
+    switchMainTab(initialTab);
 }
 
 // ================= AUTHENTICATION ================= //
@@ -1909,6 +1941,11 @@ function openAllObsModal() {
     const openRace = document.getElementById('openRaceUrl');
     if (openRace) openRace.href = `${origin}/race-overlay.html`;
 
+    const linkCards = document.getElementById('linkCardsUrl');
+    if (linkCards) linkCards.value = `${origin}/cards-overlay.html?uid=${currentUid}`;
+    const openCards = document.getElementById('openCardsUrl');
+    if (openCards) openCards.href = `${origin}/cards-overlay.html?uid=${currentUid}`;
+
     document.getElementById('allObsModal').classList.add('open');
 }
 
@@ -1932,19 +1969,28 @@ function copyCurrentOverlayUrl(type) {
     if (type === 'gifts') url = `${origin}/overlay.html?uid=${currentUid}`;
     else if (type === 'team1') url = `${origin}/overlay-team.html?team=1&uid=${currentUid}`;
     else if (type === 'team2') url = `${origin}/overlay-team.html?team=2&uid=${currentUid}`;
+    else if (type === 'cards') url = `${origin}/cards-overlay.html?uid=${currentUid}`;
     else if (type === 'fire') url = `${origin}/fire-text.html?uid=${currentUid}`;
     else if (type === 'camera') url = `${origin}/camera-overlay.html?uid=${currentUid}`;
     else if (type === 'scoreboard') url = `${origin}/scoreboard-overlay.html?id=${currentUid}`;
     else if (type === 'race') url = `${origin}/race-overlay.html`;
 
     navigator.clipboard.writeText(url);
-    showToast(`📺 تم نسخ رابط (${type === 'race' ? 'صراع الحكام' : type}) بنجاح!`, 'copy');
+    const labelMap = { race: 'صراع الحكام', cards: 'بطاقات تيك توك 3', fire: 'الشريط الناري', camera: 'إطار الكاميرا', scoreboard: 'لوحة النتائج' };
+    showToast(`📺 تم نسخ رابط (${labelMap[type] || type}) بنجاح!`, 'copy');
 }
 
 // ================= SOCKET.IO & EVENT LISTENERS ================= //
 function setupSocket() {
     try {
         const socket = io();
+
+        socket.on('cards_board_update', (data) => {
+            if (!data || !data.uid || data.uid === currentUid) {
+                const sim = document.getElementById('cardsSimIframe');
+                if (sim) sim.src = `/cards-overlay.html?uid=${currentUid}&t=${Date.now()}`;
+            }
+        });
 
         socket.on('scoreboard_update', (board) => {
             if (board && board.board_id === currentUid) {
@@ -2546,3 +2592,434 @@ function loadRaceState() {
         })
         .catch(() => {});
 }
+
+// ================= SECTION 3: هدايا تيك توك 3 (بطاقات وجنود اللعبة) ================= //
+
+let cardsBoardConfig = {
+    color: '#ff2a4a',
+    neonEnabled: true,
+    glowIntensity: 18,
+    fontFamily: 'impact',
+    giftPosition: 'top-right',
+    disappearMode: 'gift_only',
+    horizontalAlign: 'right',
+    offsetY: 0,
+    cards: [
+        { id: 1, cardType: 'skeleton_bandana', count: 1, giftName: 'وردة', giftImage: '/images/rose.png' },
+        { id: 2, cardType: 'evoker_mage', count: 1, giftName: 'عطر', giftImage: '/images/perfume.png' },
+        { id: 3, cardType: 'skeleton_cap', count: 2, giftName: 'دونات', giftImage: '/images/donut.png' },
+        { id: 4, cardType: 'hog_rider', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' },
+        { id: 5, cardType: 'golem_pumpkin', count: 1, giftName: 'آيس كريم', giftImage: '/images/icecream.png' }
+    ]
+};
+
+const MCROYALE_CHARACTERS = [
+    { id: 'skeleton_bandana', name: '💀 هيكل عظمي (Bandana)', img: '/images/mcroyale/skeleton_bandana.png' },
+    { id: 'evoker_mage', name: '🧙‍♂️ الساحر إيفوكر (Evoker Mage)', img: '/images/mcroyale/evoker_mage.png' },
+    { id: 'skeleton_cap', name: '⚔️ محارب القبعة (Skeleton Cap)', img: '/images/mcroyale/skeleton_cap.png' },
+    { id: 'hog_rider', name: '🐗 فارس الخنزير (Hog Rider)', img: '/images/mcroyale/hog_rider.png' },
+    { id: 'golem_pumpkin', name: '🎃 وحش اليقطين (Golem Pumpkin)', img: '/images/mcroyale/golem_pumpkin.png' }
+];
+
+let activeCardSlotIndex = null;
+let visualGiftPriceFilter = 'all';
+let visualGiftSearchQuery = '';
+
+async function loadCardsData() {
+    if (!currentUid) return;
+
+    try {
+        const res = await fetch(`/api/cards-board/${currentUid}`);
+        if (res.ok) {
+            const data = await res.json();
+            if (data && data.board) {
+                cardsBoardConfig = { ...cardsBoardConfig, ...data.board };
+                if (!Array.isArray(cardsBoardConfig.cards) || cardsBoardConfig.cards.length === 0) {
+                    cardsBoardConfig.cards = [
+                        { id: 1, cardType: 'skeleton_bandana', count: 1, giftName: 'وردة', giftImage: '/images/rose.png' },
+                        { id: 2, cardType: 'evoker_mage', count: 1, giftName: 'عطر', giftImage: '/images/perfume.png' },
+                        { id: 3, cardType: 'skeleton_cap', count: 2, giftName: 'دونات', giftImage: '/images/donut.png' },
+                        { id: 4, cardType: 'hog_rider', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' },
+                        { id: 5, cardType: 'golem_pumpkin', count: 1, giftName: 'آيس كريم', giftImage: '/images/icecream.png' }
+                    ];
+                }
+            }
+        }
+    } catch (e) {
+        console.error('Failed to load cards board data:', e);
+    }
+
+    applyCardsConfigToUI();
+    renderCardsDeckList();
+}
+
+function applyCardsConfigToUI() {
+    // 1. Neon Toggle
+    const neonOnBtn = document.getElementById('btnCardsNeonOn');
+    const neonOffBtn = document.getElementById('btnCardsNeonOff');
+    const colorBox = document.getElementById('cardsNeonColorBox');
+    if (neonOnBtn && neonOffBtn) {
+        neonOnBtn.classList.toggle('active', cardsBoardConfig.neonEnabled !== false);
+        neonOffBtn.classList.toggle('active', cardsBoardConfig.neonEnabled === false);
+    }
+    if (colorBox) {
+        colorBox.style.display = cardsBoardConfig.neonEnabled !== false ? 'block' : 'none';
+    }
+
+    // 2. Neon Color
+    const colorInput = document.getElementById('cardsNeonColor');
+    const hexSpan = document.getElementById('cardsColorHex');
+    if (colorInput) colorInput.value = cardsBoardConfig.color || '#ff2a4a';
+    if (hexSpan) {
+        hexSpan.textContent = cardsBoardConfig.color || '#ff2a4a';
+        hexSpan.style.color = cardsBoardConfig.color || '#ff2a4a';
+    }
+
+    // 3. Fonts
+    document.querySelectorAll('#cardsFontChips .chip').forEach(c => {
+        c.classList.toggle('active', c.dataset.font === cardsBoardConfig.fontFamily);
+    });
+
+    // 4. Gift Position
+    document.querySelectorAll('#cardsGiftPosChips .chip').forEach(c => {
+        c.classList.toggle('active', c.dataset.pos === cardsBoardConfig.giftPosition);
+    });
+
+    // 5. Disappearance Mode
+    const disGiftOnly = document.getElementById('btnDisappearGiftOnly');
+    const disCardAndGift = document.getElementById('btnDisappearCardAndGift');
+    if (disGiftOnly && disCardAndGift) {
+        disGiftOnly.classList.toggle('active', cardsBoardConfig.disappearMode !== 'card_and_gift');
+        disCardAndGift.classList.toggle('active', cardsBoardConfig.disappearMode === 'card_and_gift');
+    }
+
+    // 6. Alignment & Offset
+    const btnRight = document.getElementById('btnCardsAlignRight');
+    const btnLeft = document.getElementById('btnCardsAlignLeft');
+    if (btnRight && btnLeft) {
+        btnRight.classList.toggle('active', cardsBoardConfig.horizontalAlign !== 'left');
+        btnLeft.classList.toggle('active', cardsBoardConfig.horizontalAlign === 'left');
+    }
+
+    const offsetSlider = document.getElementById('cardsOffsetYSlider');
+    const offsetBadge = document.getElementById('cardsOffsetYBadge');
+    if (offsetSlider) offsetSlider.value = cardsBoardConfig.offsetY || 0;
+    if (offsetBadge) offsetBadge.textContent = `${cardsBoardConfig.offsetY || 0} px`;
+
+    // 7. Preview external link
+    const extLink = document.getElementById('cardsPreviewExternalLink');
+    if (extLink) extLink.href = `/cards-overlay.html?uid=${currentUid}`;
+}
+
+function renderCardsDeckList() {
+    const listContainer = document.getElementById('cardsDeckItemsList');
+    const countDisplay = document.getElementById('cardsCountDisplay');
+    if (!listContainer) return;
+
+    if (countDisplay) countDisplay.textContent = cardsBoardConfig.cards.length;
+    listContainer.innerHTML = '';
+
+    cardsBoardConfig.cards.forEach((card, idx) => {
+        const item = document.createElement('div');
+        item.className = 'card-deck-slot-item';
+        item.setAttribute('data-slot-index', idx);
+
+        const cardSrc = `/images/mcroyale/${card.cardType || 'skeleton_bandana'}.png`;
+        const giftSrc = normalizeImgPath(card.giftImage || '/images/rose.png');
+
+        item.innerHTML = `
+            <span class="card-slot-idx">#${idx + 1}</span>
+            <div class="card-slot-avatar-wrap">
+                <img class="card-slot-avatar-img" src="${cardSrc}" alt="Character" id="slotAvatar_${idx}" onerror="this.src='/images/mcroyale/skeleton_bandana.png'">
+                <img class="card-slot-badge-preview" src="${giftSrc}" alt="Gift" id="slotBadge_${idx}" onerror="this.src='/images/rose.png'">
+            </div>
+            <div class="card-slot-controls-wrap">
+                <!-- Character select -->
+                <div class="card-slot-field">
+                    <label>شخصية البطاقة:</label>
+                    <select onchange="onCardTypeChange(${idx}, this.value)">
+                        ${MCROYALE_CHARACTERS.map(c => `
+                            <option value="${c.id}" ${c.id === (card.cardType || 'skeleton_bandana') ? 'selected' : ''}>
+                                ${c.name}
+                            </option>
+                        `).join('')}
+                    </select>
+                </div>
+                <!-- Troop Count -->
+                <div class="card-slot-field">
+                    <label>عدد الجنود (X):</label>
+                    <input type="number" min="1" max="999" value="${card.count || 1}" class="mcroyale-count-badge-input" onchange="onCardCountChange(${idx}, this.value)">
+                </div>
+                <!-- Visual Gift Trigger (صورة الهدية مش كتابة) -->
+                <div class="card-slot-field">
+                    <label>صورة هدية تيك توك المرتبطة:</label>
+                    <button type="button" class="btn-visual-gift-trigger" onclick="openVisualGiftPicker(${idx})" title="انقر لاختيار أي هدية بالصورة">
+                        <img src="${giftSrc}" alt="${escapeHtml(card.giftName || 'هدية')}" onerror="this.src='/images/rose.png'">
+                        <span class="gift-name-label">${escapeHtml(card.giftName || 'اختر هدية')}</span>
+                        <span class="gift-click-hint">تغيير 🖼️</span>
+                    </button>
+                </div>
+            </div>
+            ${cardsBoardConfig.cards.length > 1 ? `
+                <button type="button" class="btn-slot-del" onclick="deleteCardSlot(${idx})" title="حذف هذه البطاقة">✕</button>
+            ` : ''}
+        `;
+
+        listContainer.appendChild(item);
+    });
+}
+
+function onCardTypeChange(idx, val) {
+    if (!cardsBoardConfig.cards[idx]) return;
+    cardsBoardConfig.cards[idx].cardType = val;
+    const avatar = document.getElementById(`slotAvatar_${idx}`);
+    if (avatar) avatar.src = `/images/mcroyale/${val}.png`;
+    saveCardsBoardConfig(true);
+}
+
+function onCardCountChange(idx, val) {
+    if (!cardsBoardConfig.cards[idx]) return;
+    cardsBoardConfig.cards[idx].count = Math.max(1, parseInt(val) || 1);
+    saveCardsBoardConfig(true);
+}
+
+function addNewCardSlot() {
+    const nextId = (cardsBoardConfig.cards.length ? Math.max(...cardsBoardConfig.cards.map(c => c.id || 0)) : 0) + 1;
+    const chars = ['skeleton_bandana', 'evoker_mage', 'skeleton_cap', 'hog_rider', 'golem_pumpkin'];
+    const charChoice = chars[cardsBoardConfig.cards.length % chars.length];
+    
+    cardsBoardConfig.cards.push({
+        id: nextId,
+        cardType: charChoice,
+        count: 1,
+        giftName: 'وردة',
+        giftImage: '/images/rose.png'
+    });
+
+    renderCardsDeckList();
+    saveCardsBoardConfig(true);
+    showToast('تمت إضافة خانة بطاقة جديدة بنجاح! ➕', 'success');
+}
+
+function deleteCardSlot(idx) {
+    if (cardsBoardConfig.cards.length <= 1) return;
+    cardsBoardConfig.cards.splice(idx, 1);
+    renderCardsDeckList();
+    saveCardsBoardConfig(true);
+    showToast('تم حذف خانة البطاقة.', 'info');
+}
+
+function toggleCardsNeon(enabled) {
+    cardsBoardConfig.neonEnabled = !!enabled;
+    const neonOnBtn = document.getElementById('btnCardsNeonOn');
+    const neonOffBtn = document.getElementById('btnCardsNeonOff');
+    const colorBox = document.getElementById('cardsNeonColorBox');
+    if (neonOnBtn) neonOnBtn.classList.toggle('active', cardsBoardConfig.neonEnabled);
+    if (neonOffBtn) neonOffBtn.classList.toggle('active', !cardsBoardConfig.neonEnabled);
+    if (colorBox) colorBox.style.display = cardsBoardConfig.neonEnabled ? 'block' : 'none';
+    saveCardsBoardConfig(true);
+}
+
+function onCardsNeonColorChange(color) {
+    cardsBoardConfig.color = color;
+    const colorInput = document.getElementById('cardsNeonColor');
+    const hexSpan = document.getElementById('cardsColorHex');
+    if (colorInput) colorInput.value = color;
+    if (hexSpan) {
+        hexSpan.textContent = color;
+        hexSpan.style.color = color;
+    }
+    saveCardsBoardConfig(true);
+}
+
+function setCardsFont(font) {
+    cardsBoardConfig.fontFamily = font;
+    document.querySelectorAll('#cardsFontChips .chip').forEach(c => {
+        c.classList.toggle('active', c.dataset.font === font);
+    });
+    saveCardsBoardConfig(true);
+}
+
+function setCardsGiftPos(pos) {
+    cardsBoardConfig.giftPosition = pos;
+    document.querySelectorAll('#cardsGiftPosChips .chip').forEach(c => {
+        c.classList.toggle('active', c.dataset.pos === pos);
+    });
+    saveCardsBoardConfig(true);
+}
+
+function setCardsDisappearMode(mode) {
+    cardsBoardConfig.disappearMode = mode;
+    const disGiftOnly = document.getElementById('btnDisappearGiftOnly');
+    const disCardAndGift = document.getElementById('btnDisappearCardAndGift');
+    if (disGiftOnly) disGiftOnly.classList.toggle('active', mode !== 'card_and_gift');
+    if (disCardAndGift) disCardAndGift.classList.toggle('active', mode === 'card_and_gift');
+    saveCardsBoardConfig(true);
+}
+
+function setCardsAlign(align) {
+    cardsBoardConfig.horizontalAlign = align;
+    const btnRight = document.getElementById('btnCardsAlignRight');
+    const btnLeft = document.getElementById('btnCardsAlignLeft');
+    if (btnRight) btnRight.classList.toggle('active', align !== 'left');
+    if (btnLeft) btnLeft.classList.toggle('active', align === 'left');
+    saveCardsBoardConfig(true);
+}
+
+function onCardsOffsetYChange(val) {
+    cardsBoardConfig.offsetY = parseInt(val) || 0;
+    const offsetBadge = document.getElementById('cardsOffsetYBadge');
+    if (offsetBadge) offsetBadge.textContent = `${val} px`;
+    saveCardsBoardConfig(true);
+}
+
+async function saveCardsBoardConfig(silent = false) {
+    if (!currentUid) return;
+
+    try {
+        const res = await fetch(`/api/cards-board/${currentUid}/settings`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(cardsBoardConfig)
+        });
+
+        if (res.ok) {
+            // Update preview simulator iframe
+            const sim = document.getElementById('cardsSimIframe');
+            if (sim) {
+                sim.src = `/cards-overlay.html?uid=${currentUid}&t=${Date.now()}`;
+            }
+
+            if (!silent) {
+                showToast('تم حفظ إعدادات البطاقات ونشرها لـ OBS بنجاح! 💾', 'success');
+            }
+        } else {
+            if (!silent) showToast('حدث خطأ أثناء حفظ البطاقات', 'error');
+        }
+    } catch (e) {
+        console.error('Save cards failed:', e);
+        if (!silent) showToast('فشل الاتصال بالخادم لحفظ البطاقات', 'error');
+    }
+}
+
+// ================= VISUAL GIFT PICKER MODAL (اختيار الهدية كصورة) ================= //
+
+function openVisualGiftPicker(slotIdx) {
+    activeCardSlotIndex = slotIdx;
+    const modal = document.getElementById('visualGiftPickerModal');
+    if (!modal) return;
+
+    modal.classList.add('open');
+    visualGiftSearchQuery = '';
+    const searchInput = document.getElementById('visualGiftSearchInput');
+    if (searchInput) searchInput.value = '';
+
+    renderVisualGiftsGallery();
+}
+
+function closeVisualGiftPicker() {
+    const modal = document.getElementById('visualGiftPickerModal');
+    if (modal) modal.classList.remove('open');
+    activeCardSlotIndex = null;
+}
+
+function filterVisualGiftsList(query) {
+    visualGiftSearchQuery = (query || '').trim().toLowerCase();
+    renderVisualGiftsGallery();
+}
+
+function filterVisualGiftsByPrice(filter, btn) {
+    visualGiftPriceFilter = filter;
+    document.querySelectorAll('#visualGiftPickerModal .price-chips-row .chip').forEach(c => c.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    renderVisualGiftsGallery();
+}
+
+function renderVisualGiftsGallery() {
+    const grid = document.getElementById('visualGiftsGalleryGrid');
+    const countEl = document.getElementById('visualGiftPickerCount');
+    if (!grid) return;
+
+    // Collect all gifts: POPULAR_GIFTS + allTiktokGifts deduplicated
+    const giftList = [];
+    const seenImages = new Set();
+
+    POPULAR_GIFTS.forEach(g => {
+        const norm = normalizeImgPath(g.image);
+        if (!seenImages.has(norm)) {
+            seenImages.add(norm);
+            giftList.push({ name: g.name, image: g.image, diamonds: 1, popular: true });
+        }
+    });
+
+    if (Array.isArray(allTiktokGifts)) {
+        allTiktokGifts.forEach(g => {
+            const norm = normalizeImgPath(g.image);
+            if (!seenImages.has(norm)) {
+                seenImages.add(norm);
+                giftList.push({
+                    name: g.name,
+                    image: g.image,
+                    diamonds: g.diamonds || g.coins || 1,
+                    popular: (g.diamonds || 0) >= 100
+                });
+            }
+        });
+    }
+
+    // Filter by search query
+    let filtered = giftList;
+    if (visualGiftSearchQuery) {
+        filtered = filtered.filter(g => (g.name || '').toLowerCase().includes(visualGiftSearchQuery));
+    }
+
+    // Filter by price chip
+    if (visualGiftPriceFilter === 'popular') {
+        filtered = filtered.filter(g => g.popular);
+    } else if (visualGiftPriceFilter === '1-100') {
+        filtered = filtered.filter(g => (g.diamonds || 1) < 100);
+    } else if (visualGiftPriceFilter === '100+') {
+        filtered = filtered.filter(g => (g.diamonds || 1) >= 100);
+    }
+
+    // Limit to 120 items for snappy performance
+    const displayList = filtered.slice(0, 120);
+
+    grid.innerHTML = '';
+    const currentSelectedImg = (activeCardSlotIndex !== null && cardsBoardConfig.cards[activeCardSlotIndex])
+        ? normalizeImgPath(cardsBoardConfig.cards[activeCardSlotIndex].giftImage)
+        : null;
+
+    displayList.forEach(g => {
+        const card = document.createElement('div');
+        const normImg = normalizeImgPath(g.image);
+        const isSelected = currentSelectedImg === normImg;
+
+        card.className = `visual-gift-card ${isSelected ? 'selected' : ''}`;
+        card.onclick = () => selectVisualGift(g.name, g.image);
+
+        card.innerHTML = `
+            <img src="${normImg}" alt="${escapeHtml(g.name)}" onerror="this.src='/images/rose.png'">
+            <span class="v-gift-name" title="${escapeHtml(g.name)}">${escapeHtml(g.name)}</span>
+            <span class="v-gift-coins">${g.diamonds ? g.diamonds + ' 💎' : '🔥 مميزة'}</span>
+        `;
+        grid.appendChild(card);
+    });
+
+    if (countEl) {
+        countEl.textContent = `تم العثور على ${filtered.length} هدية بالصور (معروض ${displayList.length})`;
+    }
+}
+
+function selectVisualGift(giftName, giftImage) {
+    if (activeCardSlotIndex === null || !cardsBoardConfig.cards[activeCardSlotIndex]) return;
+
+    cardsBoardConfig.cards[activeCardSlotIndex].giftName = giftName;
+    cardsBoardConfig.cards[activeCardSlotIndex].giftImage = giftImage;
+
+    closeVisualGiftPicker();
+    renderCardsDeckList();
+    saveCardsBoardConfig(true);
+    showToast(`تم اختيار هدية: ${giftName} للبطاقة رقم ${activeCardSlotIndex + 1}! ✨`, 'success');
+}
+

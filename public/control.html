@@ -47,6 +47,13 @@
                     <span class="nav-badge hot">جديد 🔥</span>
                 </button>
 
+                <!-- 3. هدايا تيك توك 3 (بطاقات) -->
+                <button class="nav-item" data-tab="cardsGiftsSection">
+                    <span class="nav-icon">🃏</span>
+                    <span class="nav-label">هدايا تيك توك 3 (بطاقات)</span>
+                    <span class="nav-badge hot">جديد 👑</span>
+                </button>
+
                 <!-- 3. رابط آخر داعم (الشريط الناري) -->
                 <button class="nav-item" data-tab="fireSection">
                     <span class="nav-icon">🔥</span>
@@ -249,44 +256,8 @@
                         <!-- Gift Cards Column -->
                         <div class="panel-section gifts-panel">
                             
-                            <!-- Display Mode Selector (Classic vs MC Royale Cards) -->
-                            <div class="panel-card mode-selector-card">
-                                <div class="card-header-flex">
-                                    <h3 class="card-title"><span>🎮 نمط العرض في أوفرلاي هدايا تيك توك</span></h3>
-                                    <span class="badge-tag" id="currentDisplayModeTag">🎁 كلاسيكي</span>
-                                </div>
-                                <div class="mode-switch-tabs mt-2">
-                                    <button type="button" class="btn-mode-tab active" id="btnModeClassic" onclick="switchGiftDisplayMode('classic')">
-                                        🎁 النمط الكلاسيكي (قائمة الهدايا)
-                                    </button>
-                                    <button type="button" class="btn-mode-tab" id="btnModeMcRoyale" onclick="switchGiftDisplayMode('mcroyale')">
-                                        🃏 وضع بطاقات MC Royale (جنود وبطاقات اللعبة)
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- MC Royale Cards Manager (Shown when mcroyale mode active) -->
-                            <div class="panel-card mcroyale-manager-card" id="mcroyaleCardsCard" style="display:none;">
-                                <div class="card-header-flex">
-                                    <h3 class="card-title"><span>🃏 بطاقات MC Royale والجنود (على طرف الشاشة)</span></h3>
-                                    <span class="badge-tag">إطار ذهبي + نيون مشع ✨</span>
-                                </div>
-                                <p style="font-size:12px; color:#cbd5e1; margin-top:4px;">
-                                    حدد صورة البطاقة لكل خانة، وعدد الجنود (المضاعف مثل X1, X2...)، والهدية المرتبطة بها من المكتبة:
-                                </p>
-                                <div class="mcroyale-cards-grid mt-3" id="mcroyaleCardsGrid"></div>
-                                <div class="mt-3" style="display:flex; gap:10px;">
-                                    <button type="button" class="btn-secondary" onclick="addMcRoyaleCardSlot()" style="flex:1;">
-                                        ➕ إضافة خانة بطاقة جديدة
-                                    </button>
-                                    <button type="button" class="btn-primary" onclick="saveMcRoyaleCardsConfig()" style="flex:1;">
-                                        💾 حفظ البطاقات وتحديث البث
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Add Gifts Form (Classic Mode) -->
-                            <div class="panel-card add-gift-card" id="classicAddGiftCard">
+                            <!-- Add Gifts Form -->
+                            <div class="panel-card add-gift-card">
                                 <h3 class="card-title"><span>➕ إضافة هدايا جديدة</span></h3>
                                 <div class="tabs-nav">
                                     <button class="tab-btn active" data-tab="libraryTab">🎁 مكتبة هدايا تيك توك مصر (700+ هدية)</button>
@@ -531,108 +502,176 @@
                     </div>
                 </section>
 
-                <!-- ================= SECTION 3: رابط آخر داعم (الشريط الناري) ================= -->
+                <!-- ================= SECTION 3: هدايا تيك توك 3 (بطاقات وجنود اللعبة) ================= -->
+                <section class="tab-section" id="cardsGiftsSection">
+                    <div class="dashboard-grid">
+                        
+                        <!-- Left Column: Settings & Cards Deck -->
+                        <div class="panel-section control-panel">
+
+                            <!-- Card Appearance & Neon & Fonts -->
+                            <div class="panel-card">
+                                <div class="card-header-flex">
+                                    <h3 class="card-title"><span>🎨 مظهر وإعدادات البطاقات والنيون</span></h3>
+                                    <span class="badge-tag">هدايا تيك توك 3 👑</span>
+                                </div>
+
+                                <!-- Neon Glow Option (وضع نيون ولا لا) -->
+                                <div class="form-group mt-3" style="background:rgba(255,255,255,0.03); padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,0.08); display:flex; justify-content:space-between; align-items:center;">
+                                    <div>
+                                        <label style="margin:0; font-size:13px; font-weight:800; color:#fff;">💡 توهج النيون (Neon Glow):</label>
+                                        <div style="font-size:11px; color:#94a3b8; margin-top:2px;">خيار بطاقات بتوهج نيون مشع أو بطاقات طبيعية بدقة عالية</div>
+                                    </div>
+                                    <div class="btn-toggle-group" style="margin:0;">
+                                        <button type="button" class="btn-toggle active" id="btnCardsNeonOn" onclick="toggleCardsNeon(true)">✨ نيون مشع</button>
+                                        <button type="button" class="btn-toggle" id="btnCardsNeonOff" onclick="toggleCardsNeon(false)">⚪ بدون نيون</button>
+                                    </div>
+                                </div>
+
+                                <!-- Neon Color Picker -->
+                                <div class="color-picker-box mt-3" id="cardsNeonColorBox">
+                                    <div class="color-row">
+                                        <label for="cardsNeonColor">لون نيون البطاقات:</label>
+                                        <input type="color" id="cardsNeonColor" value="#ff2a4a" onchange="onCardsNeonColorChange(this.value)">
+                                        <span id="cardsColorHex">#ff2a4a</span>
+                                    </div>
+                                    <div class="color-presets">
+                                        <button class="preset-btn" style="--c:#ff2a4a" onclick="onCardsNeonColorChange('#ff2a4a')"></button>
+                                        <button class="preset-btn" style="--c:#ffd700" onclick="onCardsNeonColorChange('#ffd700')"></button>
+                                        <button class="preset-btn" style="--c:#a855f7" onclick="onCardsNeonColorChange('#a855f7')"></button>
+                                        <button class="preset-btn" style="--c:#00f0ff" onclick="onCardsNeonColorChange('#00f0ff')"></button>
+                                        <button class="preset-btn" style="--c:#10b981" onclick="onCardsNeonColorChange('#10b981')"></button>
+                                        <button class="preset-btn" style="--c:#f59e0b" onclick="onCardsNeonColorChange('#f59e0b')"></button>
+                                        <button class="preset-btn" style="--c:#ec4899" onclick="onCardsNeonColorChange('#ec4899')"></button>
+                                    </div>
+                                </div>
+
+                                <!-- Fonts for Troop Counts (وخلي في كذا خط حلو) -->
+                                <div class="form-group mt-3">
+                                    <label>🔤 نوع الخط لأرقام الجنود (X1, X2...):</label>
+                                    <div class="cards-font-chips-grid mt-1" id="cardsFontChips">
+                                        <button type="button" class="chip active font-impact-preview" data-font="impact" onclick="setCardsFont('impact')">🔥 ألعاب (Impact)</button>
+                                        <button type="button" class="chip font-pixel-preview" data-font="pixel" onclick="setCardsFont('pixel')">🎮 بكسل (Minecraft)</button>
+                                        <button type="button" class="chip font-cyber-preview" data-font="cyber" onclick="setCardsFont('cyber')">⚡ سايبر (Changa)</button>
+                                        <button type="button" class="chip font-cairo-preview" data-font="cairo" onclick="setCardsFont('cairo')">🌟 كايرو (Cairo 900)</button>
+                                        <button type="button" class="chip font-tajawal-preview" data-font="tajawal" onclick="setCardsFont('tajawal')">👑 فخامة (Tajawal)</button>
+                                    </div>
+                                </div>
+
+                                <!-- Gift Position on Card (اقدر اتحكم هي محطوطه في انهي مكان في الصور) -->
+                                <div class="form-group mt-3">
+                                    <label>📍 مكان ظهور صورة الهدية على البطاقة:</label>
+                                    <div class="cards-pos-chips-grid mt-1" id="cardsGiftPosChips">
+                                        <button type="button" class="chip active" data-pos="top-right" onclick="setCardsGiftPos('top-right')">↗️ أعلى اليمين</button>
+                                        <button type="button" class="chip" data-pos="top-left" onclick="setCardsGiftPos('top-left')">↖️ أعلى اليسار</button>
+                                        <button type="button" class="chip" data-pos="center" onclick="setCardsGiftPos('center')">⏺️ في المنتصف</button>
+                                        <button type="button" class="chip" data-pos="bottom-right" onclick="setCardsGiftPos('bottom-right')">↘️ أسفل اليمين</button>
+                                        <button type="button" class="chip" data-pos="bottom-left" onclick="setCardsGiftPos('bottom-left')">↙️ أسفل اليسار</button>
+                                        <button type="button" class="chip" data-pos="beside" onclick="setCardsGiftPos('beside')">➡️ بجانب البطاقة</button>
+                                        <button type="button" class="chip" data-pos="none" onclick="setCardsGiftPos('none')">🚫 إخفاء أيقونة الهدية</button>
+                                    </div>
+                                </div>
+
+                                <!-- Disappearance Mode (وضع الهدية تختفي لوحدها ولا معاها البطاقة) -->
+                                <div class="form-group mt-3">
+                                    <label>⏱️ وضع وتأثير اختفاء الهدية والبطاقة:</label>
+                                    <div class="pos-preset-buttons mt-1">
+                                        <button type="button" class="btn-pos active" id="btnDisappearGiftOnly" onclick="setCardsDisappearMode('gift_only')">
+                                            📌 الهدية تختفي وتبقى البطاقة ثابتة دائماً
+                                        </button>
+                                        <button type="button" class="btn-pos" id="btnDisappearCardAndGift" onclick="setCardsDisappearMode('card_and_gift')">
+                                            🔄 تختفي البطاقة كاملة مع الهدية
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Position & Alignment -->
+                                <div class="form-row-2col mt-3">
+                                    <div class="form-group">
+                                        <label>↔️ المحاذاة على الشاشة:</label>
+                                        <div class="btn-toggle-group">
+                                            <button type="button" class="btn-toggle active" id="btnCardsAlignRight" onclick="setCardsAlign('right')">يمين ➡️</button>
+                                            <button type="button" class="btn-toggle" id="btnCardsAlignLeft" onclick="setCardsAlign('left')">⬅️ يسار</button>
+                                        </div>
+                                    </div>
+                                    <div class="slider-group">
+                                        <div class="slider-header">
+                                            <label>↕️ إزاحة رأسية (Y-Offset):</label>
+                                            <span class="slider-badge" id="cardsOffsetYBadge">0 px</span>
+                                        </div>
+                                        <input type="range" id="cardsOffsetYSlider" min="-300" max="300" value="0" oninput="onCardsOffsetYChange(this.value)">
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <!-- Cards Deck Management -->
+                            <div class="panel-card mt-3">
+                                <div class="card-header-flex">
+                                    <h3 class="card-title"><span>🃏 قائمة البطاقات والجنود المحددة (<span id="cardsCountDisplay">5</span>)</span></h3>
+                                    <span class="badge-tag">صور وفيديوهات الهدايا ✨</span>
+                                </div>
+                                <p style="font-size:12px; color:#cbd5e1; margin-top:4px;">
+                                    حدد صورة البطاقة لكل خانة، وعدد الجنود، واضغط على صورة الهدية لاختيار أي هدية تيك توك ترغب بها:
+                                </p>
+
+                                <div class="cards-deck-items-list mt-3" id="cardsDeckItemsList"></div>
+
+                                <div class="mt-3" style="display:flex; gap:10px;">
+                                    <button type="button" class="btn-secondary" onclick="addNewCardSlot()" style="flex:1;">
+                                        ➕ إضافة خانة بطاقة جديدة
+                                    </button>
+                                    <button type="button" class="btn-primary" onclick="saveCardsBoardConfig()" style="flex:1;">
+                                        💾 حفظ البطاقات وتحديث شاشة البث
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Right Column: OBS Live Cards Simulator -->
+                        <div class="panel-section gifts-panel">
+                            <div class="panel-card">
+                                <div class="card-header-flex">
+                                    <h3 class="card-title"><span>👁️ محاكي شاشة بطاقات تيك توك 3 (OBS Live)</span></h3>
+                                    <a id="cardsPreviewExternalLink" href="/cards-overlay.html" target="_blank" class="preview-external-btn">شاشة كاملة ↗</a>
+                                </div>
+
+                                <div class="cards-sim-container" style="height:420px; border-radius:16px; overflow:hidden; position:relative; background:#070a14; border:1.5px solid rgba(255,42,74,0.35);">
+                                    <iframe id="cardsSimIframe" src="/cards-overlay.html" style="width:100%; height:100%; border:none; background:transparent;"></iframe>
+                                </div>
+
+                                <button class="btn-obs-full mt-3" onclick="copyCurrentOverlayUrl('cards')">
+                                    📋 نسخ رابط أوفرلاي البطاقات لـ OBS
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- ================= SECTION 4: رابط آخر داعم (الشريط الناري) ================= -->
                 <section class="tab-section" id="fireSection">
                     <div class="dashboard-grid">
                         
                         <!-- Left Column: Controls -->
                         <div class="panel-section control-panel">
                             
-                            <!-- Fire Text / Card Content -->
+                            <!-- Fire Text Content -->
                             <div class="panel-card">
-                                <h3 class="card-title"><span>🔥 تخصيص رابط الدعم (نص نيون أو بطاقة من طرف الشاشة)</span></h3>
+                                <h3 class="card-title"><span>🔥 تخصيص شريط رابط الدعم (Support Bio)</span></h3>
 
-                                <!-- Mode Switcher: Text vs Image/Card Mode -->
-                                <div class="form-group" style="background:linear-gradient(135deg, rgba(255,42,74,0.15), rgba(255,215,0,0.1)); padding:12px; border-radius:14px; border:1.5px solid rgba(255,42,74,0.35); margin-bottom:16px;">
-                                    <label style="font-size:13.5px; font-weight:900; color:#fff; margin-bottom:8px; display:block;">🔀 نوع العرض في الأوفرلاي:</label>
-                                    <div class="pos-preset-buttons">
-                                        <button type="button" class="btn-pos active" id="btnDispTypeText" onclick="setFireDisplayType('text')">✍️ نص وكتابة نيون (Support Bio)</button>
-                                        <button type="button" class="btn-pos" id="btnDispTypeImage" onclick="setFireDisplayType('image')">🃏 بطاقة أو صورة من طرف الشاشة (MC Royale Card)</button>
-                                    </div>
+                                <div class="form-group">
+                                    <label for="fireTextInput">✍️ النص المعروض في الشريط:</label>
+                                    <input type="text" id="fireTextInput" class="form-input" value="رابط الدعم بالبايو 🔥" placeholder="اكتب النص الذي تريده...">
                                 </div>
 
-                                <!-- 1. TEXT MODE CONTROLS -->
-                                <div id="textModeSettingsBox">
-                                    <div class="form-group">
-                                        <label for="fireTextInput">✍️ النص المعروض في الشريط:</label>
-                                        <input type="text" id="fireTextInput" class="form-input" value="رابط الدعم بالبايو 🔥" placeholder="اكتب النص الذي تريده...">
+                                <div class="slider-group mt-3">
+                                    <div class="slider-header">
+                                        <label>📏 حجم الخط (Font Size):</label>
+                                        <span class="slider-badge" id="fireFontSizeBadge">64 px</span>
                                     </div>
-
-                                    <div class="slider-group mt-3">
-                                        <div class="slider-header">
-                                            <label>📏 حجم الخط (Font Size):</label>
-                                            <span class="slider-badge" id="fireFontSizeBadge">64 px</span>
-                                        </div>
-                                        <input type="range" id="fireFontSizeSlider" min="32" max="96" value="64">
-                                    </div>
-                                </div>
-
-                                <!-- 2. CARD / IMAGE MODE CONTROLS -->
-                                <div id="cardModeSettingsBox" style="display:none;">
-                                    <div class="form-group">
-                                        <label>📍 موضع البطاقة على الشاشة (الظهور من الطرف):</label>
-                                        <div class="pos-preset-buttons">
-                                            <button type="button" class="btn-pos active" id="btnCardEdgeRight" onclick="setCardEdgePos('edge-right')">➡️ طرف الشاشة الأيمن (Edge Right)</button>
-                                            <button type="button" class="btn-pos" id="btnCardEdgeLeft" onclick="setCardEdgePos('edge-left')">⬅️ طرف الشاشة الأيسر (Edge Left)</button>
-                                            <button type="button" class="btn-pos" id="btnCardEdgeCenter" onclick="setCardEdgePos('center')">⏺️ المنتصف (Center)</button>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group mt-3">
-                                        <label>🃏 اختيار بطاقة جاهزة (MC Royale / Clash Royale / هدايا):</label>
-                                        <div class="card-presets-grid mt-2" id="cardPresetsGrid">
-                                            <div class="card-preset-item active" onclick="selectCardPreset('https://raw.githubusercontent.com/RoyaleAPI/cr-api-assets/master/cards/king.png', '👑 ROYALE', 'الملك')">
-                                                <img class="card-preset-thumb" src="https://raw.githubusercontent.com/RoyaleAPI/cr-api-assets/master/cards/king.png" onerror="this.src='/images/rose.png'">
-                                                <span class="card-preset-name">👑 الملك</span>
-                                            </div>
-                                            <div class="card-preset-item" onclick="selectCardPreset('https://raw.githubusercontent.com/RoyaleAPI/cr-api-assets/master/cards/pekka.png', '⚔️ TITAN', 'بيكا')">
-                                                <img class="card-preset-thumb" src="https://raw.githubusercontent.com/RoyaleAPI/cr-api-assets/master/cards/pekka.png" onerror="this.src='/images/rose.png'">
-                                                <span class="card-preset-name">⚔️ بيكا</span>
-                                            </div>
-                                            <div class="card-preset-item" onclick="selectCardPreset('https://raw.githubusercontent.com/RoyaleAPI/cr-api-assets/master/cards/wizard.png', '🧙 WIZARD', 'الساحر')">
-                                                <img class="card-preset-thumb" src="https://raw.githubusercontent.com/RoyaleAPI/cr-api-assets/master/cards/wizard.png" onerror="this.src='/images/rose.png'">
-                                                <span class="card-preset-name">🧙 الساحر</span>
-                                            </div>
-                                            <div class="card-preset-item" onclick="selectCardPreset('https://raw.githubusercontent.com/RoyaleAPI/cr-api-assets/master/cards/mega-knight.png', '🛡️ KNIGHT', 'الفارس')">
-                                                <img class="card-preset-thumb" src="https://raw.githubusercontent.com/RoyaleAPI/cr-api-assets/master/cards/mega-knight.png" onerror="this.src='/images/rose.png'">
-                                                <span class="card-preset-name">🛡️ الفارس</span>
-                                            </div>
-                                            <div class="card-preset-item" onclick="selectCardPreset('/images/1791198066523-1d067d13988e8754ed6adbebd89b9ee8.png~tplv-obj.webp', '💎 VIP', 'توب داعم')">
-                                                <img class="card-preset-thumb" src="/images/1791198066523-1d067d13988e8754ed6adbebd89b9ee8.png~tplv-obj.webp" onerror="this.src='/images/rose.png'">
-                                                <span class="card-preset-name">💎 فوز VIP</span>
-                                            </div>
-                                            <div class="card-preset-item" onclick="selectCardPreset('/images/1791197852391-e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp', '🌟 SHIELD', 'درع أسطوري')">
-                                                <img class="card-preset-thumb" src="/images/1791197852391-e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp" onerror="this.src='/images/rose.png'">
-                                                <span class="card-preset-name">🌟 درع الحماية</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group mt-3">
-                                        <label>🔗 أو رابط بطاقة/صورة مخصص (Custom Card URL):</label>
-                                        <div class="custom-card-url-box">
-                                            <img id="customCardThumb" class="custom-card-preview-thumb" src="https://raw.githubusercontent.com/RoyaleAPI/cr-api-assets/master/cards/king.png" onerror="this.src='/images/rose.png'">
-                                            <input type="text" id="cardImageUrlInput" class="form-input" style="flex:1;" placeholder="الصق رابط أي صورة أو بطاقة تريدها..." oninput="onCardUrlInput(this.value)">
-                                        </div>
-                                    </div>
-
-                                    <div class="slider-group mt-3">
-                                        <div class="slider-header">
-                                            <label>📏 عرض حجم البطاقة (Card Width):</label>
-                                            <span class="slider-badge" id="cardWidthBadge">220 px</span>
-                                        </div>
-                                        <input type="range" id="cardWidthSlider" min="140" max="380" value="220" oninput="onCardWidthChange(this.value)">
-                                    </div>
-
-                                    <div class="form-group mt-3">
-                                        <label for="cardBadgeInput">👑 شارة أعلى البطاقة (اختياري):</label>
-                                        <input type="text" id="cardBadgeInput" class="form-input" value="👑 ROYALE" placeholder="مثلاً: 👑 ROYALE أو 💎 VIP أو اتركه فارغاً" oninput="onCardBadgeChange(this.value)">
-                                    </div>
-
-                                    <div class="form-group mt-3">
-                                        <label for="cardTitleInput">✍️ عنوان أسفل البطاقة (اختياري):</label>
-                                        <input type="text" id="cardTitleInput" class="form-input" value="الملك" placeholder="مثلاً: الملك أو بطاقة الدعم" oninput="onCardTitleChange(this.value)">
-                                    </div>
+                                    <input type="range" id="fireFontSizeSlider" min="32" max="96" value="64">
                                 </div>
 
                                 <!-- Neon Glow Option (خيار خط نيون ولا لا) -->
@@ -1500,10 +1539,66 @@
                     </div>
                 </div>
 
+                <!-- 6. هدايا تيك توك 3 (بطاقات وجنود اللعبة) -->
+                <div class="obs-link-card">
+                    <div class="obs-link-meta">
+                        <span class="obs-icon">🃏</span>
+                        <div>
+                            <h4>هدايا تيك توك 3 (بطاقات اللعبة)</h4>
+                            <p>أوفرلاي البطاقات مع صور الهدايا ومضاعف الجنود ونمط النيون ومكان الهدية</p>
+                        </div>
+                    </div>
+                    <div class="obs-copy-row">
+                        <input type="text" id="linkCardsUrl" readonly>
+                        <button class="btn-copy" onclick="copyInput('linkCardsUrl')">📋 نسخ</button>
+                        <a id="openCardsUrl" href="/cards-overlay.html" target="_blank" class="btn-open-preview">👁️ فتح</a>
+                    </div>
+                </div>
+
             </div>
 
             <div class="modal-footer">
                 <button class="btn-secondary" onclick="closeAllObsModal()">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: VISUAL GIFT PICKER (معرض صور هدايا تيك توك) ================= -->
+    <div class="modal-backdrop" id="visualGiftPickerModal">
+        <div class="modal-box modal-wide" style="max-width:760px; max-height:85vh; display:flex; flex-direction:column;">
+            <button class="modal-close" onclick="closeVisualGiftPicker()">✕</button>
+            
+            <div class="modal-header-simple" style="margin-bottom:12px;">
+                <h3 style="color:#fff; font-size:18px; font-weight:900; display:flex; align-items:center; gap:8px;">
+                    <span>🎁 اختيار صورة الهدية للبطاقة</span>
+                    <span class="badge-tag" style="background:#ff2a4a; font-size:11px;">اضغط على صورة الهدية لاختيارها فوراً ✨</span>
+                </h3>
+                <p style="color:#94a3b8; font-size:12.5px; margin-top:4px;">
+                    اختر صورة الهدية التي تريد ربطها بهذه البطاقة من مكتبة هدايا تيك توك:
+                </p>
+            </div>
+
+            <!-- Search & Filter Controls -->
+            <div style="display:flex; gap:10px; margin-bottom:12px; align-items:center; flex-wrap:wrap;">
+                <div style="position:relative; flex:1; min-width:200px;">
+                    <input type="text" id="visualGiftSearchInput" class="form-input" placeholder="🔍 ابحث عن هدية بالاسم (وردة، نيزك، دونات، أسد...)" oninput="filterVisualGiftsList(this.value)">
+                </div>
+                <div class="price-chips-row" style="margin:0;">
+                    <button type="button" class="chip active" onclick="filterVisualGiftsByPrice('all', this)">الكل</button>
+                    <button type="button" class="chip" onclick="filterVisualGiftsByPrice('popular', this)">المشهورة 🔥</button>
+                    <button type="button" class="chip" onclick="filterVisualGiftsByPrice('1-100', this)">1 - 99 💎</button>
+                    <button type="button" class="chip" onclick="filterVisualGiftsByPrice('100+', this)">100+ 👑</button>
+                </div>
+            </div>
+
+            <!-- Visual Gifts Grid (Scrollable Gallery of Images) -->
+            <div id="visualGiftsGalleryGrid" class="visual-gifts-gallery-grid" style="flex:1; overflow-y:auto; max-height:420px; display:grid; grid-template-columns:repeat(auto-fill, minmax(95px, 1fr)); gap:10px; padding:8px; background:rgba(0,0,0,0.35); border-radius:12px; border:1px solid rgba(255,255,255,0.08);">
+                <!-- Dynamically populated with gift pictures -->
+            </div>
+
+            <div class="modal-footer" style="margin-top:14px; display:flex; justify-content:space-between; align-items:center;">
+                <span id="visualGiftPickerCount" style="font-size:12px; color:#94a3b8;">جاري تحميل الهدايا...</span>
+                <button class="btn-secondary" onclick="closeVisualGiftPicker()">إغلاق</button>
             </div>
         </div>
     </div>

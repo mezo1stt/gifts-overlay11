@@ -87,48 +87,9 @@ async function loadData() {
             document.body.classList.remove('static-text');
         }
 
-        // 5. Gifts & Cards Rendering
-        const isMcRoyaleMode = boardData.giftDisplayMode === 'mcroyale';
-        
-        if (isMcRoyaleMode) {
-            column.className = 'mcroyale-column';
-            const cards = boardData.mcroyaleCards && boardData.mcroyaleCards.length > 0
-                ? boardData.mcroyaleCards
-                : [
-                    { id: 1, cardType: 'skeleton_bandana', count: 1, giftName: 'وردة', giftImage: '/images/rose.png' },
-                    { id: 2, cardType: 'evoker_mage', count: 1, giftName: 'عطر', giftImage: '/images/perfume.png' },
-                    { id: 3, cardType: 'skeleton_cap', count: 2, giftName: 'دونات', giftImage: '/images/donut.png' },
-                    { id: 4, cardType: 'hog_rider', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' },
-                    { id: 5, cardType: 'golem_pumpkin', count: 1, giftName: 'آيس كريم', giftImage: '/images/icecream.png' }
-                ];
-
-            const currentKey = Array.from(column.children).map(c => c.getAttribute('data-card-key')).join('|');
-            const newKey = cards.map(c => `${c.id}_${c.cardType}_${c.count}_${c.giftImage}`).join('|');
-
-            if (currentKey !== newKey) {
-                column.innerHTML = '';
-                cards.forEach((card) => {
-                    const div = document.createElement('div');
-                    div.className = 'mcroyale-card-item';
-                    div.setAttribute('data-card-key', `${card.id}_${card.cardType}_${card.count}_${card.giftImage}`);
-                    div.setAttribute('data-card-id', card.id);
-                    
-                    const cardImgSrc = `/images/mcroyale/${card.cardType || 'skeleton_bandana'}.png`;
-                    const giftImgSrc = getImageSrc(card.giftImage || 'rose.png');
-                    
-                    div.innerHTML = `
-                        <div class="mcroyale-gift-corner-badge" title="${escapeHtml(card.giftName || 'هدية')}">
-                            <img src="${giftImgSrc}" alt="${escapeHtml(card.giftName || '')}" onerror="this.src='/images/rose.png'">
-                        </div>
-                        <img class="mcroyale-card-img" src="${cardImgSrc}" alt="MC Royale Card" onerror="this.src='/images/mcroyale/skeleton_bandana.png'">
-                        <div class="mcroyale-troop-count">X${card.count || 1}</div>
-                    `;
-                    column.appendChild(div);
-                });
-            }
-        } else {
-            column.className = 'gift-column';
-            const gifts = boardData.gifts || [];
+        // 5. Gifts List
+        column.className = 'gift-column';
+        const gifts = boardData.gifts || [];
 
             // Check if items changed
             const currentIds = Array.from(column.children).map(c => c.getAttribute('data-id'));

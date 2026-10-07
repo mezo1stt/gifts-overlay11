@@ -288,6 +288,28 @@ function getDefaultBoard(uid = 'default') {
     };
 }
 
+function getDefaultCardsBoard(uid = 'default') {
+    return {
+        color: '#ff2a4a',
+        neonEnabled: true,
+        glowIntensity: 18,
+        fontFamily: 'impact', // 'impact', 'pixel', 'cyber', 'cairo', 'tajawal'
+        giftPosition: 'top-right', // 'top-right', 'top-left', 'center', 'bottom-right', 'bottom-left', 'beside', 'none'
+        disappearMode: 'gift_only', // 'gift_only' or 'card_and_gift'
+        horizontalAlign: 'right',
+        offsetY: 0,
+        offsetX: 30,
+        scale: 100,
+        cards: [
+            { id: 1, cardType: 'skeleton_bandana', count: 1, giftName: 'وردة', giftImage: '/images/rose.png' },
+            { id: 2, cardType: 'evoker_mage', count: 1, giftName: 'عطر', giftImage: '/images/perfume.png' },
+            { id: 3, cardType: 'skeleton_cap', count: 2, giftName: 'دونات', giftImage: '/images/donut.png' },
+            { id: 4, cardType: 'hog_rider', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' },
+            { id: 5, cardType: 'golem_pumpkin', count: 1, giftName: 'آيس كريم', giftImage: '/images/icecream.png' }
+        ]
+    };
+}
+
 // ================= ROUTES ================= //
 
 // Control Panel
@@ -299,13 +321,18 @@ app.get('/control', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'control.html'));
 });
 
-// Overlay Widget
+// Overlay Widget (Gifts 1)
 app.get('/fire-widget.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'overlay.html'));
 });
 
 app.get('/overlay', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'overlay.html'));
+});
+
+// Cards Overlay Widget (Gifts 3 - Cards Mode)
+app.get(['/cards-overlay.html', '/cards', '/cards-overlay'], (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'cards-overlay.html'));
 });
 
 // ================= FIRE WIDGET ROUTES ================= //
@@ -917,6 +944,42 @@ app.put('/api/color/:uid', (req, res) => {
     writeData(data);
     io.emit('board_settings_update', { uid, board: data[uid] });
     res.json({ success: true, color });
+});
+
+// ================= CARDS BOARD (GIFTS 3) ENDPOINTS ================= //
+
+// Get Cards Board Data
+app.get('/api/cards-board/:uid', (req, res) => {
+    const uid = req.params.uid;
+    const data = readData();
+    const def = getDefaultCardsBoard(uid);
+    const board = (data[uid] && data[uid].cardsBoard) ? { ...def, ...data[uid].cardsBoard } : def;
+    res.json({ success: true, board });
+});
+
+// Update Cards Board Data (Settings, Cards, Multiplier, Fonts, Position, Neon)
+app.all(['/api/cards-board/:uid/settings', '/api/cards-board/:uid'], (req, res) => {
+    const uid = req.params.uid;
+    const data = readData();
+    if (!data[uid]) data[uid] = getDefaultBoard(uid);
+
+    const def = getDefaultCardsBoard(uid);
+    const currentCardsBoard = data[uid].cardsBoard ? { ...def, ...data[uid].cardsBoard } : def;
+
+    if (req.method === 'GET') {
+        return res.json({ success: true, board: currentCardsBoard });
+    }
+
+    const settings = req.body || {};
+    data[uid].cardsBoard = {
+        ...currentCardsBoard,
+        ...settings,
+        cards: settings.cards || currentCardsBoard.cards || def.cards
+    };
+
+    writeData(data);
+    io.emit('cards_board_update', { uid, board: data[uid].cardsBoard });
+    res.json({ success: true, board: data[uid].cardsBoard });
 });
 
 // Get Gifts only
