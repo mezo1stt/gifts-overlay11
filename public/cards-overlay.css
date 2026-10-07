@@ -16,38 +16,86 @@ body {
     height: 100vh;
     background: transparent !important;
     overflow: hidden;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    padding-right: 30px;
-    direction: rtl;
+    margin: 0;
+    padding: 0;
+    direction: ltr; /* Left side blue, right side red */
     user-select: none;
-    transition: padding 0.3s ease, align-items 0.3s ease, justify-content 0.3s ease;
 }
 
-body.align-left {
-    justify-content: flex-start;
-    padding-left: 30px;
-    padding-right: 0;
-    direction: ltr;
+.cards-dual-stage-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 34px;
+    box-sizing: border-box;
+    pointer-events: none;
+    transition: transform 0.3s ease;
 }
 
-.cards-stage-container {
+.cards-team-column {
     display: flex;
     flex-direction: column;
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    will-change: transform;
+    gap: 12px;
+    pointer-events: auto;
+}
+
+.team-blue-col {
+    align-items: flex-start;
+    --team-color: #00b4d8;
+}
+
+.team-red-col {
+    align-items: flex-end;
+    --team-color: #ff2a4a;
+}
+
+/* Solo Team Visibility via URL ?team=red or ?team=blue */
+body.only-team-red .team-blue-col {
+    display: none !important;
+}
+body.only-team-red .cards-dual-stage-container {
+    justify-content: flex-end;
+}
+
+body.only-team-blue .team-red-col {
+    display: none !important;
+}
+body.only-team-blue .cards-dual-stage-container {
+    justify-content: flex-start;
+}
+
+.cards-team-header {
+    margin-bottom: 4px;
+}
+
+.cards-team-badge {
+    font-family: 'Cairo', 'Changa', sans-serif;
+    font-size: 14px;
+    font-weight: 900;
+    color: #fff;
+    background: rgba(10, 5, 16, 0.85);
+    border: 2px solid var(--team-color);
+    border-radius: 12px;
+    padding: 4px 14px;
+    box-shadow: 0 0 14px var(--team-color);
+    letter-spacing: 0.5px;
+    white-space: nowrap;
 }
 
 .cards-deck-column {
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    align-items: flex-end;
+    gap: 12px;
 }
 
-body.align-left .cards-deck-column {
+.team-blue-col .cards-deck-column {
     align-items: flex-start;
+}
+
+.team-red-col .cards-deck-column {
+    align-items: flex-end;
 }
 
 /* Single Card Item */
@@ -73,9 +121,9 @@ body.mode-card-and-gift .card-unit-item:nth-child(4) { animation-delay: 3.6s; }
 body.mode-card-and-gift .card-unit-item:nth-child(5) { animation-delay: 4.8s; }
 
 @keyframes cardLoopFade {
-    0%, 15% { opacity: 0; transform: translateX(30px) scale(0.9); }
-    25%, 85% { opacity: 1; transform: translateX(0) scale(1); }
-    95%, 100% { opacity: 0; transform: translateX(30px) scale(0.9); }
+    0%, 15% { opacity: 0; transform: translateY(20px) scale(0.9); }
+    25%, 85% { opacity: 1; transform: translateY(0) scale(1); }
+    95%, 100% { opacity: 0; transform: translateY(20px) scale(0.9); }
 }
 
 /* Card Character Image */
@@ -89,7 +137,7 @@ body.mode-card-and-gift .card-unit-item:nth-child(5) { animation-delay: 4.8s; }
 
 /* Neon Glow Enabled */
 body.neon-on .card-character-img {
-    filter: drop-shadow(0 0 10px var(--neon-color)) drop-shadow(0 0 var(--glow-intensity) var(--neon-color)) drop-shadow(0 0 calc(var(--glow-intensity) * 1.6) rgba(255, 215, 0, 0.5));
+    filter: drop-shadow(0 0 10px var(--team-color, var(--neon-color))) drop-shadow(0 0 var(--glow-intensity) var(--team-color, var(--neon-color))) drop-shadow(0 0 calc(var(--glow-intensity) * 1.6) rgba(255, 215, 0, 0.4));
 }
 
 /* Neon Glow Disabled (Crisp Non-Neon) */
@@ -165,7 +213,7 @@ body.mode-gift-only .card-gift-badge {
     transform: translateY(-50%);
 }
 
-body.align-left .card-gift-badge.pos-beside {
+.team-blue-col .card-gift-badge.pos-beside {
     right: auto;
     left: calc(100% + 8px);
 }

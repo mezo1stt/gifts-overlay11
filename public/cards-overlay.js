@@ -1,8 +1,12 @@
 const params = new URLSearchParams(window.location.search);
 const uid = params.get('uid') || 'board_XXXX';
+const teamParam = (params.get('team') || 'dual').toLowerCase(); // 'red', 'blue', or 'dual'
 
 const stageContainer = document.getElementById('cardsStageContainer');
-const deckColumn = document.getElementById('cardsDeckColumn');
+const deckBlue = document.getElementById('cardsDeckBlue');
+const deckRed = document.getElementById('cardsDeckRed');
+const badgeBlue = document.getElementById('cardsTeamBlueBadge');
+const badgeRed = document.getElementById('cardsTeamRedBadge');
 
 function getImageSrc(image) {
     if (!image) return '/images/rose.png';
@@ -26,20 +30,17 @@ async function loadCardsData() {
         const data = await res.json();
         const board = data.board || {};
 
-        // 1. Neon Color & Glow
-        const color = board.color || '#ff2a4a';
-        const glow = board.glowIntensity !== undefined ? Number(board.glowIntensity) : 18;
-        document.documentElement.style.setProperty('--neon-color', color);
-        document.documentElement.style.setProperty('--glow-intensity', `${glow}px`);
-
-        // Neon ON / OFF
+        // 1. Neon Mode
         const neonEnabled = board.neonEnabled !== false;
         document.body.classList.toggle('neon-on', neonEnabled);
         document.body.classList.toggle('neon-off', !neonEnabled);
 
+        const glow = board.glowIntensity !== undefined ? Number(board.glowIntensity) : 18;
+        document.documentElement.style.setProperty('--glow-intensity', `${glow}px`);
+
         // 2. Scale & Sizing
         const scale = board.scale ? Number(board.scale) / 100 : 1;
-        const baseSize = 100 * scale;
+        const baseSize = 95 * scale;
         const countFontSize = 26 * scale;
         document.documentElement.style.setProperty('--card-size', `${Math.round(baseSize)}px`);
         document.documentElement.style.setProperty('--count-font-size', `${Math.round(countFontSize)}px`);
@@ -54,61 +55,76 @@ async function loadCardsData() {
         document.body.classList.toggle('mode-gift-only', mode === 'gift_only');
         document.body.classList.toggle('mode-card-and-gift', mode === 'card_and_gift');
 
-        // 5. Positions & Alignment
-        const hAlign = board.horizontalAlign || 'right';
-        const offsetX = board.offsetX !== undefined ? Number(board.offsetX) : 30;
-        const offsetY = board.offsetY !== undefined ? Number(board.offsetY) : 0;
-
-        if (hAlign === 'left') {
-            document.body.classList.add('align-left');
-            document.body.style.paddingLeft = `${offsetX}px`;
-            document.body.style.paddingRight = '0px';
+        // 5. Visibility based on ?team=red or ?team=blue
+        if (teamParam === 'red' || teamParam === '1') {
+            document.body.classList.add('only-team-red');
+            document.body.classList.remove('only-team-blue');
+        } else if (teamParam === 'blue' || teamParam === '2') {
+            document.body.classList.add('only-team-blue');
+            document.body.classList.remove('only-team-red');
         } else {
-            document.body.classList.remove('align-left');
-            document.body.style.paddingRight = `${offsetX}px`;
-            document.body.style.paddingLeft = '0px';
+            document.body.classList.remove('only-team-red', 'only-team-blue');
         }
-        stageContainer.style.transform = `translateY(${offsetY}px)`;
 
-        // 6. Cards Deck Rendering
-        const cards = board.cards && board.cards.length > 0
-            ? board.cards
-            : [
-                { id: 1, cardType: 'skeleton_bandana', count: 1, giftName: 'وردة', giftImage: '/images/rose.png' },
-                { id: 2, cardType: 'evoker_mage', count: 1, giftName: 'عطر', giftImage: '/images/perfume.png' },
-                { id: 3, cardType: 'skeleton_cap', count: 2, giftName: 'دونات', giftImage: '/images/donut.png' },
-                { id: 4, cardType: 'hog_rider', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' },
-                { id: 5, cardType: 'golem_pumpkin', count: 1, giftName: 'آيس كريم', giftImage: '/images/icecream.png' }
-            ];
+        // Y-Offset
+        const offsetY = board.offsetY !== undefined ? Number(board.offsetY) : 0;
+        if (stageContainer) stageContainer.style.transform = `translateY(${offsetY}px)`;
 
         const giftPos = board.giftPosition || 'top-right';
 
-        const currentKey = Array.from(deckColumn.children).map(c => c.getAttribute('data-card-key')).join('|');
-        const newKey = cards.map(c => `${c.id}_${c.cardType}_${c.count}_${c.giftImage}_${giftPos}`).join('|');
+        // 6. Render Team Red
+        const teamRed = board.teamRed || {
+            title: 'الفريق الأحمر',
+            color: '#ff2a4a',
+            cards: board.cards || []
+        };
+        const redCol = document.getElementById('cardsTeamRedCol');
+        if (redCol) redCol.style.setProperty('--team-color', teamRed.color || '#ff2a4a');
+        if (badgeRed) badgeRed.textContent = teamRed.title || '🔴 الفريق الأحمر';
+        renderCardsToColumn(deckRed, teamRed.cards || [], giftPos, teamRed.color || '#ff2a4a');
 
-        if (currentKey !== newKey) {
-            deckColumn.innerHTML = '';
-            cards.forEach(card => {
-                const item = document.createElement('div');
-                item.className = 'card-unit-item';
-                item.setAttribute('data-card-key', `${card.id}_${card.cardType}_${card.count}_${card.giftImage}_${giftPos}`);
-                item.setAttribute('data-card-id', card.id);
+        // 7. Render Team Blue
+        const teamBlue = board.teamBlue || {
+            title: 'الفريق الأزرق',
+            color: '#00b4d8',
+            cards: []
+        };
+        const blueCol = document.getElementById('cardsTeamBlueCol');
+        if (blueCol) blueCol.style.setProperty('--team-color', teamBlue.color || '#00b4d8');
+        if (badgeBlue) badgeBlue.textContent = teamBlue.title || '🔵 الفريق الأزرق';
+        renderCardsToColumn(deckBlue, teamBlue.cards || [], giftPos, teamBlue.color || '#00b4d8');
 
-                const cardSrc = `/images/mcroyale/${card.cardType || 'skeleton_bandana'}.png`;
-                const giftSrc = getImageSrc(card.giftImage);
-
-                item.innerHTML = `
-                    <div class="card-gift-badge pos-${giftPos}" title="${escapeHtml(card.giftName || 'هدية')}">
-                        <img src="${giftSrc}" alt="${escapeHtml(card.giftName || '')}" onerror="this.src='/images/rose.png'">
-                    </div>
-                    <img class="card-character-img" src="${cardSrc}" alt="Card" onerror="this.src='/images/mcroyale/skeleton_bandana.png'">
-                    <div class="troop-count-badge">X${card.count || 1}</div>
-                `;
-                deckColumn.appendChild(item);
-            });
-        }
     } catch (err) {
         console.error('Error loading cards overlay data:', err);
+    }
+}
+
+function renderCardsToColumn(columnEl, cards, giftPos, teamColor) {
+    if (!columnEl) return;
+
+    const currentKey = Array.from(columnEl.children).map(c => c.getAttribute('data-card-key')).join('|');
+    const newKey = cards.map(c => `${c.id}_${c.cardType}_${c.count}_${c.giftImage}_${giftPos}_${teamColor}`).join('|');
+
+    if (currentKey !== newKey) {
+        columnEl.innerHTML = '';
+        cards.forEach(card => {
+            const item = document.createElement('div');
+            item.className = 'card-unit-item';
+            item.setAttribute('data-card-key', `${card.id}_${card.cardType}_${card.count}_${card.giftImage}_${giftPos}_${teamColor}`);
+            item.setAttribute('data-card-id', card.id);
+
+            const cardSrc = `/images/mcroyale/${card.cardType || 'skeleton_bandana'}.png`;
+            const giftSrc = getImageSrc(card.giftImage);
+
+            item.innerHTML = `
+                <div class="card-gift-badge pos-${giftPos}" title="${escapeHtml(card.giftName || 'هدية')}">
+                    <img src="${giftSrc}" alt="${escapeHtml(card.giftName || '')}" onerror="this.src='/images/rose.png'">
+                </div>
+                <img class="card-character-img" src="${cardSrc}" alt="Card" onerror="this.src='/images/mcroyale/skeleton_bandana.png'">
+                <div class="troop-count-badge">X${card.count || 1}</div>
+            `;
+            columnEl.appendChild(item);
+        });
     }
 }
 

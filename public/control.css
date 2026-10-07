@@ -28,7 +28,10 @@
     box-sizing: border-box;
 }
 
-body.app-body {
+html, body.app-body {
+    height: 100vh;
+    max-height: 100vh;
+    overflow: hidden !important;
     font-family: 'Cairo', 'Tajawal', sans-serif;
     background-color: #0b0205;
     background-image: 
@@ -36,22 +39,22 @@ body.app-body {
         radial-gradient(circle at 100% 100%, #16030a 0%, transparent 50%),
         linear-gradient(180deg, #100206 0%, #060103 100%);
     color: var(--text-main);
-    min-height: 100vh;
     direction: rtl;
-    overflow-x: hidden;
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
 
 /* ================= APP LAYOUT ================= */
 .app-layout {
     display: flex;
-    min-height: 100vh;
-    width: 100%;
+    height: 100vh;
+    max-height: 100vh;
+    width: 100vw;
     max-width: 100vw;
     position: relative;
     z-index: 10;
-    overflow-x: hidden;
+    overflow: hidden !important;
     box-sizing: border-box;
 }
 
@@ -64,9 +67,9 @@ body.app-body {
     border-left: 1.5px solid var(--border-subtle);
     display: flex;
     flex-direction: column;
-    position: sticky;
-    top: 0;
     height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
     flex-shrink: 0;
     z-index: 1000;
     transition: width 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28), min-width 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28), max-width 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
@@ -317,9 +320,10 @@ body.app-body {
     width: auto;
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
+    height: 100vh;
+    max-height: 100vh;
+    overflow: hidden !important;
     box-sizing: border-box;
-    overflow-x: hidden;
 }
 
 /* Top Navbar */
@@ -333,8 +337,7 @@ body.app-body {
     align-items: center;
     justify-content: space-between;
     padding: 0 24px;
-    position: sticky;
-    top: 0;
+    flex-shrink: 0;
     z-index: 500;
     box-sizing: border-box;
 }
@@ -434,11 +437,14 @@ body.app-body {
 /* ================= PAGE CONTENT AREA ================= */
 .page-content-area {
     flex: 1;
+    height: calc(100vh - var(--topbar-height));
+    max-height: calc(100vh - var(--topbar-height));
+    overflow-y: auto !important;
+    overflow-x: hidden;
     padding: 14px 20px;
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
-    overflow-x: hidden;
 }
 
 /* Tab Sections */

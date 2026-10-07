@@ -8,8 +8,22 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@800;900&family=Changa:wght@800;900&family=Tajawal:wght@800;900&family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="cards-stage-container" id="cardsStageContainer">
-        <div class="cards-deck-column" id="cardsDeckColumn"></div>
+    <div class="cards-dual-stage-container" id="cardsStageContainer">
+        <!-- Team Blue Column (Left side of screen) -->
+        <div class="cards-team-column team-blue-col" id="cardsTeamBlueCol">
+            <div class="cards-team-header" id="cardsTeamBlueHeader">
+                <span class="cards-team-badge" id="cardsTeamBlueBadge">🔵 الفريق الأزرق</span>
+            </div>
+            <div class="cards-deck-column" id="cardsDeckBlue"></div>
+        </div>
+
+        <!-- Team Red Column (Right side of screen) -->
+        <div class="cards-team-column team-red-col" id="cardsTeamRedCol">
+            <div class="cards-team-header" id="cardsTeamRedHeader">
+                <span class="cards-team-badge" id="cardsTeamRedBadge">🔴 الفريق الأحمر</span>
+            </div>
+            <div class="cards-deck-column" id="cardsDeckRed"></div>
+        </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>

@@ -136,7 +136,7 @@
             <main class="page-content-area">
 
                 <!-- ================= SECTION 1: هدايا التيك توك (GIFTS OVERLAY) ================= -->
-                <section class="tab-section active" id="giftsSection">
+                <section class="tab-section" id="giftsSection">
                     <div class="dashboard-grid">
                         
                         <!-- Settings Column -->
@@ -506,7 +506,7 @@
                 <section class="tab-section" id="cardsGiftsSection">
                     <div class="dashboard-grid">
                         
-                        <!-- Left Column: Settings & Cards Deck -->
+                        <!-- Left Column: Settings & Cards Decks for Both Teams -->
                         <div class="panel-section control-panel">
 
                             <!-- Card Appearance & Neon & Fonts -->
@@ -525,24 +525,6 @@
                                     <div class="btn-toggle-group" style="margin:0;">
                                         <button type="button" class="btn-toggle active" id="btnCardsNeonOn" onclick="toggleCardsNeon(true)">✨ نيون مشع</button>
                                         <button type="button" class="btn-toggle" id="btnCardsNeonOff" onclick="toggleCardsNeon(false)">⚪ بدون نيون</button>
-                                    </div>
-                                </div>
-
-                                <!-- Neon Color Picker -->
-                                <div class="color-picker-box mt-3" id="cardsNeonColorBox">
-                                    <div class="color-row">
-                                        <label for="cardsNeonColor">لون نيون البطاقات:</label>
-                                        <input type="color" id="cardsNeonColor" value="#ff2a4a" onchange="onCardsNeonColorChange(this.value)">
-                                        <span id="cardsColorHex">#ff2a4a</span>
-                                    </div>
-                                    <div class="color-presets">
-                                        <button class="preset-btn" style="--c:#ff2a4a" onclick="onCardsNeonColorChange('#ff2a4a')"></button>
-                                        <button class="preset-btn" style="--c:#ffd700" onclick="onCardsNeonColorChange('#ffd700')"></button>
-                                        <button class="preset-btn" style="--c:#a855f7" onclick="onCardsNeonColorChange('#a855f7')"></button>
-                                        <button class="preset-btn" style="--c:#00f0ff" onclick="onCardsNeonColorChange('#00f0ff')"></button>
-                                        <button class="preset-btn" style="--c:#10b981" onclick="onCardsNeonColorChange('#10b981')"></button>
-                                        <button class="preset-btn" style="--c:#f59e0b" onclick="onCardsNeonColorChange('#f59e0b')"></button>
-                                        <button class="preset-btn" style="--c:#ec4899" onclick="onCardsNeonColorChange('#ec4899')"></button>
                                     </div>
                                 </div>
 
@@ -577,7 +559,7 @@
                                     <label>⏱️ وضع وتأثير اختفاء الهدية والبطاقة:</label>
                                     <div class="pos-preset-buttons mt-1">
                                         <button type="button" class="btn-pos active" id="btnDisappearGiftOnly" onclick="setCardsDisappearMode('gift_only')">
-                                            📌 الهدية تختفي وتبقى البطاقة ثابتة دائماً
+                                             📌 الهدية تختفي وتبقى البطاقة ثابتة دائماً
                                         </button>
                                         <button type="button" class="btn-pos" id="btnDisappearCardAndGift" onclick="setCardsDisappearMode('card_and_gift')">
                                             🔄 تختفي البطاقة كاملة مع الهدية
@@ -585,65 +567,120 @@
                                     </div>
                                 </div>
 
-                                <!-- Position & Alignment -->
-                                <div class="form-row-2col mt-3">
-                                    <div class="form-group">
-                                        <label>↔️ المحاذاة على الشاشة:</label>
-                                        <div class="btn-toggle-group">
-                                            <button type="button" class="btn-toggle active" id="btnCardsAlignRight" onclick="setCardsAlign('right')">يمين ➡️</button>
-                                            <button type="button" class="btn-toggle" id="btnCardsAlignLeft" onclick="setCardsAlign('left')">⬅️ يسار</button>
+                                <!-- Vertical Offset -->
+                                <div class="slider-group mt-3">
+                                    <div class="slider-header">
+                                        <label>↕️ إزاحة رأسية للشاشتين (Y-Offset):</label>
+                                        <span class="slider-badge" id="cardsOffsetYBadge">0 px</span>
+                                    </div>
+                                    <input type="range" id="cardsOffsetYSlider" min="-300" max="300" value="0" oninput="onCardsOffsetYChange(this.value)">
+                                </div>
+
+                            </div>
+
+                            <!-- Cards Teams Dual Boxes (خانتين للفريق الأحمر والأزرق زي هدايا تيك توك 2) -->
+                            <div class="team-dual-grid mt-3">
+                                
+                                <!-- 1. Team Red Box (الفريق الأحمر) -->
+                                <div class="team-manage-card team-2-card" style="border-color:#ff2a4a; box-shadow:0 0 15px rgba(255,42,74,0.25);">
+                                    <div class="team-card-header">
+                                        <div class="team-badge-tag red">🔴 الفريق الأحمر</div>
+                                        <div class="team-color-picker-box">
+                                            <label for="cardsTeamRedColor">اللون:</label>
+                                            <input type="color" id="cardsTeamRedColor" value="#ff2a4a" onchange="onCardsTeamColorChange('teamRed', this.value)">
+                                            <span id="cardsTeamRedColorHex" style="font-size:12px; color:#ff2a4a; font-weight:800;">#ff2a4a</span>
                                         </div>
                                     </div>
-                                    <div class="slider-group">
-                                        <div class="slider-header">
-                                            <label>↕️ إزاحة رأسية (Y-Offset):</label>
-                                            <span class="slider-badge" id="cardsOffsetYBadge">0 px</span>
+
+                                    <div class="form-group">
+                                        <label for="cardsTeamRedTitle">اسم الفريق الأحمر:</label>
+                                        <input type="text" id="cardsTeamRedTitle" class="form-input" value="الفريق الأحمر" placeholder="الفريق الأحمر" oninput="onCardsTeamTitleChange('teamRed', this.value)">
+                                    </div>
+
+                                    <div class="team-assigned-box mt-3">
+                                        <div class="slider-header" style="display:flex; justify-content:space-between; align-items:center;">
+                                            <label>🃏 بطاقات وجنود الأحمر (<span id="cardsRedCount">5</span>):</label>
+                                            <button type="button" onclick="addNewCardSlot('teamRed')" style="font-size:11px; padding:3px 8px; background:rgba(255,42,74,0.2); border:1px solid #ff2a4a; color:#fff; border-radius:6px; cursor:pointer;">➕ إضافة بطاقة</button>
                                         </div>
-                                        <input type="range" id="cardsOffsetYSlider" min="-300" max="300" value="0" oninput="onCardsOffsetYChange(this.value)">
+                                        <div class="cards-deck-items-list mt-2" id="cardsRedDeckList">
+                                            <!-- Dynamically generated -->
+                                        </div>
+                                    </div>
+
+                                    <div class="team-actions-row mt-3">
+                                        <button class="btn-obs-action" onclick="copyCardsOverlayUrl('red')">📋 نسخ رابط OBS للأحمر</button>
+                                        <a id="cardsRedPreviewLink" href="/cards-overlay.html?team=red" target="_blank" class="btn-open-preview">👁️ فتح</a>
+                                    </div>
+                                </div>
+
+                                <!-- 2. Team Blue Box (الفريق الأزرق) -->
+                                <div class="team-manage-card team-1-card" style="border-color:#00b4d8; box-shadow:0 0 15px rgba(0,180,216,0.25);">
+                                    <div class="team-card-header">
+                                        <div class="team-badge-tag blue" style="background:#00b4d8;">🔵 الفريق الأزرق</div>
+                                        <div class="team-color-picker-box">
+                                            <label for="cardsTeamBlueColor">اللون:</label>
+                                            <input type="color" id="cardsTeamBlueColor" value="#00b4d8" onchange="onCardsTeamColorChange('teamBlue', this.value)">
+                                            <span id="cardsTeamBlueColorHex" style="font-size:12px; color:#00b4d8; font-weight:800;">#00b4d8</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="cardsTeamBlueTitle">اسم الفريق الأزرق:</label>
+                                        <input type="text" id="cardsTeamBlueTitle" class="form-input" value="الفريق الأزرق" placeholder="الفريق الأزرق" oninput="onCardsTeamTitleChange('teamBlue', this.value)">
+                                    </div>
+
+                                    <div class="team-assigned-box mt-3">
+                                        <div class="slider-header" style="display:flex; justify-content:space-between; align-items:center;">
+                                            <label>🃏 بطاقات وجنود الأزرق (<span id="cardsBlueCount">5</span>):</label>
+                                            <button type="button" onclick="addNewCardSlot('teamBlue')" style="font-size:11px; padding:3px 8px; background:rgba(0,180,216,0.2); border:1px solid #00b4d8; color:#fff; border-radius:6px; cursor:pointer;">➕ إضافة بطاقة</button>
+                                        </div>
+                                        <div class="cards-deck-items-list mt-2" id="cardsBlueDeckList">
+                                            <!-- Dynamically generated -->
+                                        </div>
+                                    </div>
+
+                                    <div class="team-actions-row mt-3">
+                                        <button class="btn-obs-action" onclick="copyCardsOverlayUrl('blue')">📋 نسخ رابط OBS للأزرق</button>
+                                        <a id="cardsBluePreviewLink" href="/cards-overlay.html?team=blue" target="_blank" class="btn-open-preview">👁️ فتح</a>
                                     </div>
                                 </div>
 
                             </div>
 
-                            <!-- Cards Deck Management -->
-                            <div class="panel-card mt-3">
-                                <div class="card-header-flex">
-                                    <h3 class="card-title"><span>🃏 قائمة البطاقات والجنود المحددة (<span id="cardsCountDisplay">5</span>)</span></h3>
-                                    <span class="badge-tag">صور وفيديوهات الهدايا ✨</span>
-                                </div>
-                                <p style="font-size:12px; color:#cbd5e1; margin-top:4px;">
-                                    حدد صورة البطاقة لكل خانة، وعدد الجنود، واضغط على صورة الهدية لاختيار أي هدية تيك توك ترغب بها:
-                                </p>
-
-                                <div class="cards-deck-items-list mt-3" id="cardsDeckItemsList"></div>
-
-                                <div class="mt-3" style="display:flex; gap:10px;">
-                                    <button type="button" class="btn-secondary" onclick="addNewCardSlot()" style="flex:1;">
-                                        ➕ إضافة خانة بطاقة جديدة
-                                    </button>
-                                    <button type="button" class="btn-primary" onclick="saveCardsBoardConfig()" style="flex:1;">
-                                        💾 حفظ البطاقات وتحديث شاشة البث
-                                    </button>
-                                </div>
+                            <div class="mt-3">
+                                <button type="button" class="btn-primary" onclick="saveCardsBoardConfig()" style="width:100%; padding:12px; font-weight:900;">
+                                    💾 حفظ ونشر إعدادات البطاقات للفريقين فوراً لـ OBS
+                                </button>
                             </div>
 
                         </div>
 
-                        <!-- Right Column: OBS Live Cards Simulator -->
+                        <!-- Right Column: OBS Live Cards Dual Simulator -->
                         <div class="panel-section gifts-panel">
                             <div class="panel-card">
                                 <div class="card-header-flex">
-                                    <h3 class="card-title"><span>👁️ محاكي شاشة بطاقات تيك توك 3 (OBS Live)</span></h3>
+                                    <h3 class="card-title"><span>👁️ محاكي شاشات بطاقات تيك توك 3 (Live Dual OBS)</span></h3>
                                     <a id="cardsPreviewExternalLink" href="/cards-overlay.html" target="_blank" class="preview-external-btn">شاشة كاملة ↗</a>
                                 </div>
+                                <p style="font-size:12px; color:#94a3b8; margin-bottom:10px;">معاينة حية فورية لشاشة البث لكلا الفريقين (الأزرق على اليسار، والأحمر على اليمين):</p>
 
-                                <div class="cards-sim-container" style="height:420px; border-radius:16px; overflow:hidden; position:relative; background:#070a14; border:1.5px solid rgba(255,42,74,0.35);">
+                                <div class="cards-sim-container" style="height:380px; border-radius:16px; overflow:hidden; position:relative; background:#070a14; border:1.5px solid rgba(255,42,74,0.35);">
                                     <iframe id="cardsSimIframe" src="/cards-overlay.html" style="width:100%; height:100%; border:none; background:transparent;"></iframe>
                                 </div>
 
-                                <button class="btn-obs-full mt-3" onclick="copyCurrentOverlayUrl('cards')">
-                                    📋 نسخ رابط أوفرلاي البطاقات لـ OBS
-                                </button>
+                                <div class="mt-3" style="display:flex; flex-direction:column; gap:8px;">
+                                    <button class="btn-obs-action" onclick="copyCardsOverlayUrl('dual')" style="width:100%;">
+                                        📺 نسخ رابط الشاشتين معاً لـ OBS (Dual Screen)
+                                    </button>
+                                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+                                        <button class="btn-obs-action" onclick="copyCardsOverlayUrl('red')" style="font-size:11.5px; padding:7px;">
+                                            🔴 نسخ رابط الفريق الأحمر
+                                        </button>
+                                        <button class="btn-obs-action" onclick="copyCardsOverlayUrl('blue')" style="font-size:11.5px; padding:7px;">
+                                            🔵 نسخ رابط الفريق الأزرق
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 

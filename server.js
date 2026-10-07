@@ -290,23 +290,35 @@ function getDefaultBoard(uid = 'default') {
 
 function getDefaultCardsBoard(uid = 'default') {
     return {
-        color: '#ff2a4a',
         neonEnabled: true,
         glowIntensity: 18,
         fontFamily: 'impact', // 'impact', 'pixel', 'cyber', 'cairo', 'tajawal'
         giftPosition: 'top-right', // 'top-right', 'top-left', 'center', 'bottom-right', 'bottom-left', 'beside', 'none'
         disappearMode: 'gift_only', // 'gift_only' or 'card_and_gift'
-        horizontalAlign: 'right',
         offsetY: 0,
-        offsetX: 30,
         scale: 100,
-        cards: [
-            { id: 1, cardType: 'skeleton_bandana', count: 1, giftName: 'وردة', giftImage: '/images/rose.png' },
-            { id: 2, cardType: 'evoker_mage', count: 1, giftName: 'عطر', giftImage: '/images/perfume.png' },
-            { id: 3, cardType: 'skeleton_cap', count: 2, giftName: 'دونات', giftImage: '/images/donut.png' },
-            { id: 4, cardType: 'hog_rider', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' },
-            { id: 5, cardType: 'golem_pumpkin', count: 1, giftName: 'آيس كريم', giftImage: '/images/icecream.png' }
-        ]
+        teamRed: {
+            title: 'الفريق الأحمر',
+            color: '#ff2a4a',
+            cards: [
+                { id: 1, cardType: 'skeleton_bandana', count: 1, giftName: 'تيربو', giftImage: '/images/rose.png' },
+                { id: 2, cardType: 'skeleton_cap', count: 2, giftName: 'بوابه', giftImage: '/images/donut.png' },
+                { id: 3, cardType: 'golem_pumpkin', count: 1, giftName: 'نيزك', giftImage: '/images/1791197748042-81cb495abfe066981b9c135cfff21c7a.png~tplv-obj.webp' },
+                { id: 4, cardType: 'hog_rider', count: 3, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
+                { id: 5, cardType: 'evoker_mage', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' }
+            ]
+        },
+        teamBlue: {
+            title: 'الفريق الأزرق',
+            color: '#00b4d8',
+            cards: [
+                { id: 101, cardType: 'evoker_mage', count: 1, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
+                { id: 102, cardType: 'hog_rider', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' },
+                { id: 103, cardType: 'skeleton_bandana', count: 2, giftName: 'مكوك فضائي', giftImage: '/images/1791197817001-eb77ead5c3abb6da6034d3cf6cfeb438~tplv-obj.webp' },
+                { id: 104, cardType: 'golem_pumpkin', count: 1, giftName: 'حمايه', giftImage: '/images/1791197852391-e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp' },
+                { id: 105, cardType: 'skeleton_cap', count: 3, giftName: 'بوابه', giftImage: '/images/donut.png' }
+            ]
+        }
     };
 }
 
@@ -974,7 +986,8 @@ app.all(['/api/cards-board/:uid/settings', '/api/cards-board/:uid'], (req, res) 
     data[uid].cardsBoard = {
         ...currentCardsBoard,
         ...settings,
-        cards: settings.cards || currentCardsBoard.cards || def.cards
+        teamRed: settings.teamRed || currentCardsBoard.teamRed || def.teamRed,
+        teamBlue: settings.teamBlue || currentCardsBoard.teamBlue || def.teamBlue
     };
 
     writeData(data);
