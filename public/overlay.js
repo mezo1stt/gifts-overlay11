@@ -125,7 +125,6 @@ async function loadData() {
                     }
                 });
             }
-        }
     } catch (err) {
         console.error('Error loading overlay data:', err);
     }

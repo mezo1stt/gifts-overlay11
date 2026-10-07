@@ -2660,7 +2660,7 @@ const MCROYALE_CHARACTERS = [
     { id: 'golem_pumpkin', name: '🎃 وحش اليقطين (Golem Pumpkin)', img: '/images/mcroyale/golem_pumpkin.png' }
 ];
 
-let activeTargetTeam = 'teamRed'; // 'teamRed' or 'teamBlue'
+let cardsActiveTargetTeam = 'teamRed'; // 'teamRed' or 'teamBlue'
 let activeCardSlotIndex = null;
 let visualGiftPriceFilter = 'all';
 let visualGiftSearchQuery = '';
@@ -3007,7 +3007,7 @@ async function saveCardsBoardConfig(silent = false) {
 // ================= VISUAL GIFT PICKER MODAL (اختيار الهدية كصورة) ================= //
 
 function openVisualGiftPicker(teamKey, slotIdx) {
-    activeTargetTeam = teamKey || 'teamRed';
+    cardsActiveTargetTeam = teamKey || 'teamRed';
     activeCardSlotIndex = slotIdx;
     const modal = document.getElementById('visualGiftPickerModal');
     if (!modal) return;
@@ -3089,8 +3089,8 @@ function renderVisualGiftsGallery() {
     const displayList = filtered.slice(0, 120);
 
     grid.innerHTML = '';
-    const currentSelectedImg = (activeCardSlotIndex !== null && cardsBoardConfig[activeTargetTeam]?.cards[activeCardSlotIndex])
-        ? normalizeImgPath(cardsBoardConfig[activeTargetTeam].cards[activeCardSlotIndex].giftImage)
+    const currentSelectedImg = (activeCardSlotIndex !== null && cardsBoardConfig[cardsActiveTargetTeam]?.cards[activeCardSlotIndex])
+        ? normalizeImgPath(cardsBoardConfig[cardsActiveTargetTeam].cards[activeCardSlotIndex].giftImage)
         : null;
 
     displayList.forEach(g => {
@@ -3116,7 +3116,7 @@ function renderVisualGiftsGallery() {
 
 function selectVisualGift(giftName, giftImage) {
     if (activeCardSlotIndex === null) return;
-    const team = cardsBoardConfig[activeTargetTeam];
+    const team = cardsBoardConfig[cardsActiveTargetTeam];
     if (!team || !team.cards[activeCardSlotIndex]) return;
 
     team.cards[activeCardSlotIndex].giftName = giftName;
@@ -3125,7 +3125,7 @@ function selectVisualGift(giftName, giftImage) {
     closeVisualGiftPicker();
     renderCardsDeckList();
     saveCardsBoardConfig(true);
-    const teamLabel = activeTargetTeam === 'teamRed' ? 'الفريق الأحمر' : 'الفريق الأزرق';
+    const teamLabel = cardsActiveTargetTeam === 'teamRed' ? 'الفريق الأحمر' : 'الفريق الأزرق';
     showToast(`تم اختيار هدية (${giftName}) لـ ${teamLabel} للبطاقة رقم ${activeCardSlotIndex + 1}! ✨`, 'success');
 }
 
