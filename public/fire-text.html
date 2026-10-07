@@ -153,21 +153,58 @@
             transition: all 0.3s ease;
         }
 
-        /* ================= FootageCrate Appear Smoke Layer (يعدي فوق النص) ================= */
+        /* ================= Glowing Neon Smoke Aura (هالة الدخان النيون) ================= */
+        .smoke-neon-aura {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 680px;
+            height: 400px;
+            border-radius: 50%;
+            background: radial-gradient(ellipse at center, var(--fire-c, #ff1e00) 20%, var(--shine-c, #ffd700) 50%, transparent 75%);
+            filter: blur(42px);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 25;
+            transition: opacity 0.35s ease, transform 0.4s ease;
+            mix-blend-mode: screen;
+        }
+
+        .smoke-neon-aura.active {
+            opacity: 0.9;
+            animation: neonSmokePulse 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes neonSmokePulse {
+            0% { transform: translate(-50%, -50%) scale(0.92); opacity: 0.75; }
+            100% { transform: translate(-50%, -50%) scale(1.08); opacity: 0.95; }
+        }
+
+        /* ================= FootageCrate Appear Neon Smoke Video Layer ================= */
         .sky-smoke-video {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 820px;
+            width: 860px;
             max-width: 95vw;
-            height: 540px;
+            height: 560px;
             object-fit: contain;
             pointer-events: none;
-            z-index: 35; /* فوق النص تماماً */
+            z-index: 35; /* يمر فوق النص تماماً */
             opacity: 0;
             display: none;
-            transition: opacity 0.2s ease;
+            mix-blend-mode: screen;
+            /* فلتر النيون للدخان ليصبح مشعاً ومضيئاً بألوان النيون */
+            filter: 
+                drop-shadow(0 0 16px var(--fire-c, #ff1e00))
+                drop-shadow(0 0 35px var(--shine-c, #ffd700))
+                drop-shadow(0 0 65px var(--fire-c, #ff1e00))
+                brightness(1.9)
+                contrast(1.4)
+                saturate(3);
+            transition: opacity 0.25s ease;
         }
 
         .sky-smoke-video.active {
@@ -177,22 +214,22 @@
 
         /* ================= ANIMATION CHOREOGRAPHY ================= */
         
-        /* 1. Holding State (النص ثابت وظاهر بوضوح تام) */
+        /* 1. Holding State (النص ثابت وظاهر بوضوح تام بنمط النيون) */
         .banner-holding {
             opacity: 1 !important;
             transform: translateY(0) scale(1) !important;
             filter: blur(0px) !important;
         }
 
-        /* 2. Smoke Wipe Out (الدخان لما يعدي فوقيه يختفي النص بسلاسة) */
+        /* 2. Smoke Wipe Out (الدخان لما ينزل تتلاشى الكلمة معه بسلاسة) */
         .banner-smoke-out {
             opacity: 0 !important;
-            transform: translateY(15px) scale(0.94) !important;
-            filter: blur(7px) !important;
-            transition: opacity 0.45s ease-out, transform 0.45s ease-out, filter 0.45s ease-out !important;
+            transform: translateY(12px) scale(0.95) !important;
+            filter: blur(8px) !important;
+            transition: opacity 0.35s ease-out, transform 0.35s ease-out, filter 0.35s ease-out !important;
         }
 
-        /* 3. Smooth Slide In (يظهر بسلاسة SLIDE IN) */
+        /* 3. Smooth Slide In (ظهور انسيابي ناعم SLIDE IN) */
         .banner-slide-in {
             animation: animNeonSlideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
         }
@@ -230,8 +267,11 @@
                 </div>
             </div>
 
+            <!-- Glowing Neon Smoke Aura (هالة الدخان النيون) -->
+            <div class="smoke-neon-aura" id="smokeNeonAura"></div>
+
             <!-- FootageCrate Smoke Vortex Layer (Descent & Sweep - OVER TEXT) -->
-            <video id="skySmokeVideo" class="sky-smoke-video" src="/videos/appear_from_sky.webm" playsinline muted preload="auto"></video>
+            <video id="skySmokeVideo" class="sky-smoke-video" src="/videos/appear_from_sky.webm" autoplay playsinline muted preload="auto"></video>
 
         </div>
     </div>
@@ -249,10 +289,10 @@
             neon_enabled: true,
             neon_strength: 95,
             banner_style: 'transparent',
-            display_mode: 'continuous',
+            display_mode: 'cycle',
             smoke_enabled: true,
             hold_duration: 6,
-            loop_interval: 8,
+            loop_interval: 6,
             position_v: 'center',
             offset_y: 0
         };
@@ -264,6 +304,7 @@
         const stageWrapper = document.getElementById('stageWrapper');
         const stageInner = document.getElementById('stageInner');
         const skySmokeVideo = document.getElementById('skySmokeVideo');
+        const smokeNeonAura = document.getElementById('smokeNeonAura');
 
         // Apply Styles to DOM
         function applyStyles() {
@@ -352,19 +393,52 @@
                     skySmokeVideo.classList.remove('active');
                     skySmokeVideo.pause();
                 }
+                if (smokeNeonAura) smokeNeonAura.classList.remove('active');
                 bannerBox.className = `fire-banner-box frame-${frame} banner-holding`;
                 bannerBox.style.opacity = '1';
                 return;
             }
 
             // Smoke enabled: run the smoke wipe -> vanish -> slide in cycle!
-            runSmokeSlideCycle();
+            runSmokeSlideCycle(false);
         }
 
-        function runSmokeSlideCycle() {
+        function triggerInstantSmokeWipe() {
+            const frame = settings.banner_style || 'transparent';
+            if (skySmokeVideo) {
+                skySmokeVideo.classList.add('active');
+                skySmokeVideo.currentTime = 0;
+                skySmokeVideo.play().catch(() => {});
+            }
+            if (smokeNeonAura) smokeNeonAura.classList.add('active');
+
+            // As smoke descends over the text (~380ms), text dissolves with smoke!
+            setTimeout(() => {
+                bannerBox.className = `fire-banner-box frame-${frame} banner-smoke-out`;
+
+                // Smoke disperses (~1600ms)
+                setTimeout(() => {
+                    if (skySmokeVideo) skySmokeVideo.classList.remove('active');
+                    if (smokeNeonAura) smokeNeonAura.classList.remove('active');
+
+                    // Slide back in!
+                    setTimeout(() => {
+                        bannerBox.className = `fire-banner-box frame-${frame} banner-slide-in`;
+                        setTimeout(() => {
+                            bannerBox.className = `fire-banner-box frame-${frame} banner-holding`;
+                        }, 800);
+                    }, 250);
+
+                }, 1250);
+
+            }, 380);
+        }
+
+        function runSmokeSlideCycle(isInitial = false) {
             const isSmokeOn = settings.smoke_enabled !== false && settings.smoke_enabled !== 0 && settings.smoke_enabled !== 'false';
+            const frame = settings.banner_style || 'transparent';
+
             if (!isSmokeOn) {
-                const frame = settings.banner_style || 'transparent';
                 bannerBox.className = `fire-banner-box frame-${frame} banner-holding`;
                 bannerBox.style.opacity = '1';
                 return;
@@ -373,53 +447,50 @@
             clearTimeout(cycleTimeout);
             isCycleRunning = true;
 
-            const frame = settings.banner_style || 'transparent';
-            const holdMs = Math.max(3, (settings.hold_duration || 6)) * 1000;
-            const intervalMs = Math.max(2, (settings.loop_interval || 8)) * 1000;
-
-            // 1. Text is visible and holding in crisp Neon
-            bannerBox.className = `fire-banner-box frame-${frame} banner-holding`;
-            bannerBox.style.opacity = '1';
+            const holdMs = isInitial ? 1500 : Math.max(2.5, (settings.hold_duration || 5)) * 1000;
+            const intervalMs = Math.max(2, (settings.loop_interval || 6)) * 1000;
 
             // Wait for hold duration before starting smoke wipe
             cycleTimeout = setTimeout(() => {
-                // 2. Smoke video descends and sweeps OVER the text
+                // 1. Neon Smoke video descends from sky and glowing neon aura lights up
                 if (skySmokeVideo) {
                     skySmokeVideo.classList.add('active');
                     skySmokeVideo.currentTime = 0;
                     skySmokeVideo.play().catch(() => {});
                 }
+                if (smokeNeonAura) {
+                    smokeNeonAura.classList.add('active');
+                }
 
-                // 3. At peak smoke density (~820ms), the text vanishes underneath the smoke
+                // 2. As the smoke cloud sweeps over the text (~380ms), the word dissolves and fades away WITH the smoke!
                 cycleTimeout = setTimeout(() => {
                     bannerBox.className = `fire-banner-box frame-${frame} banner-smoke-out`;
 
-                    // 4. At ~1900ms, smoke clears out
+                    // 3. At ~1600ms, the dense smoke finishes and starts dispersing
                     cycleTimeout = setTimeout(() => {
-                        if (skySmokeVideo) {
-                            skySmokeVideo.classList.remove('active');
-                        }
+                        if (skySmokeVideo) skySmokeVideo.classList.remove('active');
+                        if (smokeNeonAura) smokeNeonAura.classList.remove('active');
 
-                        // 5. Short pause, then text reappears with smooth SLIDE IN!
+                        // 4. Short breath, then text re-enters with smooth SLIDE IN!
                         cycleTimeout = setTimeout(() => {
                             bannerBox.className = `fire-banner-box frame-${frame} banner-slide-in`;
 
-                            // Once slide-in animation finishes (800ms), transition back to holding
+                            // 5. Once slide in finishes (800ms), lock in holding state
                             cycleTimeout = setTimeout(() => {
                                 bannerBox.className = `fire-banner-box frame-${frame} banner-holding`;
 
-                                // 6. Wait interval before next smoke sweep
+                                // 6. Schedule next smoke sweep
                                 cycleTimeout = setTimeout(() => {
-                                    runSmokeSlideCycle();
+                                    runSmokeSlideCycle(false);
                                 }, intervalMs);
 
                             }, 800);
 
-                        }, 300);
+                        }, 250);
 
-                    }, 1100);
+                    }, 1250);
 
-                }, 820);
+                }, 380);
 
             }, holdMs);
         }
@@ -434,32 +505,8 @@
                 setupAnimationMode();
             } else if (data.type === 'test_action') {
                 if (data.action === 'smoke_cycle') {
-                    // Trigger instant live demo of the smoke sweep + slide-in
                     clearTimeout(cycleTimeout);
-                    const frame = settings.banner_style || 'transparent';
-                    
-                    if (skySmokeVideo) {
-                        skySmokeVideo.classList.add('active');
-                        skySmokeVideo.currentTime = 0;
-                        skySmokeVideo.play().catch(() => {});
-                    }
-
-                    setTimeout(() => {
-                        bannerBox.className = `fire-banner-box frame-${frame} banner-smoke-out`;
-                        
-                        setTimeout(() => {
-                            if (skySmokeVideo) skySmokeVideo.classList.remove('active');
-                            
-                            setTimeout(() => {
-                                bannerBox.className = `fire-banner-box frame-${frame} banner-slide-in`;
-                                setTimeout(() => {
-                                    bannerBox.className = `fire-banner-box frame-${frame} banner-holding`;
-                                }, 800);
-                            }, 300);
-
-                        }, 1100);
-
-                    }, 820);
+                    triggerInstantSmokeWipe();
                 }
             }
         });
@@ -493,7 +540,8 @@
 
         loadSettings().then(() => {
             applyStyles();
-            setupAnimationMode();
+            // Start initial smoke wipe quickly after 1.5s
+            runSmokeSlideCycle(true);
         });
 
         // Polling fallback

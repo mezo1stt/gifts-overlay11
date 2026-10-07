@@ -641,7 +641,7 @@ function getDefaultFireSettings() {
         font_family: 'Cairo',
         letter_spacing: 2,
         animation_style: 'realistic_flames',
-        display_mode: 'continuous',      // 'continuous', 'cycle'
+        display_mode: 'cycle',           // 'continuous', 'cycle'
         banner_style: 'transparent',     // 'transparent', 'glass', 'magma'
         intro_style: 'burst',            // 'burst', 'volcano', 'slide', 'burn', 'fade'
         outro_style: 'burn',             // 'burn', 'slide', 'melt', 'fade'

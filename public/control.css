@@ -58,21 +58,26 @@ body.app-body {
 /* ================= RIGHT SIDEBAR (مطابق تماماً لصورة تيك أليرت) ================= */
 .sidebar-nav {
     width: var(--sidebar-width);
-    background: linear-gradient(180deg, #1f070e 0%, #160408 50%, #100205 100%);
+    min-width: var(--sidebar-width);
+    max-width: var(--sidebar-width);
+    background: linear-gradient(180deg, #18050b 0%, #120307 50%, #0a0104 100%);
     border-left: 1.5px solid var(--border-subtle);
     display: flex;
     flex-direction: column;
-    position: fixed;
+    position: sticky;
     top: 0;
-    right: 0;
-    bottom: 0;
+    height: 100vh;
+    flex-shrink: 0;
     z-index: 1000;
-    transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    transition: width 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28), min-width 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28), max-width 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
     box-shadow: -5px 0 30px rgba(0, 0, 0, 0.7);
+    box-sizing: border-box;
 }
 
 .sidebar-nav.collapsed {
     width: var(--sidebar-collapsed-width);
+    min-width: var(--sidebar-collapsed-width);
+    max-width: var(--sidebar-collapsed-width);
 }
 
 .sidebar-nav.collapsed .nav-label,
@@ -309,27 +314,18 @@ body.app-body {
 .main-wrapper {
     flex: 1;
     min-width: 0;
-    margin-right: var(--sidebar-width);
-    width: calc(100% - var(--sidebar-width));
-    max-width: calc(100% - var(--sidebar-width));
+    width: 0;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    transition: margin-right 0.3s ease, width 0.3s ease, max-width 0.3s ease;
-    overflow-x: hidden;
     box-sizing: border-box;
-}
-
-.sidebar-nav.collapsed ~ .main-wrapper {
-    margin-right: var(--sidebar-collapsed-width);
-    width: calc(100% - var(--sidebar-collapsed-width));
-    max-width: calc(100% - var(--sidebar-collapsed-width));
 }
 
 /* Top Navbar */
 .top-navbar {
+    width: 100%;
     height: var(--topbar-height);
-    background: rgba(20, 6, 12, 0.85);
+    background: rgba(18, 5, 10, 0.95);
     border-bottom: 1.5px solid var(--border-subtle);
     backdrop-filter: blur(14px);
     display: flex;
@@ -339,6 +335,7 @@ body.app-body {
     position: sticky;
     top: 0;
     z-index: 500;
+    box-sizing: border-box;
 }
 
 .active-page-title {
@@ -472,7 +469,7 @@ body.app-body {
     box-sizing: border-box;
 }
 
-@media (max-width: 1250px) {
+@media (max-width: 1400px) {
     .dashboard-grid {
         grid-template-columns: minmax(0, 1fr);
     }
