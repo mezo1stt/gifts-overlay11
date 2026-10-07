@@ -800,9 +800,113 @@ async function loadFireData() {
 
             // Smoke toggle (يا اشغله يا لا)
             const isSmoke = fireConfig.smoke_enabled !== false && fireConfig.smoke_enabled !== 0 && fireConfig.smoke_enabled !== 'false';
-            setFireSmokeEnabled(isSmoke, false);
+            // Display Type: 'text' vs 'image'
+            const dispType = fireConfig.display_type || 'text';
+            setFireDisplayType(dispType, false);
+
+            // Card Edge Pos
+            const cardPos = fireConfig.card_position || 'edge-right';
+            setCardEdgePos(cardPos);
+
+            // Card Image & Presets
+            if (fireConfig.card_image) {
+                const urlInput = document.getElementById('cardImageUrlInput');
+                if (urlInput) urlInput.value = fireConfig.card_image;
+                const thumb = document.getElementById('customCardThumb');
+                if (thumb) thumb.src = fireConfig.card_image;
+            }
+            if (fireConfig.card_width) {
+                const s = document.getElementById('cardWidthSlider');
+                if (s) s.value = fireConfig.card_width;
+                const b = document.getElementById('cardWidthBadge');
+                if (b) b.textContent = fireConfig.card_width + ' px';
+            }
+            if (fireConfig.card_badge) {
+                const b = document.getElementById('cardBadgeInput');
+                if (b) b.value = fireConfig.card_badge;
+            }
+            if (fireConfig.card_title) {
+                const t = document.getElementById('cardTitleInput');
+                if (t) t.value = fireConfig.card_title;
+            }
         }
     } catch (e) {}
+}
+
+function setFireDisplayType(type, updateSim = true) {
+    fireConfig.display_type = type;
+    const btnT = document.getElementById('btnDispTypeText');
+    const btnI = document.getElementById('btnDispTypeImage');
+    if (btnT) btnT.classList.toggle('active', type === 'text');
+    if (btnI) btnI.classList.toggle('active', type === 'image');
+
+    const textBox = document.getElementById('textModeSettingsBox');
+    const cardBox = document.getElementById('cardModeSettingsBox');
+    if (textBox) textBox.style.display = type === 'text' ? 'block' : 'none';
+    if (cardBox) cardBox.style.display = type === 'image' ? 'block' : 'none';
+
+    if (updateSim) {
+        updateFireSimLive();
+        showToast(type === 'image' ? '🃏 تم تفعيل وضع البطاقة/الصورة من طرف الشاشة' : '✍️ تم تفعيل وضع نص النيون', 'info');
+    }
+}
+
+function setCardEdgePos(pos) {
+    fireConfig.card_position = pos;
+    const btnR = document.getElementById('btnCardEdgeRight');
+    const btnL = document.getElementById('btnCardEdgeLeft');
+    const btnC = document.getElementById('btnCardEdgeCenter');
+    if (btnR) btnR.classList.toggle('active', pos === 'edge-right');
+    if (btnL) btnL.classList.toggle('active', pos === 'edge-left');
+    if (btnC) btnC.classList.toggle('active', pos === 'center');
+    updateFireSimLive();
+}
+
+function selectCardPreset(url, badge, title) {
+    fireConfig.card_image = url;
+    fireConfig.card_badge = badge;
+    fireConfig.card_title = title;
+
+    const urlInput = document.getElementById('cardImageUrlInput');
+    if (urlInput) urlInput.value = url;
+    const thumb = document.getElementById('customCardThumb');
+    if (thumb) thumb.src = url;
+    const badgeInput = document.getElementById('cardBadgeInput');
+    if (badgeInput) badgeInput.value = badge;
+    const titleInput = document.getElementById('cardTitleInput');
+    if (titleInput) titleInput.value = title;
+
+    document.querySelectorAll('#cardPresetsGrid .card-preset-item').forEach(item => {
+        const img = item.querySelector('img');
+        item.classList.toggle('active', img && img.src.includes(url));
+    });
+
+    updateFireSimLive();
+    showToast(`🃏 تم اختيار ${title || 'البطاقة'} بنجاح!`, 'success');
+}
+
+function onCardUrlInput(val) {
+    fireConfig.card_image = val.trim();
+    const thumb = document.getElementById('customCardThumb');
+    if (thumb) thumb.src = val.trim();
+    updateFireSimLive();
+}
+
+function onCardWidthChange(val) {
+    fireConfig.card_width = parseInt(val) || 220;
+    const b = document.getElementById('cardWidthBadge');
+    if (b) b.textContent = val + ' px';
+    updateFireSimLive();
+}
+
+function onCardBadgeChange(val) {
+    fireConfig.card_badge = val.trim();
+    updateFireSimLive();
+}
+
+function onCardTitleChange(val) {
+    fireConfig.card_title = val.trim();
+    updateFireSimLive();
 }
 
 function setFireSmokeEnabled(enabled, updateSim = true) {
@@ -931,6 +1035,16 @@ async function saveFireSettingsAction() {
     fireConfig.font_size = parseInt(document.getElementById('fireFontSizeSlider').value);
     fireConfig.neon_strength = parseInt(document.getElementById('fireNeonStrengthSlider').value);
     fireConfig.offset_y = parseInt(document.getElementById('fireOffsetYSlider').value);
+
+    // Card fields
+    const cardUrlInp = document.getElementById('cardImageUrlInput');
+    if (cardUrlInp && cardUrlInp.value.trim()) fireConfig.card_image = cardUrlInp.value.trim();
+    const cardWidthInp = document.getElementById('cardWidthSlider');
+    if (cardWidthInp) fireConfig.card_width = parseInt(cardWidthInp.value) || 220;
+    const cardBadgeInp = document.getElementById('cardBadgeInput');
+    if (cardBadgeInp) fireConfig.card_badge = cardBadgeInp.value.trim();
+    const cardTitleInp = document.getElementById('cardTitleInput');
+    if (cardTitleInp) fireConfig.card_title = cardTitleInp.value.trim();
 
     const holdSlider = document.getElementById('fireHoldDurationSlider');
     if (holdSlider) fireConfig.hold_duration = parseFloat(holdSlider.value) || 6;
@@ -1069,9 +1183,10 @@ async function loadScoreboardData() {
             const b = data.board;
             document.getElementById('sbTitleInput').value = b.title || '🏆 تحدي الأساطير 🏆';
             document.getElementById('sbTeamAName').value = b.team_a_name || 'المخربين';
-            document.getElementById('sbTeamBName').value = b.team_b_name || 'المساعدين';
-            document.getElementById('sbScoreADisplay').textContent = b.team_a_score || 0;
-            document.getElementById('sbScoreBDisplay').textContent = b.team_b_score || 0;
+            const scA = b.team_a_score || 0;
+            const scB = b.team_b_score || 0;
+            document.getElementById('sbScoreADisplay').textContent = scA >= 1000 ? scA.toLocaleString() : scA;
+            document.getElementById('sbScoreBDisplay').textContent = scB >= 1000 ? scB.toLocaleString() : scB;
         }
 
         // Update trigger URLs on screen
@@ -1094,10 +1209,39 @@ async function adjustSbScore(team, delta) {
         });
         const data = await res.json();
         if (data.success && data.board) {
-            document.getElementById('sbScoreADisplay').textContent = data.board.team_a_score || 0;
-            document.getElementById('sbScoreBDisplay').textContent = data.board.team_b_score || 0;
+            const scA = data.board.team_a_score || 0;
+            const scB = data.board.team_b_score || 0;
+            document.getElementById('sbScoreADisplay').textContent = scA >= 1000 ? scA.toLocaleString() : scA;
+            document.getElementById('sbScoreBDisplay').textContent = scB >= 1000 ? scB.toLocaleString() : scB;
         }
     } catch (e) {}
+}
+
+async function setSbDirectScore(team) {
+    const inputId = team === 'a' ? 'sbScoreACustom' : 'sbScoreBCustom';
+    const input = document.getElementById(inputId);
+    if (!input || input.value === '') return;
+    const val = parseInt(input.value);
+    if (isNaN(val) || val < 0) return;
+
+    try {
+        const res = await fetch(`/api/scoreboard/${currentUid}/score`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ team, score: val })
+        });
+        const data = await res.json();
+        if (data.success && data.board) {
+            const scA = data.board.team_a_score || 0;
+            const scB = data.board.team_b_score || 0;
+            document.getElementById('sbScoreADisplay').textContent = scA >= 1000 ? scA.toLocaleString() : scA;
+            document.getElementById('sbScoreBDisplay').textContent = scB >= 1000 ? scB.toLocaleString() : scB;
+            showToast(`⚡ تم ضبط نتيجة الفريق ${team === 'a' ? 'الأحمر' : 'الأخضر'} على: ${val.toLocaleString()}`, 'success');
+            input.value = '';
+        }
+    } catch (e) {
+        showToast('خطأ في تعيين النتيجة', 'error');
+    }
 }
 
 async function resetSbScores() {

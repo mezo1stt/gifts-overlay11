@@ -229,6 +229,163 @@
             transition: opacity 0.35s ease-out, transform 0.35s ease-out, filter 0.35s ease-out !important;
         }
 
+        /* ================= GAMING CARD / IMAGE MODE (MC Royale / Clash Royale) ================= */
+        .fire-card-wrapper {
+            position: relative;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 15;
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .card-inner-box {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 22px;
+            overflow: hidden;
+            background: linear-gradient(145deg, rgba(22, 12, 28, 0.96), rgba(10, 6, 16, 0.96));
+            border: 3.5px solid var(--shine-c, #ffd700);
+            box-shadow: 
+                0 12px 40px rgba(0, 0, 0, 0.9),
+                0 0 25px var(--fire-c, #ff1e00),
+                inset 0 0 20px rgba(255, 215, 0, 0.25);
+            transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28), box-shadow 0.3s ease;
+        }
+
+        .card-inner-box:hover {
+            transform: scale(1.04);
+            box-shadow: 
+                0 16px 50px rgba(0, 0, 0, 0.95),
+                0 0 35px var(--shine-c, #ffd700);
+        }
+
+        .card-img {
+            display: block;
+            width: var(--card-w, 220px);
+            height: auto;
+            max-height: 420px;
+            object-fit: contain;
+            border-radius: 18px;
+            filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.85));
+            transition: transform 0.3s ease;
+        }
+
+        .card-badge-tag {
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            color: #000;
+            font-size: 11px;
+            font-weight: 900;
+            padding: 3px 10px;
+            border-radius: 12px;
+            border: 1px solid #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+            letter-spacing: 0.5px;
+            z-index: 5;
+        }
+
+        .card-title-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.95) 75%);
+            padding: 10px 14px 6px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 900;
+            color: #ffffff;
+            text-shadow: 0 0 10px var(--shine-c, #ffd700);
+            z-index: 5;
+        }
+
+        /* Edge Docking Positions */
+        .dock-edge-right {
+            position: fixed !important;
+            right: 20px !important;
+            left: auto !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+        }
+
+        .dock-edge-left {
+            position: fixed !important;
+            left: 20px !important;
+            right: auto !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+        }
+
+        .dock-center {
+            position: relative !important;
+        }
+
+        /* Card Slide-in & Smoke Dissolve Animations */
+        .card-slide-in-right {
+            animation: animCardSlideInRight 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+        }
+
+        @keyframes animCardSlideInRight {
+            0% {
+                opacity: 0;
+                transform: translateX(120%) scale(0.9);
+                filter: blur(8px);
+            }
+            70% {
+                opacity: 1;
+                transform: translateX(-8px) scale(1.02);
+                filter: blur(0px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+                filter: blur(0px);
+            }
+        }
+
+        .card-slide-in-left {
+            animation: animCardSlideInLeft 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+        }
+
+        @keyframes animCardSlideInLeft {
+            0% {
+                opacity: 0;
+                transform: translateX(-120%) scale(0.9);
+                filter: blur(8px);
+            }
+            70% {
+                opacity: 1;
+                transform: translateX(8px) scale(1.02);
+                filter: blur(0px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+                filter: blur(0px);
+            }
+        }
+
+        .card-smoke-out-right {
+            opacity: 0 !important;
+            transform: translateX(50px) scale(0.92) !important;
+            filter: blur(10px) !important;
+            transition: opacity 0.38s ease-out, transform 0.38s ease-out, filter 0.38s ease-out !important;
+        }
+
+        .card-smoke-out-left {
+            opacity: 0 !important;
+            transform: translateX(-50px) scale(0.92) !important;
+            filter: blur(10px) !important;
+            transition: opacity 0.38s ease-out, transform 0.38s ease-out, filter 0.38s ease-out !important;
+        }
+
         /* 3. Smooth Slide In (ظهور انسيابي ناعم SLIDE IN) */
         .banner-slide-in {
             animation: animNeonSlideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
@@ -265,12 +422,23 @@
                     <div class="fire-text-back" id="textBack">رابط الدعم في البايو 🔥</div>
                     <div class="fire-text-front" id="textFront">رابط الدعم في البايو 🔥</div>
                 </div>
+
+                <!-- Gaming Card / Image Wrapper (MC Royale / Clash Royale / Support Card) -->
+                <div class="fire-card-wrapper" id="cardWrapper" style="display: none;">
+                    <div class="card-inner-box" id="cardInnerBox">
+                        <img class="card-img" id="cardImg" src="/images/1791198066523-1d067d13988e8754ed6adbebd89b9ee8.png~tplv-obj.webp" alt="Card" onerror="this.src='/images/rose.png'">
+                        <div class="card-badge-tag" id="cardBadgeTag">👑 ROYALE</div>
+                        <div class="card-title-bar" id="cardTitleBar">
+                            <span id="cardTitleText">بطاقة الدعم</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Glowing Neon Smoke Aura (هالة الدخان النيون) -->
             <div class="smoke-neon-aura" id="smokeNeonAura"></div>
 
-            <!-- FootageCrate Smoke Vortex Layer (Descent & Sweep - OVER TEXT) -->
+            <!-- FootageCrate Smoke Vortex Layer (Descent & Sweep - OVER TEXT & CARD) -->
             <video id="skySmokeVideo" class="sky-smoke-video" src="/videos/appear_from_sky.webm" autoplay playsinline muted preload="auto"></video>
 
         </div>
@@ -282,6 +450,7 @@
         let uid = params.get('uid') || localStorage.getItem('gifts_last_uid') || 'board_XXXX';
 
         let settings = {
+            display_type: 'text', // 'text' | 'image'
             text: 'رابط الدعم في البايو 🔥',
             color: '#ff1e00',
             shine_color: '#ffd700',
@@ -294,29 +463,137 @@
             hold_duration: 6,
             loop_interval: 6,
             position_v: 'center',
-            offset_y: 0
+            offset_y: 0,
+            card_image: '/images/1791198066523-1d067d13988e8754ed6adbebd89b9ee8.png~tplv-obj.webp',
+            card_position: 'edge-right', // 'edge-right', 'edge-left', 'center'
+            card_width: 220,
+            card_badge: '👑 ROYALE',
+            card_title: 'بطاقة الدعم'
         };
 
         const bannerBox = document.getElementById('bannerBox');
         const textWrapper = document.getElementById('textWrapper');
         const textBack = document.getElementById('textBack');
         const textFront = document.getElementById('textFront');
+        const cardWrapper = document.getElementById('cardWrapper');
+        const cardInnerBox = document.getElementById('cardInnerBox');
+        const cardImg = document.getElementById('cardImg');
+        const cardBadgeTag = document.getElementById('cardBadgeTag');
+        const cardTitleBar = document.getElementById('cardTitleBar');
+        const cardTitleText = document.getElementById('cardTitleText');
         const stageWrapper = document.getElementById('stageWrapper');
         const stageInner = document.getElementById('stageInner');
         const skySmokeVideo = document.getElementById('skySmokeVideo');
         const smokeNeonAura = document.getElementById('smokeNeonAura');
 
+        function getSmokeOutClass() {
+            const dispType = settings.display_type || 'text';
+            const cardPos = settings.card_position || 'edge-right';
+            if (dispType === 'image') {
+                return cardPos === 'edge-left' ? 'card-smoke-out-left' : 'card-smoke-out-right';
+            }
+            const frame = settings.banner_style || 'transparent';
+            return `frame-${frame} banner-smoke-out`;
+        }
+
+        function getSlideInClass() {
+            const dispType = settings.display_type || 'text';
+            const cardPos = settings.card_position || 'edge-right';
+            if (dispType === 'image') {
+                return cardPos === 'edge-left' ? 'card-slide-in-left' : 'card-slide-in-right';
+            }
+            const frame = settings.banner_style || 'transparent';
+            return `frame-${frame} banner-slide-in`;
+        }
+
+        function getHoldingClass() {
+            const dispType = settings.display_type || 'text';
+            if (dispType === 'image') {
+                return 'banner-holding';
+            }
+            const frame = settings.banner_style || 'transparent';
+            return `frame-${frame} banner-holding`;
+        }
+
         // Apply Styles to DOM
         function applyStyles() {
-            // Text Content
-            const txt = settings.text || 'رابط الدعم في البايو 🔥';
-            textFront.textContent = txt;
-            textBack.textContent = txt;
+            const dispType = settings.display_type || 'text';
+            const cardPos = settings.card_position || 'edge-right';
 
-            // Font Size
-            const fSize = settings.font_size || 64;
-            textFront.style.fontSize = `${fSize}px`;
-            textBack.style.fontSize = `${fSize}px`;
+            // Reset stage docking classes
+            stageInner.classList.remove('dock-edge-right', 'dock-edge-left', 'dock-center');
+
+            if (dispType === 'image') {
+                textWrapper.style.display = 'none';
+                cardWrapper.style.display = 'inline-flex';
+
+                if (cardPos === 'edge-right') {
+                    stageInner.classList.add('dock-edge-right');
+                } else if (cardPos === 'edge-left') {
+                    stageInner.classList.add('dock-edge-left');
+                } else {
+                    stageInner.classList.add('dock-center');
+                }
+
+                if (settings.card_image) {
+                    cardImg.src = settings.card_image;
+                }
+                const cWidth = settings.card_width || 220;
+                document.documentElement.style.setProperty('--card-w', `${cWidth}px`);
+
+                if (settings.card_badge) {
+                    cardBadgeTag.style.display = 'inline-block';
+                    cardBadgeTag.textContent = settings.card_badge;
+                } else {
+                    cardBadgeTag.style.display = 'none';
+                }
+
+                if (settings.card_title) {
+                    cardTitleBar.style.display = 'block';
+                    cardTitleText.textContent = settings.card_title;
+                } else {
+                    cardTitleBar.style.display = 'none';
+                }
+            } else {
+                textWrapper.style.display = 'inline-block';
+                cardWrapper.style.display = 'none';
+                stageInner.classList.add('dock-center');
+
+                // Text Content
+                const txt = settings.text || 'رابط الدعم في البايو 🔥';
+                textFront.textContent = txt;
+                textBack.textContent = txt;
+
+                // Font Size
+                const fSize = settings.font_size || 64;
+                textFront.style.fontSize = `${fSize}px`;
+                textBack.style.fontSize = `${fSize}px`;
+
+                // Neon Styling
+                const isNeon = settings.neon_enabled !== false && settings.neon_enabled !== 0;
+                if (isNeon) {
+                    const str = Math.max(0.4, (settings.neon_strength || 85) / 100);
+                    const g1 = Math.round(4 * str);
+                    const g2 = Math.round(12 * str);
+                    const g3 = Math.round(24 * str);
+                    const g4 = Math.round(42 * str);
+
+                    textFront.style.color = '#ffffff';
+                    textFront.style.textShadow = `
+                        0 0 ${g1}px #ffffff,
+                        0 0 ${g2}px ${settings.shine_color || '#ffd700'},
+                        0 0 ${g3}px ${settings.color || '#ff1e00'},
+                        0 0 ${g4}px ${settings.color || '#ff1e00'}
+                    `;
+                    textFront.style.webkitTextFillColor = '#ffffff';
+                    textFront.style.filter = 'none';
+                } else {
+                    textFront.style.color = '#ffffff';
+                    textFront.style.textShadow = '0 3px 10px rgba(0, 0, 0, 0.9)';
+                    textFront.style.webkitTextFillColor = '#ffffff';
+                    textFront.style.filter = 'none';
+                }
+            }
 
             // Colors
             const pri = settings.color || '#ff1e00';
@@ -341,38 +618,22 @@
             }
 
             const offY = settings.offset_y || 0;
-            stageInner.style.transform = `translateY(${offY}px)`;
-
-            // Frame Style
-            const frameStyle = settings.banner_style || 'transparent';
-            if (!bannerBox.classList.contains('banner-smoke-out') && !bannerBox.classList.contains('banner-slide-in')) {
-                bannerBox.className = `fire-banner-box frame-${frameStyle} banner-holding`;
+            if (!stageInner.classList.contains('dock-edge-right') && !stageInner.classList.contains('dock-edge-left')) {
+                stageInner.style.transform = `translateY(${offY}px)`;
+            } else {
+                stageInner.style.transform = `translateY(calc(-50% + ${offY}px))`;
             }
 
-            // Neon Styling (نيون نقي وواضح بدون توهج حارق أو شرار)
-            const isNeon = settings.neon_enabled !== false && settings.neon_enabled !== 0;
-            if (isNeon) {
-                const str = Math.max(0.4, (settings.neon_strength || 85) / 100);
-                const g1 = Math.round(4 * str);
-                const g2 = Math.round(12 * str);
-                const g3 = Math.round(24 * str);
-                const g4 = Math.round(42 * str);
-
-                textFront.style.color = '#ffffff';
-                textFront.style.textShadow = `
-                    0 0 ${g1}px #ffffff,
-                    0 0 ${g2}px ${sec},
-                    0 0 ${g3}px ${pri},
-                    0 0 ${g4}px ${pri}
-                `;
-                textFront.style.webkitTextFillColor = '#ffffff';
-                textFront.style.filter = 'none';
+            // Frame Style (Text mode only)
+            if (dispType === 'text') {
+                const frameStyle = settings.banner_style || 'transparent';
+                if (!bannerBox.classList.contains('banner-smoke-out') && !bannerBox.classList.contains('banner-slide-in')) {
+                    bannerBox.className = `fire-banner-box frame-${frameStyle} banner-holding`;
+                }
             } else {
-                // Non-neon clean text
-                textFront.style.color = '#ffffff';
-                textFront.style.textShadow = '0 3px 10px rgba(0, 0, 0, 0.9)';
-                textFront.style.webkitTextFillColor = '#ffffff';
-                textFront.style.filter = 'none';
+                if (!bannerBox.classList.contains('card-smoke-out-right') && !bannerBox.classList.contains('card-smoke-out-left') && !bannerBox.classList.contains('card-slide-in-right') && !bannerBox.classList.contains('card-slide-in-left')) {
+                    bannerBox.className = `fire-banner-box frame-transparent banner-holding`;
+                }
             }
         }
 
@@ -385,26 +646,22 @@
             isCycleRunning = false;
 
             const isSmokeOn = settings.smoke_enabled !== false && settings.smoke_enabled !== 0 && settings.smoke_enabled !== 'false';
-            const frame = settings.banner_style || 'transparent';
 
             if (!isSmokeOn) {
-                // Smoke disabled: keep text holding in place smoothly
                 if (skySmokeVideo) {
                     skySmokeVideo.classList.remove('active');
                     skySmokeVideo.pause();
                 }
                 if (smokeNeonAura) smokeNeonAura.classList.remove('active');
-                bannerBox.className = `fire-banner-box frame-${frame} banner-holding`;
+                bannerBox.className = `fire-banner-box ${getHoldingClass()}`;
                 bannerBox.style.opacity = '1';
                 return;
             }
 
-            // Smoke enabled: run the smoke wipe -> vanish -> slide in cycle!
             runSmokeSlideCycle(false);
         }
 
         function triggerInstantSmokeWipe() {
-            const frame = settings.banner_style || 'transparent';
             if (skySmokeVideo) {
                 skySmokeVideo.classList.add('active');
                 skySmokeVideo.currentTime = 0;
@@ -412,21 +669,18 @@
             }
             if (smokeNeonAura) smokeNeonAura.classList.add('active');
 
-            // As smoke descends over the text (~380ms), text dissolves with smoke!
             setTimeout(() => {
-                bannerBox.className = `fire-banner-box frame-${frame} banner-smoke-out`;
+                bannerBox.className = `fire-banner-box ${getSmokeOutClass()}`;
 
-                // Smoke disperses (~1600ms)
                 setTimeout(() => {
                     if (skySmokeVideo) skySmokeVideo.classList.remove('active');
                     if (smokeNeonAura) smokeNeonAura.classList.remove('active');
 
-                    // Slide back in!
                     setTimeout(() => {
-                        bannerBox.className = `fire-banner-box frame-${frame} banner-slide-in`;
+                        bannerBox.className = `fire-banner-box ${getSlideInClass()}`;
                         setTimeout(() => {
-                            bannerBox.className = `fire-banner-box frame-${frame} banner-holding`;
-                        }, 800);
+                            bannerBox.className = `fire-banner-box ${getHoldingClass()}`;
+                        }, 850);
                     }, 250);
 
                 }, 1250);
@@ -436,10 +690,9 @@
 
         function runSmokeSlideCycle(isInitial = false) {
             const isSmokeOn = settings.smoke_enabled !== false && settings.smoke_enabled !== 0 && settings.smoke_enabled !== 'false';
-            const frame = settings.banner_style || 'transparent';
 
             if (!isSmokeOn) {
-                bannerBox.className = `fire-banner-box frame-${frame} banner-holding`;
+                bannerBox.className = `fire-banner-box ${getHoldingClass()}`;
                 bannerBox.style.opacity = '1';
                 return;
             }
@@ -462,29 +715,29 @@
                     smokeNeonAura.classList.add('active');
                 }
 
-                // 2. As the smoke cloud sweeps over the text (~380ms), the word dissolves and fades away WITH the smoke!
+                // 2. As smoke cloud sweeps over the element (~380ms), dissolves WITH smoke!
                 cycleTimeout = setTimeout(() => {
-                    bannerBox.className = `fire-banner-box frame-${frame} banner-smoke-out`;
+                    bannerBox.className = `fire-banner-box ${getSmokeOutClass()}`;
 
-                    // 3. At ~1600ms, the dense smoke finishes and starts dispersing
+                    // 3. Smoke disperses (~1600ms)
                     cycleTimeout = setTimeout(() => {
                         if (skySmokeVideo) skySmokeVideo.classList.remove('active');
                         if (smokeNeonAura) smokeNeonAura.classList.remove('active');
 
-                        // 4. Short breath, then text re-enters with smooth SLIDE IN!
+                        // 4. Slide in from edge or bottom!
                         cycleTimeout = setTimeout(() => {
-                            bannerBox.className = `fire-banner-box frame-${frame} banner-slide-in`;
+                            bannerBox.className = `fire-banner-box ${getSlideInClass()}`;
 
-                            // 5. Once slide in finishes (800ms), lock in holding state
+                            // 5. Holding
                             cycleTimeout = setTimeout(() => {
-                                bannerBox.className = `fire-banner-box frame-${frame} banner-holding`;
+                                bannerBox.className = `fire-banner-box ${getHoldingClass()}`;
 
                                 // 6. Schedule next smoke sweep
                                 cycleTimeout = setTimeout(() => {
                                     runSmokeSlideCycle(false);
                                 }, intervalMs);
 
-                            }, 800);
+                            }, 850);
 
                         }, 250);
 

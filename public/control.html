@@ -455,20 +455,39 @@
 
                             </div>
 
+                        </div>
+
+                        <!-- Right Column: Live Dual Simulator & Quick OBS Links -->
+                        <div class="panel-section gifts-panel">
+                            
                             <!-- Live Dual Simulator Card -->
-                            <div class="panel-card mt-3">
-                                <h3 class="card-title"><span>👁️ محاكي شاشات البث المباشر المزدوج (Live OBS Preview)</span></h3>
+                            <div class="panel-card">
+                                <div class="card-header-flex">
+                                    <h3 class="card-title"><span>👁️ محاكي شاشات البث المباشر المزدوج (Live OBS Preview)</span></h3>
+                                </div>
                                 <p style="font-size:12px; color:#94a3b8; margin-bottom:12px;">معاينة حية فورية لما سيظهر على شاشة البث في OBS لكلا الفريقين في نفس الوقت:</p>
-                                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+                                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
                                     <div style="background:rgba(0,0,0,0.6); border:1.5px solid #22ff88; border-radius:14px; padding:10px;">
-                                        <h4 style="color:#22ff88; font-size:13px; margin-bottom:8px; text-align:center;">🟢 أوفرلاي الفريق 1</h4>
+                                        <h4 style="color:#22ff88; font-size:12.5px; margin-bottom:8px; text-align:center;">🟢 أوفرلاي الفريق 1</h4>
                                         <iframe id="team1SimIframe" src="/overlay-team.html?team=1" style="width:100%; height:260px; border:none; border-radius:10px; background:rgba(0,0,0,0.3);"></iframe>
+                                        <button class="btn-obs-action mt-2" style="width:100%; font-size:11.5px; padding:6px;" onclick="copyTeamOverlayUrl('1')">📋 نسخ رابط 1</button>
                                     </div>
                                     <div style="background:rgba(0,0,0,0.6); border:1.5px solid #ff2a4a; border-radius:14px; padding:10px;">
-                                        <h4 style="color:#ff2a4a; font-size:13px; margin-bottom:8px; text-align:center;">🔴 أوفرلاي الفريق 2</h4>
+                                        <h4 style="color:#ff2a4a; font-size:12.5px; margin-bottom:8px; text-align:center;">🔴 أوفرلاي الفريق 2</h4>
                                         <iframe id="team2SimIframe" src="/overlay-team.html?team=2" style="width:100%; height:260px; border:none; border-radius:10px; background:rgba(0,0,0,0.3);"></iframe>
+                                        <button class="btn-obs-action mt-2" style="width:100%; font-size:11.5px; padding:6px;" onclick="copyTeamOverlayUrl('2')">📋 نسخ رابط 2</button>
                                     </div>
                                 </div>
+                            </div>
+
+                            <!-- Dual Instructions Card -->
+                            <div class="panel-card mt-3">
+                                <h4 style="color:var(--gold); font-size:13.5px; margin-bottom:8px;">💡 تعليمات استخدام أوفرلاي الفرق في البث:</h4>
+                                <ul style="font-size:12px; color:#cbd5e1; line-height:1.7; padding-right:18px;">
+                                    <li>أضف مصدرين Browser في OBS: واحد للفريق 1 في زاوية الشاشة، والآخر للفريق 2.</li>
+                                    <li>كل هدية تختارها لأحد الفريقين تختفي تلقائياً من قائمة الفريق الثاني منعاً لأي تشابه.</li>
+                                    <li>يمكنك تغيير اسم الفريق ولونه النيوني وسيتم تحديثه على شاشة البث فوراً.</li>
+                                </ul>
                             </div>
 
                         </div>
@@ -483,21 +502,101 @@
                         <!-- Left Column: Controls -->
                         <div class="panel-section control-panel">
                             
-                            <!-- Fire Text Content -->
+                            <!-- Fire Text / Card Content -->
                             <div class="panel-card">
-                                <h3 class="card-title"><span>🔥 تخصيص نص ورابط الدعم (الشريط الناري)</span></h3>
-                                
-                                <div class="form-group">
-                                    <label for="fireTextInput">✍️ النص المعروض في الشريط:</label>
-                                    <input type="text" id="fireTextInput" class="form-input" value="رابط الدعم بالبايو 🔥" placeholder="اكتب النص الذي تريده...">
+                                <h3 class="card-title"><span>🔥 تخصيص رابط الدعم (نص نيون أو بطاقة من طرف الشاشة)</span></h3>
+
+                                <!-- Mode Switcher: Text vs Image/Card Mode -->
+                                <div class="form-group" style="background:linear-gradient(135deg, rgba(255,42,74,0.15), rgba(255,215,0,0.1)); padding:12px; border-radius:14px; border:1.5px solid rgba(255,42,74,0.35); margin-bottom:16px;">
+                                    <label style="font-size:13.5px; font-weight:900; color:#fff; margin-bottom:8px; display:block;">🔀 نوع العرض في الأوفرلاي:</label>
+                                    <div class="pos-preset-buttons">
+                                        <button type="button" class="btn-pos active" id="btnDispTypeText" onclick="setFireDisplayType('text')">✍️ نص وكتابة نيون (Support Bio)</button>
+                                        <button type="button" class="btn-pos" id="btnDispTypeImage" onclick="setFireDisplayType('image')">🃏 بطاقة أو صورة من طرف الشاشة (MC Royale Card)</button>
+                                    </div>
                                 </div>
 
-                                <div class="slider-group mt-3">
-                                    <div class="slider-header">
-                                        <label>📏 حجم الخط (Font Size):</label>
-                                        <span class="slider-badge" id="fireFontSizeBadge">64 px</span>
+                                <!-- 1. TEXT MODE CONTROLS -->
+                                <div id="textModeSettingsBox">
+                                    <div class="form-group">
+                                        <label for="fireTextInput">✍️ النص المعروض في الشريط:</label>
+                                        <input type="text" id="fireTextInput" class="form-input" value="رابط الدعم بالبايو 🔥" placeholder="اكتب النص الذي تريده...">
                                     </div>
-                                    <input type="range" id="fireFontSizeSlider" min="32" max="96" value="64">
+
+                                    <div class="slider-group mt-3">
+                                        <div class="slider-header">
+                                            <label>📏 حجم الخط (Font Size):</label>
+                                            <span class="slider-badge" id="fireFontSizeBadge">64 px</span>
+                                        </div>
+                                        <input type="range" id="fireFontSizeSlider" min="32" max="96" value="64">
+                                    </div>
+                                </div>
+
+                                <!-- 2. CARD / IMAGE MODE CONTROLS -->
+                                <div id="cardModeSettingsBox" style="display:none;">
+                                    <div class="form-group">
+                                        <label>📍 موضع البطاقة على الشاشة (الظهور من الطرف):</label>
+                                        <div class="pos-preset-buttons">
+                                            <button type="button" class="btn-pos active" id="btnCardEdgeRight" onclick="setCardEdgePos('edge-right')">➡️ طرف الشاشة الأيمن (Edge Right)</button>
+                                            <button type="button" class="btn-pos" id="btnCardEdgeLeft" onclick="setCardEdgePos('edge-left')">⬅️ طرف الشاشة الأيسر (Edge Left)</button>
+                                            <button type="button" class="btn-pos" id="btnCardEdgeCenter" onclick="setCardEdgePos('center')">⏺️ المنتصف (Center)</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group mt-3">
+                                        <label>🃏 اختيار بطاقة جاهزة (MC Royale / Clash Royale / هدايا):</label>
+                                        <div class="card-presets-grid mt-2" id="cardPresetsGrid">
+                                            <div class="card-preset-item active" onclick="selectCardPreset('https://raw.githubusercontent.com/RoyaleAPI/cr-api-assets/master/cards/king.png', '👑 ROYALE', 'الملك')">
+                                                <img class="card-preset-thumb" src="https://raw.githubusercontent.com/RoyaleAPI/cr-api-assets/master/cards/king.png" onerror="this.src='/images/rose.png'">
+                                                <span class="card-preset-name">👑 الملك</span>
+                                            </div>
+                                            <div class="card-preset-item" onclick="selectCardPreset('https://raw.githubusercontent.com/RoyaleAPI/cr-api-assets/master/cards/pekka.png', '⚔️ TITAN', 'بيكا')">
+                                                <img class="card-preset-thumb" src="https://raw.githubusercontent.com/RoyaleAPI/cr-api-assets/master/cards/pekka.png" onerror="this.src='/images/rose.png'">
+                                                <span class="card-preset-name">⚔️ بيكا</span>
+                                            </div>
+                                            <div class="card-preset-item" onclick="selectCardPreset('https://raw.githubusercontent.com/RoyaleAPI/cr-api-assets/master/cards/wizard.png', '🧙 WIZARD', 'الساحر')">
+                                                <img class="card-preset-thumb" src="https://raw.githubusercontent.com/RoyaleAPI/cr-api-assets/master/cards/wizard.png" onerror="this.src='/images/rose.png'">
+                                                <span class="card-preset-name">🧙 الساحر</span>
+                                            </div>
+                                            <div class="card-preset-item" onclick="selectCardPreset('https://raw.githubusercontent.com/RoyaleAPI/cr-api-assets/master/cards/mega-knight.png', '🛡️ KNIGHT', 'الفارس')">
+                                                <img class="card-preset-thumb" src="https://raw.githubusercontent.com/RoyaleAPI/cr-api-assets/master/cards/mega-knight.png" onerror="this.src='/images/rose.png'">
+                                                <span class="card-preset-name">🛡️ الفارس</span>
+                                            </div>
+                                            <div class="card-preset-item" onclick="selectCardPreset('/images/1791198066523-1d067d13988e8754ed6adbebd89b9ee8.png~tplv-obj.webp', '💎 VIP', 'توب داعم')">
+                                                <img class="card-preset-thumb" src="/images/1791198066523-1d067d13988e8754ed6adbebd89b9ee8.png~tplv-obj.webp" onerror="this.src='/images/rose.png'">
+                                                <span class="card-preset-name">💎 فوز VIP</span>
+                                            </div>
+                                            <div class="card-preset-item" onclick="selectCardPreset('/images/1791197852391-e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp', '🌟 SHIELD', 'درع أسطوري')">
+                                                <img class="card-preset-thumb" src="/images/1791197852391-e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp" onerror="this.src='/images/rose.png'">
+                                                <span class="card-preset-name">🌟 درع الحماية</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group mt-3">
+                                        <label>🔗 أو رابط بطاقة/صورة مخصص (Custom Card URL):</label>
+                                        <div class="custom-card-url-box">
+                                            <img id="customCardThumb" class="custom-card-preview-thumb" src="https://raw.githubusercontent.com/RoyaleAPI/cr-api-assets/master/cards/king.png" onerror="this.src='/images/rose.png'">
+                                            <input type="text" id="cardImageUrlInput" class="form-input" style="flex:1;" placeholder="الصق رابط أي صورة أو بطاقة تريدها..." oninput="onCardUrlInput(this.value)">
+                                        </div>
+                                    </div>
+
+                                    <div class="slider-group mt-3">
+                                        <div class="slider-header">
+                                            <label>📏 عرض حجم البطاقة (Card Width):</label>
+                                            <span class="slider-badge" id="cardWidthBadge">220 px</span>
+                                        </div>
+                                        <input type="range" id="cardWidthSlider" min="140" max="380" value="220" oninput="onCardWidthChange(this.value)">
+                                    </div>
+
+                                    <div class="form-group mt-3">
+                                        <label for="cardBadgeInput">👑 شارة أعلى البطاقة (اختياري):</label>
+                                        <input type="text" id="cardBadgeInput" class="form-input" value="👑 ROYALE" placeholder="مثلاً: 👑 ROYALE أو 💎 VIP أو اتركه فارغاً" oninput="onCardBadgeChange(this.value)">
+                                    </div>
+
+                                    <div class="form-group mt-3">
+                                        <label for="cardTitleInput">✍️ عنوان أسفل البطاقة (اختياري):</label>
+                                        <input type="text" id="cardTitleInput" class="form-input" value="الملك" placeholder="مثلاً: الملك أو بطاقة الدعم" oninput="onCardTitleChange(this.value)">
+                                    </div>
                                 </div>
 
                                 <!-- Neon Glow Option (خيار خط نيون ولا لا) -->
@@ -890,9 +989,15 @@
                                         <div class="score-number-display" id="sbScoreADisplay">0</div>
                                         <div class="score-buttons-row">
                                             <button class="btn-score red" onclick="adjustSbScore('a', 1)">+1</button>
-                                            <button class="btn-score red" onclick="adjustSbScore('a', 2)">+2</button>
                                             <button class="btn-score red" onclick="adjustSbScore('a', 5)">+5</button>
+                                            <button class="btn-score red" onclick="adjustSbScore('a', 10)">+10</button>
+                                            <button class="btn-score red" onclick="adjustSbScore('a', 100)">+100</button>
+                                            <button class="btn-score red" onclick="adjustSbScore('a', 1000)">+1k</button>
                                             <button class="btn-score minus" onclick="adjustSbScore('a', -1)">-1</button>
+                                        </div>
+                                        <div class="score-direct-box mt-2">
+                                            <input type="number" id="sbScoreACustom" class="score-direct-input" placeholder="نتيجة مباشرة (مثال: 100000)" min="0">
+                                            <button class="btn-set-score" onclick="setSbDirectScore('a')">تطبيق</button>
                                         </div>
                                     </div>
 
@@ -905,9 +1010,15 @@
                                         <div class="score-number-display" id="sbScoreBDisplay">0</div>
                                         <div class="score-buttons-row">
                                             <button class="btn-score green" onclick="adjustSbScore('b', 1)">+1</button>
-                                            <button class="btn-score green" onclick="adjustSbScore('b', 2)">+2</button>
                                             <button class="btn-score green" onclick="adjustSbScore('b', 5)">+5</button>
+                                            <button class="btn-score green" onclick="adjustSbScore('b', 10)">+10</button>
+                                            <button class="btn-score green" onclick="adjustSbScore('b', 100)">+100</button>
+                                            <button class="btn-score green" onclick="adjustSbScore('b', 1000)">+1k</button>
                                             <button class="btn-score minus" onclick="adjustSbScore('b', -1)">-1</button>
+                                        </div>
+                                        <div class="score-direct-box mt-2">
+                                            <input type="number" id="sbScoreBCustom" class="score-direct-input" placeholder="نتيجة مباشرة (مثال: 100000)" min="0">
+                                            <button class="btn-set-score" onclick="setSbDirectScore('b')">تطبيق</button>
                                         </div>
                                     </div>
 

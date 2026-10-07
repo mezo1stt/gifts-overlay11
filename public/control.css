@@ -314,11 +314,12 @@ body.app-body {
 .main-wrapper {
     flex: 1;
     min-width: 0;
-    width: 0;
+    width: auto;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
     box-sizing: border-box;
+    overflow-x: hidden;
 }
 
 /* Top Navbar */
@@ -1223,6 +1224,73 @@ input[type="range"] {
     box-shadow: 0 0 15px rgba(255, 60, 0, 0.3);
 }
 
+/* Card Mode Presets & Edge Docking */
+.card-presets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
+    gap: 10px;
+}
+
+.card-preset-item {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    padding: 8px 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.22s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    text-align: center;
+}
+
+.card-preset-item:hover {
+    border-color: var(--primary-red);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 6px 18px rgba(255, 42, 74, 0.35);
+}
+
+.card-preset-item.active {
+    border-color: #ffd700;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.18), rgba(255, 42, 74, 0.18));
+    box-shadow: 0 0 16px rgba(255, 215, 0, 0.5);
+}
+
+.card-preset-thumb {
+    width: 60px;
+    height: 75px;
+    object-fit: contain;
+    border-radius: 8px;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.7));
+}
+
+.card-preset-name {
+    font-size: 11px;
+    font-weight: 800;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.custom-card-url-box {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.custom-card-preview-thumb {
+    width: 48px;
+    height: 60px;
+    border-radius: 8px;
+    object-fit: contain;
+    background: rgba(0,0,0,0.6);
+    border: 1px solid rgba(255,255,255,0.2);
+    flex-shrink: 0;
+}
+
 .fire-simulator-container {
     height: 280px;
     border-radius: 14px;
@@ -1439,10 +1507,52 @@ input[type="range"] {
 
 .score-number-display {
     font-family: 'Changa', 'Cairo', sans-serif;
-    font-size: 56px;
+    font-size: clamp(28px, 4.5vw, 54px);
     font-weight: 900;
-    line-height: 1;
+    line-height: 1.1;
     margin: 8px 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.score-direct-box {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    margin-top: 6px;
+}
+
+.score-direct-input {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    color: #ffd700;
+    font-size: 14px;
+    font-weight: 800;
+    text-align: center;
+    padding: 6px;
+    font-family: 'Changa', sans-serif;
+}
+
+.btn-set-score {
+    background: rgba(255, 215, 0, 0.2);
+    border: 1px solid #ffd700;
+    color: #ffd700;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 900;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-set-score:hover {
+    background: #ffd700;
+    color: #000;
 }
 
 .team-a-box .score-number-display { color: #ff2a4a; text-shadow: 0 0 15px rgba(255, 42, 74, 0.8); }

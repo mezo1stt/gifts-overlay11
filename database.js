@@ -220,13 +220,19 @@ function updateScoreboard(boardId, updates) {
     return sb;
 }
 
-function adjustScore(boardId, team, delta) {
+function adjustScore(boardId, team, delta, directScore) {
     const sb = getScoreboard(boardId);
-    const num = parseInt(delta) || 0;
-    if (team === 'a') {
-        sb.team_a_score = Math.max(0, (sb.team_a_score || 0) + num);
-    } else if (team === 'b') {
-        sb.team_b_score = Math.max(0, (sb.team_b_score || 0) + num);
+    if (directScore !== undefined && directScore !== null) {
+        const val = Math.max(0, parseInt(directScore) || 0);
+        if (team === 'a') sb.team_a_score = val;
+        else if (team === 'b') sb.team_b_score = val;
+    } else {
+        const num = parseInt(delta) || 0;
+        if (team === 'a') {
+            sb.team_a_score = Math.max(0, (sb.team_a_score || 0) + num);
+        } else if (team === 'b') {
+            sb.team_b_score = Math.max(0, (sb.team_b_score || 0) + num);
+        }
     }
     sb.updated_at = Date.now();
     saveScoreboards();

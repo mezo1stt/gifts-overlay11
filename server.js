@@ -389,8 +389,8 @@ app.post('/api/scoreboard/:id/update', (req, res) => {
 });
 
 app.post('/api/scoreboard/:id/score', (req, res) => {
-    const { team, delta } = req.body;
-    const board = db.adjustScore(req.params.id, team, delta);
+    const { team, delta, score } = req.body;
+    const board = db.adjustScore(req.params.id, team, delta, score);
     io.emit('scoreboard_update', board);
     res.json({ success: true, board });
 });
@@ -658,7 +658,13 @@ function getDefaultFireSettings() {
         position_v: 'center',            // 'top', 'center', 'bottom'
         position_h: 'center',            // 'right', 'center', 'left'
         offset_y: 0,
-        scale: 100
+        scale: 100,
+        display_type: 'text',            // 'text', 'image'
+        card_image: 'https://raw.githubusercontent.com/RoyaleAPI/cr-api-assets/master/cards/king.png',
+        card_position: 'edge-right',     // 'edge-right', 'edge-left', 'center'
+        card_width: 220,
+        card_badge: '👑 ROYALE',
+        card_title: 'الملك'
     };
 }
 
