@@ -51,6 +51,11 @@
         "id": 1791198066525,
         "name": "فوز",
         "image": "1791198066523-1d067d13988e8754ed6adbebd89b9ee8.png~tplv-obj.webp"
+      },
+      {
+        "id": 1791319329456,
+        "name": "مكوك 🛸",
+        "image": "/images/donut.png"
       }
     ],
     "verticalAlign": "top",
@@ -66,30 +71,33 @@
       "text": "رابط الدعم والمتجر في البايو",
       "color": "#ffffff",
       "shine_color": "#ff0000",
-      "font_size": 64,
+      "font_size": 52,
       "shine_speed": 4,
       "font_family": "Cairo",
       "widget_type": "both",
       "direction": "right-left",
       "intro_duration": 2.5,
-      "hold_duration": 3,
+      "hold_duration": 13,
       "outro_duration": 2.5,
       "shadow_strength": 40,
-      "neon_enabled": 1,
-      "neon_strength": 150,
-      "intro_style": "burn",
-      "outro_style": "fade",
+      "neon_enabled": true,
+      "neon_strength": 20,
+      "intro_style": "sky_drop",
+      "outro_style": "slide",
       "flame_particles": true,
       "sound_enabled": false,
       "letter_spacing": 2,
-      "animation_style": "blaze_flame",
+      "animation_style": "liquid_blood",
+      "flame_height": 115,
+      "flame_density": 69,
       "display_mode": "continuous",
-      "banner_style": "glass",
-      "loop_interval": 8,
+      "banner_style": "cyber_neon",
+      "loop_interval": 15,
       "position_v": "center",
       "position_h": "center",
       "offset_y": 0,
-      "scale": 100
+      "scale": 100,
+      "fullscreen_fire": false
     },
     "supportLink": {
       "mode": "text",
@@ -105,6 +113,16 @@
       "sparks": true,
       "glowIntensity": 120,
       "subtitle": ""
+    },
+    "textStaticMode": true,
+    "cameraSettings": {
+      "style": "titanium_prism",
+      "ratio": "16-9",
+      "tag": "",
+      "tagPos": "none",
+      "glow": 33,
+      "radius": 27,
+      "thickness": 5
     }
   },
   "board_test": {
@@ -144,26 +162,276 @@
       "text": "رابط الدعم بالبايو 🔥",
       "color": "#ff1e00",
       "shine_color": "#ffd700",
-      "font_size": 64,
+      "font_size": 68,
       "font_family": "Cairo",
       "letter_spacing": 2,
       "animation_style": "energy_slash",
-      "display_mode": "continuous",
-      "banner_style": "transparent",
+      "display_mode": "cycle",
+      "banner_style": "glass",
       "intro_style": "burst",
       "outro_style": "burn",
       "intro_duration": 2.5,
-      "hold_duration": 4,
+      "hold_duration": 5,
       "outro_duration": 2.5,
-      "loop_interval": 8,
-      "neon_enabled": 1,
-      "neon_strength": 100,
+      "loop_interval": 7,
+      "neon_enabled": true,
+      "neon_strength": 95,
       "flame_particles": true,
       "sound_enabled": true,
       "position_v": "center",
       "position_h": "center",
       "offset_y": 0,
       "scale": 100
+    }
+  },
+  "default": {
+    "color": "#a855f7",
+    "verticalAlign": "center",
+    "offsetY": 0,
+    "horizontalAlign": "right",
+    "offsetX": 30,
+    "scale": 100,
+    "fontSize": 22,
+    "glowIntensity": 15,
+    "animationType": "slide",
+    "animationDuration": 7,
+    "textStaticMode": true,
+    "gifts": [
+      {
+        "id": 1,
+        "name": "تيربو",
+        "image": "rose.png"
+      },
+      {
+        "id": 2,
+        "name": "مكوك فضائي",
+        "image": "1791197817001-eb77ead5c3abb6da6034d3cf6cfeb438~tplv-obj.webp"
+      },
+      {
+        "id": 3,
+        "name": "حمايه",
+        "image": "1791197852391-e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp"
+      },
+      {
+        "id": 4,
+        "name": "صاروخ",
+        "image": "perfume.png"
+      },
+      {
+        "id": 5,
+        "name": "بوابه",
+        "image": "donut.png"
+      },
+      {
+        "id": 6,
+        "name": "نيزك",
+        "image": "1791197748042-81cb495abfe066981b9c135cfff21c7a.png~tplv-obj.webp"
+      },
+      {
+        "id": 7,
+        "name": "تبطئ الاعبين",
+        "image": "1791197915043-374dfe46d5b09ce1db19be06202d34f5.png~tplv-obj.webp"
+      },
+      {
+        "id": 8,
+        "name": "اسرع لاعب",
+        "image": "1791198042522-9f8bd92363c400c284179f6719b6ba9c~tplv-obj.webp"
+      },
+      {
+        "id": 9,
+        "name": "نقل اسطوري",
+        "image": "1791198055544-79a02148079526539f7599150da9fd28.png~tplv-obj.webp"
+      },
+      {
+        "id": 10,
+        "name": "فوز",
+        "image": "1791198066523-1d067d13988e8754ed6adbebd89b9ee8.png~tplv-obj.webp"
+      },
+      {
+        "id": 11,
+        "name": "قلب",
+        "image": "heart.png"
+      }
+    ],
+    "teamGifts": {
+      "team1": {
+        "title": "المساعدين",
+        "color": "#22ff88",
+        "icon": "💚",
+        "imageOnlyAnimation": true,
+        "gifts": [
+          {
+            "id": 101,
+            "name": "تيربو",
+            "image": "rose.png"
+          },
+          {
+            "id": 102,
+            "name": "حمايه",
+            "image": "1791197852391-e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp"
+          },
+          {
+            "id": 103,
+            "name": "بوابه",
+            "image": "donut.png"
+          },
+          {
+            "id": 104,
+            "name": "اسرع لاعب",
+            "image": "1791198042522-9f8bd92363c400c284179f6719b6ba9c~tplv-obj.webp"
+          }
+        ]
+      },
+      "team2": {
+        "title": "المخربين",
+        "color": "#ff2a4a",
+        "icon": "🔥",
+        "imageOnlyAnimation": true,
+        "gifts": [
+          {
+            "id": 201,
+            "name": "صاروخ",
+            "image": "perfume.png"
+          },
+          {
+            "id": 202,
+            "name": "نيزك",
+            "image": "1791197748042-81cb495abfe066981b9c135cfff21c7a.png~tplv-obj.webp"
+          },
+          {
+            "id": 203,
+            "name": "تبطئ الاعبين",
+            "image": "1791197915043-374dfe46d5b09ce1db19be06202d34f5.png~tplv-obj.webp"
+          },
+          {
+            "id": 204,
+            "name": "نقل اسطوري",
+            "image": "1791198055544-79a02148079526539f7599150da9fd28.png~tplv-obj.webp"
+          }
+        ]
+      },
+      "teamGifts": {
+        "team1": {
+          "title": "المساعدين الخارقين",
+          "color": "#00ffcc",
+          "gifts": [
+            {
+              "id": 101,
+              "name": "تيربو",
+              "image": "rose.png"
+            }
+          ]
+        },
+        "team2": {
+          "title": "المخربين الأشرار",
+          "color": "#ff0033",
+          "gifts": [
+            {
+              "id": 201,
+              "name": "صاروخ",
+              "image": "perfume.png"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "test_uid": {
+    "color": "#a855f7",
+    "verticalAlign": "center",
+    "offsetY": 0,
+    "horizontalAlign": "right",
+    "offsetX": 30,
+    "scale": 100,
+    "fontSize": 22,
+    "glowIntensity": 15,
+    "animationType": "slide",
+    "animationDuration": 7,
+    "textStaticMode": false,
+    "gifts": [
+      {
+        "id": 1,
+        "name": "تيربو",
+        "image": "rose.png"
+      },
+      {
+        "id": 2,
+        "name": "مكوك فضائي",
+        "image": "1791197817001-eb77ead5c3abb6da6034d3cf6cfeb438~tplv-obj.webp"
+      },
+      {
+        "id": 3,
+        "name": "حمايه",
+        "image": "1791197852391-e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp"
+      },
+      {
+        "id": 4,
+        "name": "صاروخ",
+        "image": "perfume.png"
+      },
+      {
+        "id": 5,
+        "name": "بوابه",
+        "image": "donut.png"
+      },
+      {
+        "id": 6,
+        "name": "نيزك",
+        "image": "1791197748042-81cb495abfe066981b9c135cfff21c7a.png~tplv-obj.webp"
+      },
+      {
+        "id": 7,
+        "name": "تبطئ الاعبين",
+        "image": "1791197915043-374dfe46d5b09ce1db19be06202d34f5.png~tplv-obj.webp"
+      },
+      {
+        "id": 8,
+        "name": "اسرع لاعب",
+        "image": "1791198042522-9f8bd92363c400c284179f6719b6ba9c~tplv-obj.webp"
+      },
+      {
+        "id": 9,
+        "name": "نقل اسطوري",
+        "image": "1791198055544-79a02148079526539f7599150da9fd28.png~tplv-obj.webp"
+      },
+      {
+        "id": 10,
+        "name": "فوز",
+        "image": "1791198066523-1d067d13988e8754ed6adbebd89b9ee8.png~tplv-obj.webp"
+      },
+      {
+        "id": 11,
+        "name": "قلب",
+        "image": "heart.png"
+      }
+    ],
+    "teamGifts": {
+      "team1": {
+        "title": "فريق الفرسان",
+        "color": "#00ff88",
+        "icon": "⚔️",
+        "imageOnlyAnimation": true,
+        "gifts": [
+          {
+            "id": 101,
+            "name": "تيربو",
+            "image": "rose.png"
+          }
+        ]
+      },
+      "team2": {
+        "title": "فريق الأشباح",
+        "color": "#ff2255",
+        "icon": "👻",
+        "imageOnlyAnimation": true,
+        "gifts": [
+          {
+            "id": 201,
+            "name": "صاروخ",
+            "image": "perfume.png"
+          }
+        ]
+      }
     }
   }
 }

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌪️ تجربة هبوط الدخان من السماء (Appear From Sky Demo)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Changa:wght@800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #0b0206;
+            background-image: 
+                radial-gradient(circle at 50% 15%, rgba(255, 23, 68, 0.25) 0%, transparent 65%),
+                linear-gradient(180deg, #110208 0%, #060104 100%);
+            color: #ffffff;
+            font-family: 'Cairo', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 16px;
+        }
+
+        .header {
+            text-align: center;
+            max-width: 820px;
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            font-size: 30px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #ffffff 0%, #ff8da1 40%, #ff1744 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+
+        .header p {
+            color: #94a3b8;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .stage-card {
+            width: 100%;
+            max-width: 960px;
+            background: rgba(18, 4, 10, 0.85);
+            border: 1.5px solid rgba(255, 23, 68, 0.35);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85);
+            margin-bottom: 25px;
+        }
+
+        /* Simulator Stage Viewport */
+        .stage-viewport {
+            position: relative;
+            width: 100%;
+            height: 480px;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: #0f1016;
+            background-image: 
+                linear-gradient(45deg, #090a10 25%, transparent 25%), 
+                linear-gradient(-45deg, #090a10 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #090a10 75%), 
+                linear-gradient(-45deg, transparent 75%, #090a10 75%);
+            background-size: 24px 24px;
+            background-position: 0 0, 0 12px, 12px -12px, -12px 0px;
+        }
+
+        .stage-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: transparent;
+        }
+
+        /* Controls Panel */
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-top: 18px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .ctrl-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .ctrl-group label {
+            font-size: 13px;
+            font-weight: 800;
+            color: #cbd5e1;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn-opt {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #cbd5e1;
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-opt:hover, .btn-opt.active {
+            background: linear-gradient(135deg, #ff1744, #b70024);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 0 15px rgba(255, 23, 68, 0.5);
+        }
+
+        .input-field {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 9px 14px;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 13px;
+        }
+
+        .action-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 18px;
+            flex-wrap: wrap;
+        }
+
+        .btn-action-primary {
+            flex: 1;
+            background: linear-gradient(135deg, #ff1744, #ff5252);
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 900;
+            font-size: 15px;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(255, 23, 68, 0.5);
+            transition: transform 0.2s;
+        }
+
+        .btn-action-primary:hover {
+            transform: scale(1.02);
+        }
+
+        .btn-action-obs {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>🌪️ تجربة هبوط الدخان من السماء (Appear From Sky)</h1>
+        <p>تم تحويل فيديو FootageCrate الأصلي لـ WebM شفاف 100%، وتم تصميمه ليعمل في أي ركن في الشاشة أو مع شريط النص الناري!</p>
+    </div>
+
+    <div class="stage-card">
+        
+        <!-- Live Preview Stage with Checkerboard Background -->
+        <div class="stage-viewport">
+            <iframe id="previewIframe" src="/corner-overlay.html?pos=bottom-right&tint=dark" class="stage-iframe"></iframe>
+        </div>
+
+        <div class="controls-grid">
+            
+            <!-- Corner Position -->
+            <div class="ctrl-group">
+                <label>📍 موضع الركن في الشاشة:</label>
+                <div class="btn-row">
+                    <button class="btn-opt active" onclick="setPos('bottom-right', this)">↘️ أسفل اليمين</button>
+                    <button class="btn-opt" onclick="setPos('bottom-left', this)">↙️ أسفل اليسار</button>
+                    <button class="btn-opt" onclick="setPos('top-right', this)">↗️ أعلى اليمين</button>
+                    <button class="btn-opt" onclick="setPos('top-left', this)">↖️ أعلى اليسار</button>
+                </div>
+            </div>
+
+            <!-- Smoke Tint -->
+            <div class="ctrl-group">
+                <label>🎨 هالة ولون الدخان:</label>
+                <div class="btn-row">
+                    <button class="btn-opt active" onclick="setTint('dark', this)">🌑 أصلي داكن</button>
+                    <button class="btn-opt" onclick="setTint('crimson', this)">🔥 ناري أحمر</button>
+                    <button class="btn-opt" onclick="setTint('gold', this)">👑 ذهبي ملوكي</button>
+                    <button class="btn-opt" onclick="setTint('neon', this)">⚡ أزرق نيون</button>
+                </div>
+            </div>
+
+            <!-- Supporter Name -->
+            <div class="ctrl-group">
+                <label>👤 اسم الداعم / النص:</label>
+                <input type="text" id="demoName" class="input-field" value="MEZO TIK" oninput="updateValues()">
+            </div>
+
+            <!-- Subtitle -->
+            <div class="ctrl-group">
+                <label>💎 التفاصيل / العملات:</label>
+                <input type="text" id="demoSub" class="input-field" value="أرسل 1,000 عملة 🔥" oninput="updateValues()">
+            </div>
+
+        </div>
+
+        <div class="action-row">
+            <button class="btn-action-primary" onclick="triggerTest()">🌪️ تشغيل هبوط الدخان الآن (Test Trigger)</button>
+            <button class="btn-action-obs" onclick="copyObsLink()">📋 نسخ رابط OBS للركن</button>
+            <a href="/control.html" class="btn-action-obs">🎛️ لوحة التحكم الرئيسية</a>
+        </div>
+
+    </div>
+
+    <script>
+        let currentPos = 'bottom-right';
+        let currentTint = 'dark';
+
+        function updateIframe() {
+            const name = encodeURIComponent(document.getElementById('demoName').value.trim());
+            const sub = encodeURIComponent(document.getElementById('demoSub').value.trim());
+            const iframe = document.getElementById('previewIframe');
+            iframe.src = `/corner-overlay.html?pos=${currentPos}&tint=${currentTint}&name=${name}&sub=${sub}&t=${Date.now()}`;
+        }
+
+        function setPos(pos, btn) {
+            currentPos = pos;
+            btn.parentElement.querySelectorAll('.btn-opt').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            updateIframe();
+        }
+
+        function setTint(tint, btn) {
+            currentTint = tint;
+            btn.parentElement.querySelectorAll('.btn-opt').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            updateIframe();
+        }
+
+        let debounce;
+        function updateValues() {
+            clearTimeout(debounce);
+            debounce = setTimeout(updateIframe, 400);
+        }
+
+        function triggerTest() {
+            const iframe = document.getElementById('previewIframe');
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.postMessage({
+                    type: 'corner_trigger',
+                    config: {
+                        position: currentPos,
+                        tint: currentTint,
+                        name: document.getElementById('demoName').value.trim(),
+                        subtitle: document.getElementById('demoSub').value.trim()
+                    }
+                }, '*');
+            }
+        }
+
+        function copyObsLink() {
+            const origin = window.location.origin;
+            const url = `${origin}/corner-overlay.html?pos=${currentPos}&tint=${currentTint}`;
+            navigator.clipboard.writeText(url);
+            alert('📋 تم نسخ رابط أوفرلاي الركن لـ OBS:\n' + url);
+        }
+    </script>
+</body>
+</html>

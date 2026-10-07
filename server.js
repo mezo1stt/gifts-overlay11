@@ -7,6 +7,7 @@ const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
+const db = require('./database');
 
 const app = express();
 const server = http.createServer(app);
@@ -214,6 +215,51 @@ async function saveUploadedFile(file) {
     return filename;
 }
 
+// Permanent default gifts from New folder (6)
+const PERMANENT_DEFAULT_GIFTS = [
+    { id: 1, name: "تيربو", image: "rose.png" },
+    { id: 2, name: "مكوك فضائي", image: "1791197817001-eb77ead5c3abb6da6034d3cf6cfeb438~tplv-obj.webp" },
+    { id: 3, name: "حمايه", image: "1791197852391-e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp" },
+    { id: 4, name: "صاروخ", image: "perfume.png" },
+    { id: 5, name: "بوابه", image: "donut.png" },
+    { id: 6, name: "نيزك", image: "1791197748042-81cb495abfe066981b9c135cfff21c7a.png~tplv-obj.webp" },
+    { id: 7, name: "تبطئ الاعبين", image: "1791197915043-374dfe46d5b09ce1db19be06202d34f5.png~tplv-obj.webp" },
+    { id: 8, name: "اسرع لاعب", image: "1791198042522-9f8bd92363c400c284179f6719b6ba9c~tplv-obj.webp" },
+    { id: 9, name: "نقل اسطوري", image: "1791198055544-79a02148079526539f7599150da9fd28.png~tplv-obj.webp" },
+    { id: 10, name: "فوز", image: "1791198066523-1d067d13988e8754ed6adbebd89b9ee8.png~tplv-obj.webp" },
+    { id: 11, name: "قلب", image: "heart.png" }
+];
+
+// Default Team Gifts Template (Strictly no duplicate images between Team 1 and Team 2)
+function getDefaultTeamGifts() {
+    return {
+        team1: {
+            title: 'المساعدين',
+            color: '#22ff88',
+            icon: '💚',
+            imageOnlyAnimation: true,
+            gifts: [
+                { id: 101, name: 'تيربو', image: 'rose.png' },
+                { id: 102, name: 'حمايه', image: '1791197852391-e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp' },
+                { id: 103, name: 'بوابه', image: 'donut.png' },
+                { id: 104, name: 'اسرع لاعب', image: '1791198042522-9f8bd92363c400c284179f6719b6ba9c~tplv-obj.webp' }
+            ]
+        },
+        team2: {
+            title: 'المخربين',
+            color: '#ff2a4a',
+            icon: '🔥',
+            imageOnlyAnimation: true,
+            gifts: [
+                { id: 201, name: 'صاروخ', image: 'perfume.png' },
+                { id: 202, name: 'نيزك', image: '1791197748042-81cb495abfe066981b9c135cfff21c7a.png~tplv-obj.webp' },
+                { id: 203, name: 'تبطئ الاعبين', image: '1791197915043-374dfe46d5b09ce1db19be06202d34f5.png~tplv-obj.webp' },
+                { id: 204, name: 'نقل اسطوري', image: '1791198055544-79a02148079526539f7599150da9fd28.png~tplv-obj.webp' }
+            ]
+        }
+    };
+}
+
 // Default board template
 function getDefaultBoard(uid = 'default') {
     return {
@@ -227,7 +273,9 @@ function getDefaultBoard(uid = 'default') {
         glowIntensity: 15,       // px blur
         animationType: 'slide',  // 'slide', 'fade', 'bounce', 'pulse', 'none'
         animationDuration: 7,    // seconds
-        gifts: []
+        textStaticMode: false,   // Keeps text static while only images animate
+        gifts: [...PERMANENT_DEFAULT_GIFTS],
+        teamGifts: getDefaultTeamGifts()
     };
 }
 
@@ -275,6 +323,305 @@ app.get('/fire-text', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'fire-text.html'));
 });
 
+// Camera Overlay routes
+app.get('/camera-overlay.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'camera-overlay.html'));
+});
+app.get('/camera-overlay', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'camera-overlay.html'));
+});
+
+// Scoreboard Overlay routes
+app.get('/scoreboard-overlay.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'scoreboard-overlay.html'));
+});
+app.get('/scoreboard-overlay', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'scoreboard-overlay.html'));
+});
+
+// ================= AUTHENTICATION & USER DB ================= //
+app.post('/api/auth/register', (req, res) => {
+    try {
+        const { username, password, displayName } = req.body;
+        const result = db.registerUser(username, password, displayName);
+        res.json({ success: true, ...result });
+    } catch (e) {
+        res.status(400).json({ success: false, error: e.message });
+    }
+});
+
+app.post('/api/auth/login', (req, res) => {
+    try {
+        const { username, password } = req.body;
+        const result = db.loginUser(username, password);
+        res.json({ success: true, ...result });
+    } catch (e) {
+        res.status(400).json({ success: false, error: e.message });
+    }
+});
+
+app.post('/api/auth/logout', (req, res) => {
+    const token = req.headers.authorization?.replace('Bearer ', '') || req.body.token;
+    db.destroySession(token);
+    res.json({ success: true });
+});
+
+app.get('/api/auth/me', (req, res) => {
+    const token = req.headers.authorization?.replace('Bearer ', '') || req.query.token;
+    const user = db.getUserByToken(token);
+    if (!user) {
+        return res.status(401).json({ success: false, error: 'غير مسجل الدخول' });
+    }
+    res.json({ success: true, user });
+});
+
+// ================= SCOREBOARD ROUTES ================= //
+app.get('/api/scoreboard/:id', (req, res) => {
+    const board = db.getScoreboard(req.params.id);
+    res.json({ success: true, board });
+});
+
+app.post('/api/scoreboard/:id/update', (req, res) => {
+    const board = db.updateScoreboard(req.params.id, req.body);
+    io.emit('scoreboard_update', board);
+    res.json({ success: true, board });
+});
+
+app.post('/api/scoreboard/:id/score', (req, res) => {
+    const { team, delta } = req.body;
+    const board = db.adjustScore(req.params.id, team, delta);
+    io.emit('scoreboard_update', board);
+    res.json({ success: true, board });
+});
+
+app.post('/api/scoreboard/:id/reset', (req, res) => {
+    const board = db.resetScoreboard(req.params.id);
+    io.emit('scoreboard_update', board);
+    res.json({ success: true, board });
+});
+
+// ================= SCOREBOARD TRIGGER & WEBHOOK ROUTES ================= //
+// Compatibility with original C:\Users\mezo_1sttt\Desktop\scoreboard
+app.all('/trigger', (req, res) => {
+    try {
+        const params = { ...req.query, ...req.body };
+        const boardId = params.id || params.board_id || 'board_XXXX';
+        let { team, action, value } = params;
+
+        team = team || 'a';
+        action = action || 'add';
+        value = parseInt(value);
+        if (isNaN(value)) value = 1;
+        if (!['a', 'b'].includes(team)) team = 'a';
+
+        let delta = value;
+        if (action === 'subtract') delta = -value;
+
+        let updatedBoard;
+        if (action === 'set') {
+            const updates = team === 'a' ? { team_a_score: value } : { team_b_score: value };
+            updatedBoard = db.updateScoreboard(boardId, updates);
+        } else if (action === 'reset') {
+            updatedBoard = db.resetScoreboard(boardId);
+        } else {
+            updatedBoard = db.adjustScore(boardId, team, delta);
+        }
+
+        io.emit('scoreboard_update', updatedBoard);
+        console.log(`⚡ /trigger → ${action} ${value} to team ${team} (board: ${boardId})`);
+        res.send('OK');
+    } catch (err) {
+        console.error('Trigger error:', err);
+        res.send('OK');
+    }
+});
+
+app.all('/tiktok-trigger', (req, res) => {
+    try {
+        const params = { ...req.query, ...req.body };
+        const boardId = params.id || params.board_id || 'board_XXXX';
+        let team = params.team || 'a';
+        let value = parseInt(params.value);
+        if (isNaN(value)) value = 1;
+        if (!['a', 'b'].includes(team)) team = 'a';
+
+        const updatedBoard = db.adjustScore(boardId, team, value);
+        io.emit('scoreboard_update', updatedBoard);
+        console.log(`⚡ /tiktok-trigger → +${value} to team ${team} (board: ${boardId})`);
+        res.send('OK');
+    } catch (err) {
+        console.error('TikTok trigger error:', err);
+        res.send('OK');
+    }
+});
+
+// TikFinity Webhook
+async function handleTikFinityWebhook(event, boardId = 'board_XXXX') {
+    const giftName = (event.giftName || '').toLowerCase();
+    const giftId = event.giftId || '';
+    const coins = parseInt(event.coins || 0);
+    const repeatCount = parseInt(event.repeatCount || 1);
+    const likeCount = parseInt(event.likeCount || 0);
+    const subMonth = parseInt(event.subMonth || 0);
+    const username = event.username || '';
+    const nickname = event.nickname || '';
+
+    let team = 'b';
+    let points = 0;
+
+    if (giftName && giftId) {
+        console.log(`🎁 TikFinity Gift: ${giftName} x${repeatCount} from ${nickname}`);
+        if (giftName.includes('rose')) {
+            team = 'a';
+            points = 1 * repeatCount;
+        } else if (giftName.includes('galaxy')) {
+            team = 'b';
+            points = 50 * repeatCount;
+        } else if (giftName.includes('tiktok')) {
+            team = 'b';
+            points = 100 * repeatCount;
+        } else if (giftName.includes('lion')) {
+            team = 'a';
+            points = 30 * repeatCount;
+        } else {
+            team = 'b';
+            points = (coins || 1) * repeatCount;
+        }
+    } else if (likeCount > 0) {
+        points = Math.floor(likeCount / 10);
+        team = 'b';
+    } else if (subMonth > 0) {
+        points = 50;
+        team = 'b';
+    } else if (username) {
+        points = 5;
+        team = 'b';
+    }
+
+    if (points > 0) {
+        const updatedBoard = db.adjustScore(boardId, team, points);
+        io.emit('scoreboard_update', updatedBoard);
+        console.log(`✅ Webhook: +${points} to team ${team} (board: ${boardId})`);
+    }
+}
+
+app.all(['/tiktok-webhook', '/webhook/tikfinity'], async (req, res) => {
+    try {
+        const payload = req.method === 'POST' ? req.body : req.query;
+        const boardId = (req.query && (req.query.id || req.query.board_id)) || 'board_XXXX';
+        res.status(200).send('OK');
+        await handleTikFinityWebhook(payload || {}, boardId);
+    } catch (err) {
+        console.error('Webhook error:', err);
+        if (!res.headersSent) res.send('OK');
+    }
+});
+
+// ================= TIKTOK EGYPT GIFTS CATALOG (STREAMTOEARN.IO) ================= //
+app.get('/api/tiktok-gifts', (req, res) => {
+    try {
+        const filePath = path.join(__dirname, 'public', 'data', 'tiktok_gifts_eg.json');
+        if (fs.existsSync(filePath)) {
+            const raw = fs.readFileSync(filePath, 'utf8');
+            res.setHeader('Content-Type', 'application/json; charset=utf-8');
+            res.send(raw);
+        } else {
+            res.json([]);
+        }
+    } catch (e) {
+        res.status(500).json({ error: 'Failed to load gifts library' });
+    }
+});
+
+// ================= CORNER OVERLAY (APPEAR FROM SKY) ROUTES ================= //
+app.get('/corner-overlay.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'corner-overlay.html'));
+});
+
+// ================= TEAM GIFTS (هدايا تيك توك 2) ROUTES ================= //
+app.get('/overlay-team.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'overlay-team.html'));
+});
+
+app.get('/api/team-gifts/:uid', (req, res) => {
+    const uid = req.params.uid;
+    const data = readData();
+    const board = data[uid] || getDefaultBoard(uid);
+    const teamGifts = board.teamGifts || getDefaultTeamGifts();
+    res.json({ success: true, teamGifts });
+});
+
+app.post('/api/team-gifts/:uid', (req, res) => {
+    const uid = req.params.uid;
+    const data = readData();
+    if (!data[uid]) data[uid] = getDefaultBoard(uid);
+
+    const payload = (req.body && req.body.teamGifts) ? req.body.teamGifts : req.body;
+    data[uid].teamGifts = {
+        ...(data[uid].teamGifts || getDefaultTeamGifts()),
+        ...payload
+    };
+
+    writeData(data);
+    io.emit('team_gifts_update', { uid, teamGifts: data[uid].teamGifts });
+    res.json({ success: true, teamGifts: data[uid].teamGifts });
+});
+
+// ================= CAMERA SETTINGS ROUTES ================= //
+function getDefaultCameraSettings() {
+    return {
+        style: 'volcano',
+        ratio: '16-9',
+        tag: '',
+        tagPos: 'none',
+        glow: 24,
+        radius: 18,
+        thickness: 4
+    };
+}
+
+app.get('/api/camera-settings/:uid', (req, res) => {
+    const uid = req.params.uid;
+    const data = readData();
+    const board = data[uid] || getDefaultBoard(uid);
+    const settings = {
+        ...getDefaultCameraSettings(),
+        ...(board.cameraSettings || {})
+    };
+    res.json({ success: true, settings });
+});
+
+app.post('/api/camera-settings/:uid', (req, res) => {
+    const uid = req.params.uid;
+    const data = readData();
+    if (!data[uid]) data[uid] = getDefaultBoard(uid);
+
+    data[uid].cameraSettings = {
+        ...(data[uid].cameraSettings || getDefaultCameraSettings()),
+        ...req.body
+    };
+
+    writeData(data);
+    io.emit('camera_settings_update', { uid, settings: data[uid].cameraSettings });
+    res.json({ success: true, settings: data[uid].cameraSettings });
+});
+
+// MEZO TIK Last Supporter proxy helper
+app.get('/api/last-supporter', async (req, res) => {
+    const username = req.query.username || 'mezo';
+    try {
+        const response = await fetch(
+            `https://tikalert-eg.com/last-supporter/widget?username=${username}`,
+            { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' } }
+        );
+        const html = await response.text();
+        res.set('Content-Type', 'text/html; charset=utf-8');
+        res.send(html);
+    } catch (err) {
+        res.status(500).send('Error loading widget');
+    }
+});
+
 // Device board UID helper
 app.get('/api/device-board', (req, res) => {
     const ip = req.ip || req.connection.remoteAddress || 'default';
@@ -291,7 +638,7 @@ function getDefaultFireSettings() {
         font_size: 64,
         font_family: 'Cairo',
         letter_spacing: 2,
-        animation_style: 'energy_slash', // 'energy_slash', 'volcano_magma', 'fire_burst', 'blaze_flame', 'laser_sweep', 'pulse_glow'
+        animation_style: 'realistic_flames',
         display_mode: 'continuous',      // 'continuous', 'cycle'
         banner_style: 'transparent',     // 'transparent', 'glass', 'magma'
         intro_style: 'burst',            // 'burst', 'volcano', 'slide', 'burn', 'fade'
@@ -302,6 +649,8 @@ function getDefaultFireSettings() {
         loop_interval: 8,
         neon_enabled: 1,
         neon_strength: 95,
+        flame_height: 120,
+        flame_density: 100,
         flame_particles: true,           // realistic rising sparks & flames
         sound_enabled: true,
         position_v: 'center',            // 'top', 'center', 'bottom'
@@ -515,12 +864,16 @@ app.get('/api/data/:uid', (req, res) => {
 });
 
 // Update Board Settings (Positions, Offsets, Color, Scale, etc.)
-app.put('/api/board/:uid/settings', (req, res) => {
+app.all(['/api/board/:uid/settings', '/api/board/:uid'], (req, res) => {
     const uid = req.params.uid;
-    const settings = req.body;
     const data = readData();
     if (!data[uid]) data[uid] = getDefaultBoard(uid);
 
+    if (req.method === 'GET') {
+        return res.json({ success: true, board: data[uid] });
+    }
+
+    const settings = req.body || {};
     data[uid] = {
         ...data[uid],
         ...settings,
@@ -741,6 +1094,13 @@ app.put('/api/gifts/:uid/reorder', (req, res) => {
     data[uid].gifts = reordered;
     writeData(data);
     res.json({ success: true, gifts: reordered });
+});
+
+// Socket.io Connection & Event Forwarding
+io.on('connection', (socket) => {
+    socket.on('corner_trigger', (data) => {
+        io.emit('corner_trigger', data);
+    });
 });
 
 server.listen(PORT, () => {

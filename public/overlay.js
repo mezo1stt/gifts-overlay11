@@ -80,6 +80,13 @@ async function loadData() {
             document.body.classList.add(`anim-${animType}`);
         }
 
+        // 4.1 Static Text Mode (الكلام ثابت والصور فقط متحركة)
+        if (boardData.textStaticMode) {
+            document.body.classList.add('static-text');
+        } else {
+            document.body.classList.remove('static-text');
+        }
+
         // 5. Gifts List
         const gifts = boardData.gifts || [];
 

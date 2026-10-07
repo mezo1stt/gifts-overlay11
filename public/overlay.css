@@ -121,3 +121,35 @@ body.anim-none .gift-item {
     50%      { transform: scale(1.06); opacity: 1; }
     85%      { opacity: 0.2; transform: scale(0.95); }
 }
+
+/* ================= STATIC TEXT MODE (الكلام ثابت والصور فقط متحركة) ================= */
+body.static-text .gift-item {
+    animation: none !important;
+}
+
+body.static-text .gift-item span {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+}
+
+body.static-text .gift-item img {
+    animation: showHide var(--anim-duration) infinite;
+    will-change: transform, opacity;
+}
+
+body.static-text.anim-fade .gift-item img {
+    animation-name: animFade;
+}
+
+body.static-text.anim-bounce .gift-item img {
+    animation-name: animBounce;
+}
+
+body.static-text.anim-pulse .gift-item img {
+    animation-name: animPulse;
+}
+
+body.static-text.anim-none .gift-item img {
+    animation: none !important;
+}

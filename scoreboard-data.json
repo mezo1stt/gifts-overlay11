@@ -1,0 +1,20 @@
+{
+  "default": {
+    "board_id": "default",
+    "title": "🏆 تحدي الأساطير 🏆",
+    "team_a_name": "المخربين",
+    "team_b_name": "المساعدين",
+    "team_a_score": 0,
+    "team_b_score": 0,
+    "updated_at": 1791318726382
+  },
+  "board_XXXX": {
+    "board_id": "board_XXXX",
+    "title": "🏆 تحدي الأساطير 🏆",
+    "team_a_name": "المخربين",
+    "team_b_name": "المساعدين",
+    "team_a_score": 0,
+    "team_b_score": 0,
+    "updated_at": 1791338976889
+  }
+}

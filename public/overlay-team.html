@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEZO TIK · أوفرلاي هدايا الفرق (Team Gifts)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Changa:wght@700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/overlay.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: transparent !important;
+            font-family: 'Cairo', sans-serif;
+            direction: rtl;
+            user-select: none;
+        }
+
+        .team-overlay-wrapper {
+            position: fixed;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 100;
+        }
+
+        /* Position variations */
+        .pos-top-right { top: 20px; right: 20px; align-items: flex-start; }
+        .pos-top-left { top: 20px; left: 20px; align-items: flex-end; }
+        .pos-bottom-right { bottom: 20px; right: 20px; align-items: flex-start; }
+        .pos-bottom-left { bottom: 20px; left: 20px; align-items: flex-end; }
+
+        /* Team Header Banner */
+        .team-header-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 22px;
+            border-radius: 30px;
+            background: rgba(12, 6, 10, 0.92);
+            border: 2px solid var(--team-color, #22ff88);
+            box-shadow: 
+                0 6px 25px rgba(0, 0, 0, 0.8),
+                0 0 20px var(--team-color-glow, rgba(34, 255, 136, 0.5));
+            backdrop-filter: blur(12px);
+            animation: teamHeaderPulse 2.5s ease-in-out infinite alternate;
+        }
+
+        .team-title-text {
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--team-color, #22ff88);
+            text-shadow: 0 0 14px var(--team-color-glow, rgba(34, 255, 136, 0.8));
+            letter-spacing: 0.5px;
+        }
+
+        .team-title-icon {
+            font-size: 20px;
+        }
+
+        @keyframes teamHeaderPulse {
+            0% { transform: scale(1); box-shadow: 0 6px 25px rgba(0, 0, 0, 0.8), 0 0 15px var(--team-color-glow); }
+            100% { transform: scale(1.03); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.9), 0 0 28px var(--team-color-glow); }
+        }
+
+        /* Gifts Column */
+        .team-gifts-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .team-gift-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(15, 6, 12, 0.92);
+            border: 1.5px solid var(--team-color, #22ff88);
+            border-radius: 16px;
+            padding: 7px 16px;
+            box-shadow: 
+                0 4px 18px rgba(0, 0, 0, 0.7),
+                0 0 14px var(--team-color-glow, rgba(34, 255, 136, 0.35));
+            backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+            width: fit-content;
+        }
+
+        .team-gift-img {
+            width: 44px;
+            height: 44px;
+            object-fit: contain;
+            border-radius: 10px;
+            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
+        }
+
+        /* Image-only animation mode */
+        .animate-img-only .team-gift-img {
+            animation: giftImgPulse 1.8s ease-in-out infinite alternate;
+        }
+
+        @keyframes giftImgPulse {
+            0% { transform: scale(0.95); filter: drop-shadow(0 0 6px var(--team-color)); }
+            100% { transform: scale(1.1) rotate(4deg); filter: drop-shadow(0 0 14px var(--team-color)); }
+        }
+
+        .team-gift-name {
+            font-size: 16px;
+            font-weight: 800;
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="team-overlay-wrapper pos-top-right" id="teamOverlayWrapper">
+        
+        <!-- Team Header Title with Custom Color -->
+        <div class="team-header-pill" id="teamHeaderPill">
+            <span class="team-title-icon" id="teamIcon">⚡</span>
+            <span class="team-title-text" id="teamTitleText">المساعدين</span>
+        </div>
+
+        <!-- Team Gifts List -->
+        <div class="team-gifts-container animate-img-only" id="teamGiftsContainer">
+            <!-- Dynamically populated via JS -->
+        </div>
+
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const teamKey = params.get('team') || '1'; // '1' or '2'
+        const uid = params.get('uid') || 'board_XXXX';
+        const pos = params.get('pos') || (teamKey === '2' ? 'top-left' : 'top-right');
+
+        const wrapper = document.getElementById('teamOverlayWrapper');
+        wrapper.className = `team-overlay-wrapper pos-${pos}`;
+
+        const headerPill = document.getElementById('teamHeaderPill');
+        const titleText = document.getElementById('teamTitleText');
+        const giftsContainer = document.getElementById('teamGiftsContainer');
+        const teamIcon = document.getElementById('teamIcon');
+
+        function applyTeamData(teamData) {
+            if (!teamData) return;
+
+            const title = teamData.title || (teamKey === '2' ? 'المخربين' : 'المساعدين');
+            const color = teamData.color || (teamKey === '2' ? '#ff2a4a' : '#22ff88');
+            const icon = teamData.icon || (teamKey === '2' ? '🔥' : '💚');
+            const gifts = teamData.gifts || [];
+            const imgOnly = teamData.imageOnlyAnimation !== false;
+
+            titleText.textContent = title;
+            teamIcon.textContent = icon;
+
+            document.documentElement.style.setProperty('--team-color', color);
+            document.documentElement.style.setProperty('--team-color-glow', color + '66');
+
+            if (imgOnly) {
+                giftsContainer.classList.add('animate-img-only');
+            } else {
+                giftsContainer.classList.remove('animate-img-only');
+            }
+
+            giftsContainer.innerHTML = '';
+            gifts.forEach(g => {
+                const card = document.createElement('div');
+                card.className = 'team-gift-card';
+                const imgSrc = g.image.startsWith('http') || g.image.startsWith('/') ? g.image : `/images/${g.image}`;
+
+                card.innerHTML = `
+                    <img class="team-gift-img" src="${imgSrc}" alt="${g.name}" onerror="this.src='/images/rose.png'">
+                    <span class="team-gift-name">${g.name}</span>
+                `;
+                giftsContainer.appendChild(card);
+            });
+        }
+
+        async function loadTeamData() {
+            try {
+                const res = await fetch(`/api/team-gifts/${uid}`);
+                const data = await res.json();
+                if (data.success && data.teamGifts) {
+                    const currentTeam = teamKey === '2' ? data.teamGifts.team2 : data.teamGifts.team1;
+                    applyTeamData(currentTeam);
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        loadTeamData();
+        setInterval(loadTeamData, 1000);
+
+        try {
+            const socket = io();
+            socket.on('team_gifts_update', (data) => {
+                if (data && data.uid === uid) {
+                    const currentTeam = teamKey === '2' ? data.teamGifts.team2 : data.teamGifts.team1;
+                    applyTeamData(currentTeam);
+                }
+            });
+        } catch (e) {}
+    </script>
+</body>
+</html>

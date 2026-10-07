@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEZO TIK · Camera Frame Overlay | إطار وبنر الكاميرا</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@800;900&family=Changa:wght@700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/camera.css">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body class="camera-overlay-body">
+
+    <!-- Container for the Cam Frame -->
+    <div class="cam-frame-stage" id="camStage">
+        <div class="cam-frame-box style-volcano ratio-16-9" id="camBox">
+            
+            <!-- Transparent Inside for Streamer Webcam -->
+            <div class="cam-transparent-viewport">
+                <!-- Inner glow / accents -->
+                <div class="cam-corner top-left"></div>
+                <div class="cam-corner top-right"></div>
+                <div class="cam-corner bottom-left"></div>
+                <div class="cam-corner bottom-right"></div>
+            </div>
+
+            <!-- Optional Streamer Tag Badge -->
+            <div class="cam-tag-badge pos-bottom" id="camTagBadge" style="display: none;">
+                <span class="cam-tag-dot"></span>
+                <span class="cam-tag-text" id="camTagText"></span>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Parse URL params
+        const params = new URLSearchParams(window.location.search);
+        let uid = params.get('uid') || 'board_XXXX';
+
+        let currentConfig = {
+            style: params.get('style') || 'volcano',
+            ratio: params.get('ratio') || '16-9',
+            tag: params.get('tag') !== null ? params.get('tag') : '',
+            tagPos: params.get('tagpos') || 'none',
+            glow: parseInt(params.get('glow') || '24'),
+            radius: parseInt(params.get('radius') || '18'),
+            thickness: parseInt(params.get('thickness') || '4')
+        };
+
+        const camBox = document.getElementById('camBox');
+        const camTagBadge = document.getElementById('camTagBadge');
+        const camTagText = document.getElementById('camTagText');
+
+        function applyConfig(cfg) {
+            if (!cfg) return;
+            currentConfig = { ...currentConfig, ...cfg };
+
+            // Apply style class
+            const style = currentConfig.style || 'volcano';
+            const ratio = currentConfig.ratio || '16-9';
+            camBox.className = `cam-frame-box style-${style} ratio-${ratio}`;
+
+            // Apply dimensions and glow
+            document.documentElement.style.setProperty('--cam-glow', (currentConfig.glow || 24) + 'px');
+            document.documentElement.style.setProperty('--cam-radius', (currentConfig.radius || 18) + 'px');
+            document.documentElement.style.setProperty('--cam-thickness', (currentConfig.thickness || 4) + 'px');
+
+            // Apply tag
+            const tag = currentConfig.tag || '';
+            const tagPos = currentConfig.tagPos || 'none';
+            if (!tag || tag === 'none' || tag === 'false' || tagPos === 'none') {
+                camTagBadge.style.display = 'none';
+            } else {
+                camTagBadge.style.display = 'inline-flex';
+                camTagText.textContent = tag;
+                camTagBadge.className = `cam-tag-badge pos-${tagPos}`;
+            }
+        }
+
+        // Initial apply from URL
+        applyConfig(currentConfig);
+
+        // Fetch settings from API
+        async function fetchCameraSettings() {
+            try {
+                const res = await fetch(`/api/camera-settings/${encodeURIComponent(uid)}?t=${Date.now()}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.success && data.settings) {
+                        applyConfig(data.settings);
+                    }
+                }
+            } catch (e) {}
+        }
+
+        fetchCameraSettings();
+        // Polling fallback every 3s
+        setInterval(fetchCameraSettings, 3000);
+
+        // Socket.IO real-time connection
+        try {
+            if (typeof io !== 'undefined') {
+                const socket = io();
+                socket.on('camera_settings_update', (data) => {
+                    if (!data) return;
+                    if (!data.uid || data.uid === uid || uid === 'board_XXXX') {
+                        applyConfig(data.settings);
+                    }
+                });
+            }
+        } catch (e) {}
+
+        // Listen for live update messages (for simulator in dashboard)
+        window.addEventListener('message', (e) => {
+            if (e.data && e.data.type === 'UPDATE_CAM_FRAME') {
+                applyConfig(e.data.config);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -6,6 +6,12 @@
     <title>🔥 شريط النص الناري | Fire Text Widget</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Tajawal:wght@800;900&family=Almarai:wght@800;900&family=Changa:wght@800;900&family=El+Messiri:wght@700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --fire-c: #ff1e00;
+            --shine-c: #ffd700;
+            --font-sz: 64px;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -43,70 +49,51 @@
             transition: transform 0.3s ease;
         }
 
-        /* Spark Particle Canvas */
+        /* Spark Embers Canvas */
         .spark-canvas {
             position: absolute;
             inset: 0;
             width: 100%;
             height: 100%;
             pointer-events: none;
-            z-index: 12;
+            z-index: 15;
         }
 
-        /* Expanding Shockwave Ring */
-        .fire-shockwave {
-            position: absolute;
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            border: 6px solid #ffd700;
-            box-shadow: 0 0 50px var(--fire-c, #ff1e00), inset 0 0 50px var(--shine-c, #ffd700);
-            opacity: 0;
-            pointer-events: none;
-            z-index: 9;
-        }
-
-        .fire-shockwave.active {
-            animation: shockwaveExpand 0.85s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
-        }
-
-        @keyframes shockwaveExpand {
-            0% { transform: scale(0.2); opacity: 1; border-width: 10px; }
-            100% { transform: scale(8); opacity: 0; border-width: 1px; }
-        }
-
-        /* ================= BANNER FRAMES (خالية تماماً من أي إشارات أو أسهم) ================= */
+        /* ================= BANNER BOX CONTAINER ================= */
         .fire-banner-box {
             position: relative;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 16px 42px;
+            padding: 16px 44px;
             border-radius: 20px;
-            transition: all 0.3s ease;
+            transition: border 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
             z-index: 10;
+            opacity: 1;
         }
 
-        /* 1. Transparent Frame */
-        .frame-transparent {
-            background: transparent;
-            border: none;
-            box-shadow: none;
-            padding: 12px 24px;
+        /* 1. Transparent Frame (بدون إطار إطلاقاً - نص حر شفاف) */
+        .frame-transparent,
+        .frame-none {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            backdrop-filter: none !important;
+            padding: 10px 24px !important;
         }
 
-        /* 2. Glass Frame with Fiery Border */
+        /* 2. Glass Frame (إطار زجاجي فاخر) */
         .frame-glass {
             background: rgba(10, 10, 18, 0.88);
-            border: 2px solid rgba(255, 69, 0, 0.55);
+            border: 2px solid rgba(255, 69, 0, 0.65);
             box-shadow: 
-                0 10px 35px rgba(0, 0, 0, 0.8),
-                0 0 25px rgba(255, 30, 0, 0.4),
-                inset 0 0 20px rgba(255, 69, 0, 0.2);
-            backdrop-filter: blur(12px);
+                0 10px 35px rgba(0, 0, 0, 0.85),
+                0 0 25px rgba(255, 30, 0, 0.45),
+                inset 0 0 20px rgba(255, 69, 0, 0.25);
+            backdrop-filter: blur(14px);
         }
 
-        /* 3. Molten Magma Ribbon */
+        /* 3. Magma Frame (شريط الحمم البركانية) */
         .frame-magma {
             background: linear-gradient(135deg, rgba(35, 10, 10, 0.94), rgba(15, 6, 8, 0.94));
             border: 2.5px solid var(--shine-c, #ffd700);
@@ -117,93 +104,35 @@
             backdrop-filter: blur(14px);
         }
 
-        /* ================= ENERGY FIRE SLASH OVERLAY (مثل GIF standard_3.gif) ================= */
-        .energy-slash-layer {
-            position: absolute;
-            inset: -40px;
-            pointer-events: none;
-            border-radius: inherit;
-            overflow: hidden;
-            z-index: 15;
-            mix-blend-mode: screen;
-            opacity: 0;
-            transition: opacity 0.3s ease;
+        /* 4. Cyber Neon Frame (إطار سايبر نيون) */
+        .frame-cyber_neon {
+            background: rgba(10, 15, 25, 0.92);
+            border: 2px solid var(--shine-c, #00f0ff);
+            border-radius: 14px;
+            box-shadow: 
+                0 0 25px var(--shine-c, #00f0ff),
+                0 0 50px rgba(0, 240, 255, 0.4),
+                inset 0 0 18px rgba(0, 240, 255, 0.25);
+            backdrop-filter: blur(14px);
         }
 
-        .anim-energy_slash .energy-slash-layer {
-            opacity: 1;
+        /* 5. Royal Gold Frame (إطار ذهبي ملكي) */
+        .frame-gold_royal {
+            background: linear-gradient(135deg, rgba(28, 20, 5, 0.94), rgba(12, 8, 2, 0.94));
+            border: 2px solid #ffd700;
+            border-radius: 18px;
+            box-shadow: 
+                0 10px 40px rgba(0, 0, 0, 0.9),
+                0 0 30px #ffd700,
+                inset 0 0 22px rgba(255, 215, 0, 0.35);
+            backdrop-filter: blur(14px);
         }
 
-        .energy-slash-layer::before {
-            content: '';
-            position: absolute;
-            top: -100%;
-            left: -100%;
-            width: 300%;
-            height: 300%;
-            background: repeating-linear-gradient(
-                -62deg,
-                transparent 0%,
-                transparent 14%,
-                rgba(255, 20, 0, 0.25) 16%,
-                var(--fire-c, #ff1e00) 18.5%,
-                rgba(255, 140, 0, 0.95) 20.5%,
-                var(--shine-c, #ffd700) 22%,
-                #ffffff 22.8%,
-                var(--shine-c, #ffd700) 23.6%,
-                rgba(255, 60, 0, 0.7) 25.5%,
-                transparent 28%,
-                transparent 40%
-            );
-            background-size: 250% 250%;
-            animation: energySlashMotion 1.5s cubic-bezier(0.25, 1, 0.5, 1) infinite;
-        }
-
-        @keyframes energySlashMotion {
-            0% {
-                transform: translateX(-35%) translateY(-15%);
-            }
-            100% {
-                transform: translateX(35%) translateY(15%);
-            }
-        }
-
-        /* Secondary Energy Blade Slices */
-        .energy-slash-layer::after {
-            content: '';
-            position: absolute;
-            top: -100%;
-            left: -100%;
-            width: 300%;
-            height: 300%;
-            background: repeating-linear-gradient(
-                -62deg,
-                transparent 0%,
-                transparent 22%,
-                rgba(255, 255, 255, 0.85) 23.5%,
-                var(--shine-c, #ffd700) 24.5%,
-                transparent 26%,
-                transparent 50%
-            );
-            background-size: 250% 250%;
-            animation: energySlashSecondary 1.5s cubic-bezier(0.25, 1, 0.5, 1) infinite;
-            animation-delay: -0.45s;
-        }
-
-        @keyframes energySlashSecondary {
-            0% {
-                transform: translateX(-40%) translateY(-20%);
-            }
-            100% {
-                transform: translateX(40%) translateY(20%);
-            }
-        }
-
-        /* ================= FIRE TEXT ELEMENTS ================= */
+        /* ================= TEXT ELEMENTS ================= */
         .fire-text-wrapper {
             position: relative;
             display: inline-block;
-            z-index: 11;
+            z-index: 12;
             white-space: nowrap;
         }
 
@@ -216,7 +145,7 @@
             font-weight: 900;
             line-height: 1.15;
             white-space: nowrap;
-            color: #2b0000;
+            color: #1a0000;
             pointer-events: none;
             z-index: 1;
         }
@@ -229,223 +158,67 @@
             color: #ffffff;
             z-index: 2;
             will-change: transform, filter, opacity;
-            transition: transform 0.2s ease;
+            -webkit-text-stroke: 1.5px rgba(25, 0, 0, 0.95);
+            text-shadow: 0 3px 6px rgba(0, 0, 0, 0.9);
+            transition: filter 0.3s ease;
         }
 
-        /* ================= ANIMATION STYLES ================= */
-
-        /* 1. Volcanic Magma Neon (نيون بركاني متدفق) */
-        .anim-volcano_magma .fire-text-front {
-            background: linear-gradient(
-                175deg,
-                #ffffff 0%,
-                #fffba8 12%,
-                var(--shine-c, #ffd700) 35%,
-                var(--fire-c, #ff1e00) 68%,
-                #6b0000 92%,
-                #300000 100%
-            );
-            background-size: 250% 250%;
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: magmaFlowAnim 3s ease-in-out infinite alternate;
-        }
-
-        @keyframes magmaFlowAnim {
-            0% { background-position: 0% 15%; filter: brightness(1); }
-            100% { background-position: 100% 85%; filter: brightness(1.25); }
-        }
-
-        /* 2. Laser Fire Sweep (مسح ليزر ناري) */
-        .anim-laser_sweep .fire-text-wrapper::after {
-            content: '';
+        /* ================= FootageCrate Appear From Sky Smoke Layer ================= */
+        .sky-smoke-video {
             position: absolute;
-            top: -15%;
-            left: 0;
-            width: 18px;
-            height: 130%;
-            background: linear-gradient(90deg, transparent, #ffffff, var(--shine-c, #ffd700), transparent);
-            filter: drop-shadow(0 0 15px var(--fire-c, #ff1e00));
-            animation: laserSweepMotion 2.2s ease-in-out infinite alternate;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 720px;
+            height: 520px;
+            object-fit: contain;
             pointer-events: none;
-            z-index: 20;
+            z-index: 40;
+            display: none;
+            filter: drop-shadow(0 0 20px var(--fire-c, #ff1e00)) contrast(115%);
         }
 
-        @keyframes laserSweepMotion {
-            0% { left: -5%; opacity: 0; }
-            15% { opacity: 1; }
-            85% { opacity: 1; }
-            100% { left: 105%; opacity: 0; }
+        /* ================= ANIMATION CHOREOGRAPHY ================= */
+        
+        /* 1. Natural Clean Appearance (الظهور الطبيعي) */
+        .banner-natural-in {
+            animation: animNaturalIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
-
-        /* 3. Blazing Flame Aura (شعلة متوهجة مستمرة) */
-        .anim-blaze_flame .fire-text-front {
-            animation: flameBlazeJitter 1.8s ease-in-out infinite alternate;
-        }
-
-        @keyframes flameBlazeJitter {
-            0% {
-                transform: scale(1) translateY(0);
-                filter: brightness(1);
-            }
-            50% {
-                transform: scale(1.025) translateY(-2px);
-                filter: brightness(1.2) drop-shadow(0 -5px 15px var(--fire-c, #ff1e00));
-            }
-            100% {
-                transform: scale(1.04) translateY(-1px);
-                filter: brightness(1.35) drop-shadow(0 -8px 25px var(--shine-c, #ffd700));
-            }
-        }
-
-        /* 4. Fire Pulse Glow (نبض ناري) */
-        .anim-pulse_glow .fire-text-front {
-            animation: firePulseGlowAnim 2.4s ease-in-out infinite alternate;
-        }
-
-        @keyframes firePulseGlowAnim {
-            0% { transform: scale(1); filter: brightness(1); }
-            100% { transform: scale(1.04); filter: brightness(1.25); }
-        }
-
-        /* ================= INTRO ANIMATIONS ================= */
-        .intro-burst {
-            animation: animBurstIntro var(--intro-dur, 1.4s) cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
-        }
-
-        @keyframes animBurstIntro {
+        @keyframes animNaturalIn {
             0% {
                 opacity: 0;
-                transform: scale(0.1) rotate(-5deg);
-                filter: brightness(4) blur(12px);
-            }
-            60% {
-                opacity: 1;
-                transform: scale(1.15) rotate(1deg);
-                filter: brightness(2) blur(0px);
-            }
-            80% {
-                transform: scale(0.96);
-            }
-            100% {
-                opacity: 1;
-                transform: scale(1) rotate(0deg);
-                filter: brightness(1);
-            }
-        }
-
-        .intro-volcano {
-            animation: animVolcanoIntro var(--intro-dur, 1.4s) cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-        }
-
-        @keyframes animVolcanoIntro {
-            0% {
-                opacity: 0;
-                transform: translateY(120px) scale(0.8);
-                filter: blur(15px) brightness(3);
-            }
-            60% {
-                opacity: 1;
-                transform: translateY(-12px) scale(1.06);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-                filter: blur(0px) brightness(1);
-            }
-        }
-
-        .intro-slide {
-            animation: animSlideIntro var(--intro-dur, 1.2s) cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        @keyframes animSlideIntro {
-            0% {
-                opacity: 0;
-                transform: translateY(-90px) scale(0.7) skewX(-12deg);
-                filter: blur(12px) brightness(2.5);
-            }
-            70% {
-                opacity: 1;
-                transform: translateY(10px) scale(1.05) skewX(2deg);
-                filter: blur(0px) brightness(1.2);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0) scale(1) skewX(0deg);
-                filter: brightness(1);
-            }
-        }
-
-        .intro-burn {
-            animation: animBurnIntro var(--intro-dur, 1.3s) ease forwards;
-        }
-
-        @keyframes animBurnIntro {
-            0% {
-                opacity: 0;
-                transform: scale(1.25);
-                filter: blur(25px) brightness(4);
+                transform: scale(0.95);
+                filter: blur(6px);
             }
             100% {
                 opacity: 1;
                 transform: scale(1);
-                filter: blur(0px) brightness(1);
+                filter: blur(0px);
             }
         }
 
-        .intro-fade {
-            animation: animFadeIntro var(--intro-dur, 1.2s) ease-out forwards;
-        }
-
-        @keyframes animFadeIntro {
-            0% { opacity: 0; transform: scale(0.92); filter: blur(8px); }
-            100% { opacity: 1; transform: scale(1); filter: blur(0px); }
-        }
-
-        /* ================= OUTRO ANIMATIONS ================= */
-        .outro-burn {
-            animation: animBurnOutro var(--outro-dur, 1s) cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
-        }
-
-        @keyframes animBurnOutro {
-            0% { opacity: 1; transform: scale(1); filter: brightness(1.3); }
-            30% { transform: scale(1.12); filter: brightness(3.5); }
-            100% { opacity: 0; transform: scale(0.25) rotate(6deg); filter: blur(18px) brightness(0.1); }
-        }
-
-        .outro-slide {
-            animation: animSlideOutro var(--outro-dur, 0.9s) cubic-bezier(0.7, 0, 0.84, 0) forwards;
-        }
-
-        @keyframes animSlideOutro {
-            0% { opacity: 1; transform: translateY(0) scale(1); }
-            100% { opacity: 0; transform: translateY(110px) scale(0.7) skewX(8deg); filter: blur(12px) brightness(0.3); }
-        }
-
-        .outro-melt {
-            animation: animMeltOutro var(--outro-dur, 1s) ease forwards;
-        }
-
-        @keyframes animMeltOutro {
-            0% { opacity: 1; transform: scale(1); }
-            50% { transform: scaleY(0.4) scaleX(1.3) translateY(20px); filter: brightness(2); }
-            100% { opacity: 0; transform: scaleY(0.1) scaleX(1.6) translateY(50px); filter: blur(15px); }
-        }
-
-        .outro-fade {
-            animation: animFadeOutro var(--outro-dur, 1s) ease-in forwards;
-        }
-
-        @keyframes animFadeOutro {
-            0% { opacity: 1; transform: scale(1); }
-            100% { opacity: 0; transform: scale(1.06); filter: blur(8px) brightness(1.2); }
-        }
-
-        .holding {
+        /* 2. Holding state */
+        .banner-holding {
             opacity: 1;
             transform: scale(1);
+            filter: blur(0px);
+        }
+
+        /* 3. Soft Fade Outro under the smoke (يجي الدخان يشيلها وتتلاشى بنعومة) */
+        .banner-smoke-out {
+            animation: animSmokeFadeOut 0.75s ease-in-out forwards;
+        }
+        @keyframes animSmokeFadeOut {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+                filter: blur(0px);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(1.03);
+                filter: blur(10px);
+            }
         }
     </style>
 </head>
@@ -454,28 +227,23 @@
     <div class="stage-wrapper" id="stageWrapper">
         <div class="stage-inner" id="stageInner">
 
-            <!-- Shockwave Ring -->
-            <div class="fire-shockwave" id="shockwave"></div>
-
-            <!-- Canvas for sparks & embers -->
-            <canvas id="sparkCanvas" class="spark-canvas"></canvas>
-
             <!-- Fire Banner Box -->
             <div class="fire-banner-box frame-transparent" id="bannerBox">
-                
-                <!-- Dynamic Energy Slash Layer (like standard_3.gif) -->
-                <div class="energy-slash-layer" id="energySlashLayer"></div>
-
                 <!-- Text Wrapper -->
                 <div class="fire-text-wrapper" id="textWrapper">
                     <div class="fire-text-back" id="textBack">رابط الدعم بالبايو 🔥</div>
                     <div class="fire-text-front" id="textFront">رابط الدعم بالبايو 🔥</div>
                 </div>
-
             </div>
+
+            <!-- FootageCrate Smoke Vortex Layer (Descent & Wipe) -->
+            <video id="skySmokeVideo" class="sky-smoke-video" src="/videos/appear_from_sky.webm" playsinline muted preload="auto"></video>
 
         </div>
     </div>
+
+    <!-- Canvas for subtle atmospheric sparks -->
+    <canvas id="sparkCanvas" class="spark-canvas"></canvas>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
@@ -487,260 +255,180 @@
             color: '#ff1e00',
             shine_color: '#ffd700',
             font_size: 64,
-            font_family: 'Cairo',
-            letter_spacing: 2,
-            animation_style: 'energy_slash',
-            display_mode: 'continuous',
-            banner_style: 'transparent',
-            intro_style: 'burst',
-            outro_style: 'burn',
-            intro_duration: 2.5,
-            hold_duration: 4.0,
-            outro_duration: 2.5,
-            loop_interval: 8,
-            neon_enabled: 1,
+            neon_enabled: true,
             neon_strength: 95,
-            flame_particles: true,
-            sound_enabled: true,
+            banner_style: 'transparent',
+            display_mode: 'continuous', // 'continuous' or 'cycle'
+            hold_duration: 6,
+            loop_interval: 8,
             position_v: 'center',
-            position_h: 'center',
-            offset_y: 0,
-            scale: 100
+            offset_y: 0
         };
 
-        const stageWrapper = document.getElementById('stageWrapper');
-        const stageInner = document.getElementById('stageInner');
         const bannerBox = document.getElementById('bannerBox');
         const textWrapper = document.getElementById('textWrapper');
-        const textFront = document.getElementById('textFront');
         const textBack = document.getElementById('textBack');
-        const shockwave = document.getElementById('shockwave');
+        const textFront = document.getElementById('textFront');
+        const stageWrapper = document.getElementById('stageWrapper');
+        const stageInner = document.getElementById('stageInner');
+        const skySmokeVideo = document.getElementById('skySmokeVideo');
         const sparkCanvas = document.getElementById('sparkCanvas');
 
-        // ================= Web Audio API Fire Whoosh ================= //
-        let audioCtx = null;
-        function getAudioContext() {
-            if (!audioCtx) {
-                const AudioCtx = window.AudioContext || window.webkitAudioContext;
-                if (AudioCtx) audioCtx = new AudioCtx();
-            }
-            if (audioCtx && audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-            return audioCtx;
-        }
-
-        window.addEventListener('click', () => getAudioContext());
-
-        function playFireSound() {
-            if (!settings.sound_enabled) return;
-            try {
-                const ctx = getAudioContext();
-                if (!ctx) return;
-
-                const bufferSize = ctx.sampleRate * 0.55;
-                const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-                const data = buffer.getChannelData(0);
-                for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-
-                const noise = ctx.createBufferSource();
-                noise.buffer = buffer;
-
-                const filter = ctx.createBiquadFilter();
-                filter.type = 'bandpass';
-                filter.frequency.setValueAtTime(350, ctx.currentTime);
-                filter.frequency.exponentialRampToValueAtTime(1400, ctx.currentTime + 0.18);
-                filter.frequency.exponentialRampToValueAtTime(120, ctx.currentTime + 0.55);
-
-                const gain = ctx.createGain();
-                gain.gain.setValueAtTime(0, ctx.currentTime);
-                gain.gain.linearRampToValueAtTime(0.35, ctx.currentTime + 0.08);
-                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.55);
-
-                noise.connect(filter);
-                filter.connect(gain);
-                gain.connect(ctx.destination);
-
-                noise.start();
-                noise.stop(ctx.currentTime + 0.55);
-            } catch (e) {}
-        }
-
-        // ================= Apply Visual Styles ================= //
+        // Apply Styles to DOM
         function applyStyles() {
+            // Text Content
+            const txt = settings.text || 'رابط الدعم بالبايو 🔥';
+            textFront.textContent = txt;
+            textBack.textContent = txt;
+
+            // Font Size
+            const fSize = settings.font_size || 64;
+            textFront.style.fontSize = `${fSize}px`;
+            textBack.style.fontSize = `${fSize}px`;
+
+            // Colors
             const pri = settings.color || '#ff1e00';
             const sec = settings.shine_color || '#ffd700';
-            const textStr = settings.text || 'رابط الدعم بالبايو 🔥';
-            const fontSize = settings.font_size || 64;
-            const fontFamily = settings.font_family || 'Cairo';
-            const letterSpacing = settings.letter_spacing !== undefined ? settings.letter_spacing : 2;
-            const animStyle = settings.animation_style || 'energy_slash';
-            const bannerStyle = settings.banner_style || 'transparent';
-            const neonMult = (settings.neon_strength !== undefined ? settings.neon_strength : 95) / 100;
-            const scale = (settings.scale !== undefined ? settings.scale : 100) / 100;
-            const offsetY = settings.offset_y !== undefined ? settings.offset_y : 0;
-            const posV = settings.position_v || 'center';
-            const posH = settings.position_h || 'center';
-
-            // CSS Variables
             document.documentElement.style.setProperty('--fire-c', pri);
             document.documentElement.style.setProperty('--shine-c', sec);
-            document.documentElement.style.setProperty('--intro-dur', `${settings.intro_duration || 2.5}s`);
-            document.documentElement.style.setProperty('--outro-dur', `${settings.outro_duration || 2.5}s`);
 
-            // Text Content
-            textFront.textContent = textStr;
-            textBack.textContent = textStr;
-
-            // Typography
-            const fontDef = `'${fontFamily}', 'Cairo', sans-serif`;
-            textFront.style.fontFamily = fontDef;
-            textBack.style.fontFamily = fontDef;
-            textFront.style.fontSize = `${fontSize}px`;
-            textBack.style.fontSize = `${fontSize}px`;
-            textFront.style.letterSpacing = `${letterSpacing}px`;
-            textBack.style.letterSpacing = `${letterSpacing}px`;
-
-            // Position & Align
+            // Positioning
+            const posV = settings.position_v || 'center';
             if (posV === 'top') {
                 stageWrapper.style.alignItems = 'flex-start';
                 stageWrapper.style.paddingTop = '50px';
-                stageWrapper.style.paddingBottom = '0px';
+                stageWrapper.style.paddingBottom = '0';
             } else if (posV === 'bottom') {
                 stageWrapper.style.alignItems = 'flex-end';
+                stageWrapper.style.paddingTop = '0';
                 stageWrapper.style.paddingBottom = '50px';
-                stageWrapper.style.paddingTop = '0px';
             } else {
                 stageWrapper.style.alignItems = 'center';
-                stageWrapper.style.paddingTop = '0px';
-                stageWrapper.style.paddingBottom = '0px';
+                stageWrapper.style.paddingTop = '0';
+                stageWrapper.style.paddingBottom = '0';
             }
 
-            if (posH === 'right') {
-                stageWrapper.style.justifyContent = 'flex-end';
-                stageWrapper.style.paddingRight = '50px';
-                stageWrapper.style.paddingLeft = '0px';
-            } else if (posH === 'left') {
-                stageWrapper.style.justifyContent = 'flex-start';
-                stageWrapper.style.paddingLeft = '50px';
-                stageWrapper.style.paddingRight = '0px';
+            const offY = settings.offset_y || 0;
+            stageInner.style.transform = `translateY(${offY}px)`;
+
+            // Frame Style
+            const frameStyle = settings.banner_style || 'transparent';
+            bannerBox.className = `fire-banner-box frame-${frameStyle}`;
+
+            // Neon Glow Styling (خيار خط نيون ولا لا)
+            const isNeon = settings.neon_enabled !== false && settings.neon_enabled !== 0;
+            if (isNeon) {
+                const str = (settings.neon_strength || 95) / 100;
+                const g1 = Math.round(8 * str);
+                const g2 = Math.round(20 * str);
+                const g3 = Math.round(42 * str);
+                const g4 = Math.round(68 * str);
+
+                textFront.style.filter = `
+                    drop-shadow(0 0 ${g1}px #ffffff)
+                    drop-shadow(0 0 ${g2}px ${sec})
+                    drop-shadow(0 0 ${g3}px ${pri})
+                    drop-shadow(0 0 ${g4}px ${pri})
+                `;
+                textFront.style.background = `linear-gradient(180deg, #ffffff 0%, #fff8b3 20%, ${sec} 50%, ${pri} 85%, #4a0000 100%)`;
+                textFront.style.webkitBackgroundClip = 'text';
+                textFront.style.backgroundClip = 'text';
+                textFront.style.webkitTextFillColor = 'transparent';
             } else {
-                stageWrapper.style.justifyContent = 'center';
-                stageWrapper.style.paddingLeft = '0px';
-                stageWrapper.style.paddingRight = '0px';
+                // Non-neon clean text
+                textFront.style.filter = 'drop-shadow(0 3px 6px rgba(0, 0, 0, 0.9))';
+                textFront.style.background = `linear-gradient(180deg, #ffffff 15%, ${sec} 65%, ${pri} 100%)`;
+                textFront.style.webkitBackgroundClip = 'text';
+                textFront.style.backgroundClip = 'text';
+                textFront.style.webkitTextFillColor = 'transparent';
             }
-
-            stageInner.style.transform = `translateY(${offsetY}px) scale(${scale})`;
-
-            // Banner Frame
-            bannerBox.className = `fire-banner-box frame-${bannerStyle} anim-${animStyle}`;
-
-            // Volcanic 3D Underlay Extrusion Text Shadow
-            const g1 = (fontSize * 0.15 * neonMult).toFixed(0);
-            const g2 = (fontSize * 0.35 * neonMult).toFixed(0);
-            const g3 = (fontSize * 0.70 * neonMult).toFixed(0);
-            const g4 = (fontSize * 1.20 * neonMult).toFixed(0);
-
-            textBack.style.textShadow = `
-                0 1px 0 rgba(40, 0, 0, 0.95),
-                0 2px 0 rgba(35, 0, 0, 0.95),
-                0 3px 0 rgba(30, 0, 0, 0.95),
-                0 4px 0 rgba(25, 0, 0, 0.95),
-                0 5px 0 rgba(20, 0, 0, 0.95),
-                0 7px 2px rgba(0, 0, 0, 0.9),
-                0 10px 18px rgba(0, 0, 0, 0.95),
-                0 0 ${g2}px ${pri}
-            `;
-
-            // Neon Glowing Aura on Front Text
-            textFront.style.filter = `
-                drop-shadow(0 0 ${g1}px #ffffff)
-                drop-shadow(0 0 ${g2}px ${sec})
-                drop-shadow(0 0 ${g3}px ${pri})
-                drop-shadow(0 0 ${g4}px ${pri})
-            `;
         }
 
         // ================= Animation Engine ================= //
         let cycleTimeout = null;
+        let isCycleRunning = false;
+
         function setupAnimationMode() {
             clearTimeout(cycleTimeout);
+            isCycleRunning = false;
+
+            const frame = settings.banner_style || 'transparent';
 
             if (settings.display_mode === 'continuous') {
-                // Continuous mode: always visible and animated!
-                bannerBox.classList.remove('intro-burst', 'intro-volcano', 'intro-slide', 'intro-burn', 'intro-fade');
-                bannerBox.classList.remove('outro-burn', 'outro-slide', 'outro-melt', 'outro-fade');
-                bannerBox.classList.add('holding');
+                // Static display: always visible!
+                if (skySmokeVideo) skySmokeVideo.style.display = 'none';
+                bannerBox.className = `fire-banner-box frame-${frame} banner-holding`;
                 bannerBox.style.opacity = '1';
                 bannerBox.style.transform = 'scale(1)';
             } else {
-                // Timed Cycle mode: Intro -> Hold -> Outro -> Loop
+                // Timed Cycle mode: Natural appearance -> Hold -> Smoke vortex wipes it -> Loop
                 runCycle();
             }
         }
 
         function runCycle() {
             if (settings.display_mode === 'continuous') return;
+            clearTimeout(cycleTimeout);
+            isCycleRunning = true;
 
-            const introStyle = settings.intro_style || 'burst';
-            const outroStyle = settings.outro_style || 'burn';
-            const introMs = (settings.intro_duration || 2.5) * 1000;
-            const holdMs = (settings.hold_duration || 4) * 1000;
-            const outroMs = (settings.outro_duration || 2.5) * 1000;
-            const intervalMs = (settings.loop_interval || 8) * 1000;
+            const frame = settings.banner_style || 'transparent';
+            const holdMs = Math.max(2, (settings.hold_duration || 6)) * 1000;
+            const intervalMs = Math.max(2, (settings.loop_interval || 8)) * 1000;
 
-            // 1. Intro
-            bannerBox.className = `fire-banner-box frame-${settings.banner_style || 'transparent'} anim-${settings.animation_style || 'energy_slash'}`;
-            void bannerBox.offsetWidth;
+            // 1. Natural Appearance (يظهر الكلمة طبيعي)
+            bannerBox.style.opacity = '1';
+            bannerBox.className = `fire-banner-box frame-${frame} banner-natural-in`;
+            burstSparks(15);
 
-            if (introStyle === 'burst') {
-                shockwave.classList.remove('active');
-                void shockwave.offsetWidth;
-                shockwave.classList.add('active');
-                burstSparks(35);
-            } else if (introStyle === 'volcano') {
-                burstSparks(25);
-            }
-
-            playFireSound();
-            bannerBox.classList.add(`intro-${introStyle}`);
-
-            // 2. Hold
+            // After appearance completes, transition to holding
             cycleTimeout = setTimeout(() => {
-                bannerBox.className = `fire-banner-box frame-${settings.banner_style || 'transparent'} anim-${settings.animation_style || 'energy_slash'} holding`;
+                bannerBox.className = `fire-banner-box frame-${frame} banner-holding`;
 
-                // 3. Outro
+                // 2. Hold Duration (مدة بقاء الكلمة)
                 cycleTimeout = setTimeout(() => {
-                    bannerBox.className = `fire-banner-box frame-${settings.banner_style || 'transparent'} anim-${settings.animation_style || 'energy_slash'}`;
-                    void bannerBox.offsetWidth;
-                    bannerBox.classList.add(`outro-${outroStyle}`);
-                    burstSparks(20);
+                    // 3. Smoke Wipe Outro (يجي الدخان يشيلها)
+                    if (skySmokeVideo) {
+                        skySmokeVideo.style.display = 'block';
+                        skySmokeVideo.currentTime = 0;
+                        skySmokeVideo.play().catch(() => {});
+                    }
 
-                    // 4. Sleep & Repeat
+                    // At peak smoke density (~700ms), the banner dissolves smoothly underneath
                     cycleTimeout = setTimeout(() => {
-                        bannerBox.style.opacity = '0';
-                        cycleTimeout = setTimeout(runCycle, intervalMs);
-                    }, outroMs);
+                        bannerBox.className = `fire-banner-box frame-${frame} banner-smoke-out`;
+                        burstSparks(12);
+
+                        // Smoke finishes clearing around 2200ms
+                        cycleTimeout = setTimeout(() => {
+                            if (skySmokeVideo) skySmokeVideo.style.display = 'none';
+                            bannerBox.style.opacity = '0';
+                            bannerBox.className = `fire-banner-box frame-${frame}`;
+
+                            // 4. Wait Interval (الانتظار) & Reappear Naturally (ويرجع يظهر تاني بطبييعي)
+                            cycleTimeout = setTimeout(() => {
+                                runCycle();
+                            }, intervalMs);
+
+                        }, 1500);
+
+                    }, 700);
 
                 }, holdMs);
 
-            }, introMs);
+            }, 800);
         }
 
-        // ================= Realistic Canvas Sparks & Embers ================= //
-        const canvas = sparkCanvas;
-        const ctx = canvas.getContext('2d');
-        let width, height;
+        // ================= Subtle Sparks Particle Engine ================= //
+        const sCtx = sparkCanvas.getContext('2d');
+        let sWidth = window.innerWidth, sHeight = window.innerHeight;
+        let sparks = [];
 
-        function resize() {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
+        function resizeSparks() {
+            sparkCanvas.width = sWidth = window.innerWidth;
+            sparkCanvas.height = sHeight = window.innerHeight;
         }
-        window.addEventListener('resize', resize);
-        resize();
-
-        const MAX_PARTICLES = 35;
-        const particles = [];
+        window.addEventListener('resize', resizeSparks);
+        resizeSparks();
 
         class Spark {
             constructor(x, y, isBurst = false) {
@@ -748,31 +436,31 @@
             }
             reset(x, y, isBurst = false) {
                 const rect = bannerBox.getBoundingClientRect();
-                const rw = rect.width > 30 ? rect.width : 350;
-                const rx = rect.left > 0 ? rect.left : (width / 2 - 175);
-                const ry = rect.bottom > 0 ? rect.bottom : (height / 2 + 30);
+                const rw = rect.width > 20 ? rect.width : 300;
+                const rx = rect.left > 0 ? rect.left : (sWidth / 2 - 150);
+                const ry = rect.bottom > 0 ? rect.bottom : (sHeight / 2 + 20);
 
                 this.x = x !== undefined ? x : rx + Math.random() * rw;
-                this.y = y !== undefined ? y : ry - Math.random() * 20;
+                this.y = y !== undefined ? y : ry - Math.random() * 15;
 
                 if (isBurst) {
                     const angle = Math.random() * Math.PI * 2;
-                    const speed = 2 + Math.random() * 6.5;
+                    const speed = 2 + Math.random() * 5.5;
                     this.vx = Math.cos(angle) * speed;
-                    this.vy = Math.sin(angle) * speed - 2.5;
-                    this.life = 0.7 + Math.random() * 0.5;
+                    this.vy = Math.sin(angle) * speed - 1.5;
+                    this.life = 0.6 + Math.random() * 0.5;
                 } else {
-                    this.vx = (Math.random() - 0.5) * 1.8;
-                    this.vy = -(1.5 + Math.random() * 3.2);
-                    this.life = 0.8 + Math.random() * 0.4;
+                    this.vx = (Math.random() - 0.5) * 1.4;
+                    this.vy = -(1.2 + Math.random() * 2.8);
+                    this.life = 0.7 + Math.random() * 0.4;
                 }
                 this.maxLife = this.life;
-                this.decay = 0.015 + Math.random() * 0.02;
-                this.size = 2 + Math.random() * 3.5;
+                this.decay = 0.02 + Math.random() * 0.02;
+                this.size = 2 + Math.random() * 3;
 
                 const pri = settings.color || '#ff1e00';
                 const sec = settings.shine_color || '#ffd700';
-                const colors = ['#ffffff', sec, sec, pri, pri, '#ff4500'];
+                const colors = ['#ffffff', sec, sec, pri];
                 this.color = colors[Math.floor(Math.random() * colors.length)];
             }
             update() {
@@ -784,35 +472,35 @@
             }
             draw() {
                 const alpha = Math.max(0, this.life / this.maxLife);
-                ctx.save();
-                ctx.globalAlpha = alpha;
-                ctx.fillStyle = this.color;
-                ctx.shadowColor = this.color;
-                ctx.shadowBlur = 10;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
+                sCtx.save();
+                sCtx.globalAlpha = alpha;
+                sCtx.fillStyle = this.color;
+                sCtx.shadowColor = this.color;
+                sCtx.shadowBlur = 8;
+                sCtx.beginPath();
+                sCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                sCtx.fill();
+                sCtx.restore();
             }
         }
 
-        for (let i = 0; i < MAX_PARTICLES; i++) particles.push(new Spark());
+        for (let i = 0; i < 22; i++) sparks.push(new Spark());
 
-        function burstSparks(count = 25) {
+        function burstSparks(count = 15) {
             const rect = bannerBox.getBoundingClientRect();
             const cx = rect.left + rect.width / 2;
             const cy = rect.top + rect.height / 2;
-            for (let i = 0; i < count; i++) particles.push(new Spark(cx, cy, true));
+            for (let i = 0; i < count; i++) sparks.push(new Spark(cx, cy, true));
         }
 
         function renderSparks() {
-            ctx.clearRect(0, 0, width, height);
-            if (settings.flame_particles) {
-                for (let i = particles.length - 1; i >= 0; i--) {
-                    const p = particles[i];
+            sCtx.clearRect(0, 0, sWidth, sHeight);
+            if (bannerBox.style.opacity !== '0') {
+                for (let i = sparks.length - 1; i >= 0; i--) {
+                    const p = sparks[i];
                     p.update();
                     p.draw();
-                    if (p.life <= 0 && particles.length > MAX_PARTICLES) particles.splice(i, 1);
+                    if (p.life <= 0 && sparks.length > 22) sparks.splice(i, 1);
                 }
             }
             requestAnimationFrame(renderSparks);
@@ -828,24 +516,36 @@
                 applyStyles();
                 setupAnimationMode();
             } else if (data.type === 'test_action') {
-                if (data.action === 'intro') {
-                    const introStyle = settings.intro_style || 'burst';
-                    bannerBox.className = `fire-banner-box frame-${settings.banner_style || 'transparent'} anim-${settings.animation_style || 'energy_slash'}`;
-                    void bannerBox.offsetWidth;
-                    if (introStyle === 'burst') {
-                        shockwave.classList.remove('active');
-                        void shockwave.offsetWidth;
-                        shockwave.classList.add('active');
-                        burstSparks(35);
-                    }
-                    playFireSound();
-                    bannerBox.classList.add(`intro-${introStyle}`);
-                } else if (data.action === 'outro') {
-                    const outroStyle = settings.outro_style || 'burn';
-                    bannerBox.className = `fire-banner-box frame-${settings.banner_style || 'transparent'} anim-${settings.animation_style || 'energy_slash'}`;
-                    void bannerBox.offsetWidth;
-                    bannerBox.classList.add(`outro-${outroStyle}`);
-                    burstSparks(20);
+                if (data.action === 'smoke_cycle') {
+                    // Trigger live demonstration of smoke wipe
+                    clearTimeout(cycleTimeout);
+                    const frame = settings.banner_style || 'transparent';
+                    bannerBox.style.opacity = '1';
+                    bannerBox.className = `fire-banner-box frame-${frame} banner-holding`;
+
+                    setTimeout(() => {
+                        if (skySmokeVideo) {
+                            skySmokeVideo.style.display = 'block';
+                            skySmokeVideo.currentTime = 0;
+                            skySmokeVideo.play().catch(() => {});
+                        }
+                        setTimeout(() => {
+                            bannerBox.className = `fire-banner-box frame-${frame} banner-smoke-out`;
+                            burstSparks(15);
+                            setTimeout(() => {
+                                if (skySmokeVideo) skySmokeVideo.style.display = 'none';
+                                bannerBox.style.opacity = '0';
+                                setTimeout(() => {
+                                    bannerBox.className = `fire-banner-box frame-${frame} banner-natural-in`;
+                                    bannerBox.style.opacity = '1';
+                                    burstSparks(15);
+                                    setTimeout(() => {
+                                        bannerBox.className = `fire-banner-box frame-${frame} banner-holding`;
+                                    }, 800);
+                                }, 1200);
+                            }, 1500);
+                        }, 700);
+                    }, 400);
                 }
             }
         });

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scoreboard Display | لوحة النتائج</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Changa:wght@700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: transparent !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Cairo', 'Changa', sans-serif;
+            user-select: none;
+        }
+
+        .scoreboard-stage {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            background: rgba(10, 8, 14, 0.92);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 24px;
+            padding: 16px 36px;
+            box-shadow: 
+                0 10px 40px rgba(0, 0, 0, 0.85),
+                0 0 30px rgba(255, 42, 74, 0.25),
+                0 0 30px rgba(34, 255, 136, 0.25);
+            backdrop-filter: blur(14px);
+        }
+
+        /* Team Card */
+        .team-box {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            min-width: 220px;
+        }
+
+        .team-box.team-a {
+            flex-direction: row;
+        }
+
+        .team-box.team-b {
+            flex-direction: row-reverse;
+        }
+
+        .team-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .team-name {
+            font-size: 24px;
+            font-weight: 900;
+            color: #fff;
+            white-space: nowrap;
+        }
+
+        .team-score {
+            font-family: 'Changa', sans-serif;
+            font-size: 72px;
+            font-weight: 900;
+            line-height: 1;
+            transition: transform 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        }
+
+        /* Team A: Red Neon */
+        .team-a .team-name {
+            color: #ff3355;
+            text-shadow: 0 0 10px rgba(255, 51, 85, 0.6);
+        }
+        .team-a .team-score {
+            color: #ff2a4a;
+            text-shadow: 
+                0 0 20px rgba(255, 42, 74, 0.8),
+                0 0 40px rgba(255, 42, 74, 0.4);
+        }
+
+        /* Team B: Green Neon */
+        .team-b .team-name {
+            color: #22ff88;
+            text-shadow: 0 0 10px rgba(34, 255, 136, 0.6);
+        }
+        .team-b .team-score {
+            color: #22ff88;
+            text-shadow: 
+                0 0 20px rgba(34, 255, 136, 0.8),
+                0 0 40px rgba(34, 255, 136, 0.4);
+        }
+
+        /* Center VS / Title */
+        .center-divider {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 0 16px;
+            border-left: 1.5px solid rgba(255, 255, 255, 0.12);
+            border-right: 1.5px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .vs-badge {
+            font-family: 'Changa', sans-serif;
+            font-size: 26px;
+            font-weight: 900;
+            color: #ffd700;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+            letter-spacing: 2px;
+        }
+
+        .scoreboard-title-text {
+            font-size: 13px;
+            font-weight: 800;
+            color: #cbd5e1;
+            white-space: nowrap;
+        }
+
+        .score-bump {
+            transform: scale(1.35) !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="scoreboard-stage" id="scoreStage">
+        
+        <!-- TEAM A -->
+        <div class="team-box team-a">
+            <div class="team-score" id="scoreA">0</div>
+            <div class="team-info">
+                <span class="team-name" id="nameA">المخربين</span>
+            </div>
+        </div>
+
+        <!-- CENTER VS -->
+        <div class="center-divider">
+            <span class="vs-badge">VS</span>
+            <span class="scoreboard-title-text" id="boardTitle">🏆 تحدي الأساطير 🏆</span>
+        </div>
+
+        <!-- TEAM B -->
+        <div class="team-box team-b">
+            <div class="team-score" id="scoreB">0</div>
+            <div class="team-info">
+                <span class="team-name" id="nameB">المساعدين</span>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const boardId = params.get('id') || params.get('uid') || 'default';
+
+        const nameAEl = document.getElementById('nameA');
+        const nameBEl = document.getElementById('nameB');
+        const scoreAEl = document.getElementById('scoreA');
+        const scoreBEl = document.getElementById('scoreB');
+        const boardTitleEl = document.getElementById('boardTitle');
+
+        let prevScoreA = null;
+        let prevScoreB = null;
+
+        function updateUI(board) {
+            if (!board) return;
+            nameAEl.textContent = board.team_a_name || 'المخربين';
+            nameBEl.textContent = board.team_b_name || 'المساعدين';
+            boardTitleEl.textContent = board.title || '🏆 تحدي الأساطير 🏆';
+
+            const newA = board.team_a_score || 0;
+            const newB = board.team_b_score || 0;
+
+            if (prevScoreA !== null && newA !== prevScoreA) {
+                scoreAEl.classList.add('score-bump');
+                setTimeout(() => scoreAEl.classList.remove('score-bump'), 300);
+            }
+            if (prevScoreB !== null && newB !== prevScoreB) {
+                scoreBEl.classList.add('score-bump');
+                setTimeout(() => scoreBEl.classList.remove('score-bump'), 300);
+            }
+
+            scoreAEl.textContent = newA;
+            scoreBEl.textContent = newB;
+
+            prevScoreA = newA;
+            prevScoreB = newB;
+        }
+
+        async function fetchBoard() {
+            try {
+                const res = await fetch(`/api/scoreboard/${boardId}`);
+                const data = await res.json();
+                if (data.success && data.board) {
+                    updateUI(data.board);
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        fetchBoard();
+        setInterval(fetchBoard, 600);
+
+        // Socket IO real-time
+        try {
+            const socket = io();
+            socket.on('scoreboard_update', (data) => {
+                if (data && (data.board_id === boardId || boardId === 'default')) {
+                    updateUI(data);
+                }
+            });
+        } catch (e) {}
+    </script>
+</body>
+</html>

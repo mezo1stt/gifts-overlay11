@@ -1,0 +1,320 @@
+:root {
+    --cam-glow: 24px;
+    --cam-radius: 18px;
+    --cam-thickness: 4px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: transparent !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cairo', 'Changa', sans-serif;
+    user-select: none;
+}
+
+.cam-frame-stage {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* ================= BASE FRAME BOX ================= */
+.cam-frame-box {
+    position: relative;
+    border-radius: var(--cam-radius);
+    transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Aspect Ratios */
+.cam-frame-box.ratio-16-9 {
+    width: 90vw;
+    max-width: 1280px;
+    aspect-ratio: 16 / 9;
+}
+
+.cam-frame-box.ratio-4-3 {
+    width: 80vw;
+    max-width: 960px;
+    aspect-ratio: 4 / 3;
+}
+
+.cam-frame-box.ratio-1-1 {
+    width: 75vmin;
+    max-width: 700px;
+    aspect-ratio: 1 / 1;
+}
+
+.cam-frame-box.ratio-9-16 {
+    height: 90vh;
+    max-height: 1200px;
+    aspect-ratio: 9 / 16;
+}
+
+/* Transparent inside for webcam */
+.cam-transparent-viewport {
+    position: absolute;
+    inset: 0;
+    border-radius: calc(var(--cam-radius) - 2px);
+    background: transparent !important;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+/* ================= 1. VOLCANO NEON FIRE (بركان ناري نيون) ================= */
+.cam-frame-box.style-volcano {
+    border: var(--cam-thickness) solid #ff3b00;
+    box-shadow: 
+        0 0 var(--cam-glow) #ff3b00,
+        0 0 calc(var(--cam-glow) * 1.8) #ff8c00,
+        inset 0 0 calc(var(--cam-glow) * 0.5) rgba(255, 60, 0, 0.4);
+    animation: volcanoBorderPulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes volcanoBorderPulse {
+    0% {
+        border-color: #ff2200;
+        box-shadow: 
+            0 0 var(--cam-glow) #ff2200,
+            0 0 calc(var(--cam-glow) * 1.5) #ff6600,
+            inset 0 0 calc(var(--cam-glow) * 0.4) rgba(255, 34, 0, 0.3);
+    }
+    100% {
+        border-color: #ff7700;
+        box-shadow: 
+            0 0 calc(var(--cam-glow) * 1.4) #ff5500,
+            0 0 calc(var(--cam-glow) * 2.2) #ffaa00,
+            inset 0 0 calc(var(--cam-glow) * 0.7) rgba(255, 120, 0, 0.5);
+    }
+}
+
+.cam-frame-box.style-volcano .cam-corner {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border-color: #ffd700;
+}
+.cam-frame-box.style-volcano .cam-corner.top-left { top: 6px; left: 6px; border-top: 3px solid #ffd700; border-left: 3px solid #ffd700; }
+.cam-frame-box.style-volcano .cam-corner.top-right { top: 6px; right: 6px; border-top: 3px solid #ffd700; border-right: 3px solid #ffd700; }
+.cam-frame-box.style-volcano .cam-corner.bottom-left { bottom: 6px; left: 6px; border-bottom: 3px solid #ffd700; border-left: 3px solid #ffd700; }
+.cam-frame-box.style-volcano .cam-corner.bottom-right { bottom: 6px; right: 6px; border-bottom: 3px solid #ffd700; border-right: 3px solid #ffd700; }
+
+/* ================= 2. CYBERPUNK NEON (سايبر بانك نيون) ================= */
+.cam-frame-box.style-cyberpunk {
+    border: var(--cam-thickness) solid #00f0ff;
+    box-shadow: 
+        0 0 var(--cam-glow) #00f0ff,
+        0 0 calc(var(--cam-glow) * 1.5) #ff0077,
+        inset 0 0 calc(var(--cam-glow) * 0.4) rgba(0, 240, 255, 0.3);
+    animation: cyberpunkGlitch 3s ease-in-out infinite;
+}
+
+@keyframes cyberpunkGlitch {
+    0%, 100% {
+        border-color: #00f0ff;
+        box-shadow: 0 0 var(--cam-glow) #00f0ff, 0 0 calc(var(--cam-glow) * 1.4) #ff0077;
+    }
+    50% {
+        border-color: #ff0077;
+        box-shadow: 0 0 var(--cam-glow) #ff0077, 0 0 calc(var(--cam-glow) * 1.4) #00f0ff;
+    }
+}
+
+.cam-frame-box.style-cyberpunk .cam-corner {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+}
+.cam-frame-box.style-cyberpunk .cam-corner.top-left { top: 8px; left: 8px; border-top: 3.5px solid #ff0077; border-left: 3.5px solid #ff0077; }
+.cam-frame-box.style-cyberpunk .cam-corner.top-right { top: 8px; right: 8px; border-top: 3.5px solid #ff0077; border-right: 3.5px solid #ff0077; }
+.cam-frame-box.style-cyberpunk .cam-corner.bottom-left { bottom: 8px; left: 8px; border-bottom: 3.5px solid #ff0077; border-left: 3.5px solid #ff0077; }
+.cam-frame-box.style-cyberpunk .cam-corner.bottom-right { bottom: 8px; right: 8px; border-bottom: 3.5px solid #ff0077; border-right: 3.5px solid #ff0077; }
+
+/* ================= 3. GOLD LUXURY (ملكي ذهبي فاخر) ================= */
+.cam-frame-box.style-gold_luxury {
+    border: var(--cam-thickness) solid #ffd700;
+    box-shadow: 
+        0 0 var(--cam-glow) #ffd700,
+        0 0 calc(var(--cam-glow) * 1.8) rgba(255, 170, 0, 0.7),
+        inset 0 0 calc(var(--cam-glow) * 0.5) rgba(255, 215, 0, 0.4);
+    animation: goldShinePulse 2.5s ease-in-out infinite alternate;
+}
+
+@keyframes goldShinePulse {
+    0% {
+        box-shadow: 0 0 var(--cam-glow) #ffd700, 0 0 calc(var(--cam-glow) * 1.3) rgba(255, 180, 0, 0.6);
+    }
+    100% {
+        box-shadow: 0 0 calc(var(--cam-glow) * 1.5) #fff, 0 0 calc(var(--cam-glow) * 2.5) #ffd700;
+    }
+}
+
+/* ================= 4. MATRIX GAMER (جيمر ماتريكس) ================= */
+.cam-frame-box.style-matrix_gamer {
+    border: var(--cam-thickness) solid #00ff66;
+    box-shadow: 
+        0 0 var(--cam-glow) #00ff66,
+        0 0 calc(var(--cam-glow) * 1.6) rgba(0, 255, 102, 0.5),
+        inset 0 0 calc(var(--cam-glow) * 0.4) rgba(0, 255, 102, 0.3);
+    animation: matrixScan 2s linear infinite;
+}
+
+@keyframes matrixScan {
+    0%, 100% { border-color: #00ff66; }
+    50% { border-color: #39ff14; }
+}
+
+/* ================= 5. RAINBOW RGB CHROMA (تدفق ألوان RGB) ================= */
+.cam-frame-box.style-rainbow_rgb {
+    border: var(--cam-thickness) solid transparent;
+    background: 
+        linear-gradient(transparent, transparent) padding-box,
+        linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #8b00ff, #ff0000) border-box;
+    background-size: 300% 300%;
+    animation: rgbFlow 3s linear infinite;
+    box-shadow: 0 0 var(--cam-glow) rgba(0, 240, 255, 0.6);
+}
+
+@keyframes rgbFlow {
+    0% { background-position: 0% 50%; box-shadow: 0 0 var(--cam-glow) rgba(255, 0, 0, 0.6); }
+    50% { background-position: 100% 50%; box-shadow: 0 0 var(--cam-glow) rgba(0, 255, 0, 0.6); }
+    100% { background-position: 0% 50%; box-shadow: 0 0 var(--cam-glow) rgba(0, 0, 255, 0.6); }
+}
+
+/* ================= 6. ICE FROST (صقيع جليدي نيون) ================= */
+.cam-frame-box.style-ice_frost {
+    border: var(--cam-thickness) solid #a0f0ff;
+    box-shadow: 
+        0 0 var(--cam-glow) #00d4ff,
+        0 0 calc(var(--cam-glow) * 1.8) #ffffff,
+        inset 0 0 calc(var(--cam-glow) * 0.5) rgba(160, 240, 255, 0.4);
+    animation: iceFrostPulse 2.8s ease-in-out infinite alternate;
+}
+
+@keyframes iceFrostPulse {
+    0% { box-shadow: 0 0 var(--cam-glow) #00d4ff, 0 0 calc(var(--cam-glow) * 1.5) #ffffff; }
+    100% { box-shadow: 0 0 calc(var(--cam-glow) * 1.4) #ffffff, 0 0 calc(var(--cam-glow) * 2.2) #00b4d8; }
+}
+
+/* ================= 7. GALAXY PURPLE (نيون بنفسجي مجري) ================= */
+.cam-frame-box.style-galaxy_purple {
+    border: var(--cam-thickness) solid #b5179e;
+    box-shadow: 
+        0 0 var(--cam-glow) #b5179e,
+        0 0 calc(var(--cam-glow) * 1.8) #7209b7,
+        inset 0 0 calc(var(--cam-glow) * 0.4) rgba(181, 23, 158, 0.4);
+    animation: galaxyPulse 2.4s ease-in-out infinite alternate;
+}
+
+@keyframes galaxyPulse {
+    0% { border-color: #b5179e; box-shadow: 0 0 var(--cam-glow) #b5179e, 0 0 calc(var(--cam-glow) * 1.5) #7209b7; }
+    100% { border-color: #f72585; box-shadow: 0 0 calc(var(--cam-glow) * 1.3) #f72585, 0 0 calc(var(--cam-glow) * 2.2) #4361ee; }
+}
+
+/* ================= 8. MEZO TIK CRIMSON (أحمر ميزو تيك) ================= */
+.cam-frame-box.style-mezotik_crimson,
+.cam-frame-box.style-tikalert_crimson {
+    border: var(--cam-thickness) solid #ff0044;
+    box-shadow: 
+        0 0 var(--cam-glow) #ff0044,
+        0 0 calc(var(--cam-glow) * 1.8) rgba(255, 0, 68, 0.6),
+        inset 0 0 calc(var(--cam-glow) * 0.5) rgba(255, 0, 68, 0.35);
+    animation: crimsonLaser 2s ease-in-out infinite alternate;
+}
+
+@keyframes crimsonLaser {
+    0% { border-color: #ff0044; box-shadow: 0 0 var(--cam-glow) #ff0044; }
+    100% { border-color: #ff3366; box-shadow: 0 0 calc(var(--cam-glow) * 1.5) #ff3366, 0 0 calc(var(--cam-glow) * 2.4) #990022; }
+}
+
+/* ================= 9. TITANIUM PRISM (ألماسي تيتانيوم) ================= */
+.cam-frame-box.style-titanium_prism {
+    border: var(--cam-thickness) solid #e2e8f0;
+    box-shadow: 
+        0 0 var(--cam-glow) #ffffff,
+        0 0 calc(var(--cam-glow) * 1.6) #94a3b8,
+        inset 0 0 calc(var(--cam-glow) * 0.4) rgba(255, 255, 255, 0.5);
+    animation: titaniumShimmer 3s ease-in-out infinite;
+}
+
+@keyframes titaniumShimmer {
+    0%, 100% { border-color: #ffffff; box-shadow: 0 0 var(--cam-glow) #ffffff; }
+    50% { border-color: #cbd5e1; box-shadow: 0 0 calc(var(--cam-glow) * 1.4) #60a5fa, 0 0 calc(var(--cam-glow) * 2) #ffffff; }
+}
+
+/* ================= 10. LIGHTNING STORM (صاعقة كهربائية) ================= */
+.cam-frame-box.style-lightning_storm {
+    border: var(--cam-thickness) solid #00d2ff;
+    box-shadow: 
+        0 0 var(--cam-glow) #00d2ff,
+        0 0 calc(var(--cam-glow) * 2) #3a7bd5,
+        inset 0 0 calc(var(--cam-glow) * 0.5) rgba(0, 210, 255, 0.4);
+    animation: lightningFlicker 1.8s steps(6, end) infinite;
+}
+
+@keyframes lightningFlicker {
+    0%, 100% { border-color: #00d2ff; box-shadow: 0 0 var(--cam-glow) #00d2ff; }
+    20% { border-color: #ffffff; box-shadow: 0 0 calc(var(--cam-glow) * 2) #ffffff; }
+    40% { border-color: #00d2ff; box-shadow: 0 0 var(--cam-glow) #00d2ff; }
+    60% { border-color: #ffffff; box-shadow: 0 0 calc(var(--cam-glow) * 2.5) #ffffff, 0 0 40px #00d2ff; }
+    80% { border-color: #0088ff; box-shadow: 0 0 var(--cam-glow) #0088ff; }
+}
+
+/* ================= STREAMER TAG BADGE ================= */
+.cam-tag-badge {
+    position: absolute;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(10, 5, 8, 0.9);
+    border: 1.5px solid rgba(255, 255, 255, 0.3);
+    padding: 4px 14px;
+    border-radius: 20px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 900;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
+    z-index: 10;
+}
+
+.cam-tag-badge.pos-bottom {
+    bottom: -16px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.cam-tag-badge.pos-top {
+    top: -16px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.cam-tag-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ff0044;
+    box-shadow: 0 0 8px #ff0044;
+    animation: liveDotPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes liveDotPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(1.3); }
+}

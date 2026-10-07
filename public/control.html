@@ -3,362 +3,1235 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎛️ لوحة تحكم هدايا التيك توك | Gifts Overlay</title>
+    <title>MEZO TIK · منصة أدوات البث المباشر والأوفرلاي</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Changa:wght@700;800;900&family=Tajawal:wght@700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/control.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/abstract-fire-bg.css">
+    <link rel="icon" type="image/png" href="/images/mezotik-logo.png">
 </head>
-<body>
+<body class="app-body">
 
-    <!-- Header Navigation -->
-    <header class="app-header">
-        <div class="header-container">
-            <div class="logo-area">
-                <span class="logo-icon">🎁</span>
-                <div>
-                    <h1 class="logo-title">TikTok Gifts Overlay</h1>
-                    <p class="logo-subtitle">لوحة التحكم التفاعلية في هدايا البث المباشر</p>
-                </div>
-            </div>
+    <!-- ================= 100% PURE HTML/CSS ABSTRACT FIRE BACKGROUND ================= -->
+    <div class="abstract-fire-bg" id="abstractFireBg" aria-hidden="true">
+        <!-- Ambient lighting pulse -->
+        <div class="af-ambient-glow"></div>
 
-            <!-- Board ID & Switcher -->
-            <div class="board-selector-area">
-                <div class="board-id-badge">
-                    <span class="label">معرف اللوحة (ID):</span>
-                    <input type="text" id="uidInput" placeholder="board_XXXX" title="اضغط Enter للانتقال">
-                    <button id="switchUidBtn" class="btn-sm btn-neon">تغيير اللوحة</button>
-                </div>
-            </div>
-
-            <!-- Quick Status & Actions -->
-            <div class="header-actions">
-                <div class="status-indicator" id="storageStatusBadge" title="حالة التخزين السحابي">
-                    <span class="status-dot"></span>
-                    <span id="storageStatusText">جاري الفحص...</span>
-                </div>
-                <a href="/fire.html" id="btnGoToFirePage" class="btn-action btn-fire-nav" style="text-decoration:none; display:flex; align-items:center; gap:6px; background:linear-gradient(135deg, #ff4500, #ff8c00); box-shadow:0 0 15px rgba(255, 69, 0, 0.4); border-color:#ffd700;">
-                    🔥 شريط النص الناري (Fire Text) ↗
-                </a>
-                <button class="btn-action btn-obs" onclick="openObsModal()">
-                    📺 رابط الـ Overlay
-                </button>
-                <button class="btn-action btn-cloud" onclick="openCloudModal()">
-                    ☁️ إعدادات Render
-                </button>
-                <button class="btn-action btn-backup" onclick="openBackupModal()">
-                    💾 نسخة احتياطية
-                </button>
-            </div>
+        <!-- Layer 1: Deep Crimson & Dark Orange Under-Streaks -->
+        <div class="af-layer af-layer-back">
+            <div class="af-streak af-streak-back-1"></div>
+            <div class="af-streak af-streak-back-2"></div>
+            <div class="af-streak af-streak-back-3"></div>
         </div>
-    </header>
 
-    <!-- Main Dashboard -->
-    <main class="dashboard-grid">
-        
-        <!-- Right Column: Settings & Live Preview -->
-        <section class="panel-section control-panel">
-            <div class="panel-card">
-                <h2 class="card-title">
-                    <span>↕️ موقع الـ Overlay على الشاشة (تحريك لأعلى وأسفل)</span>
-                </h2>
+        <!-- Layer 2: Primary Massive Vivid Orange Flame Blades -->
+        <div class="af-layer af-layer-mid">
+            <div class="af-streak af-blade-1"></div>
+            <div class="af-streak af-blade-2"></div>
+            <div class="af-streak af-blade-3"></div>
+            <div class="af-streak af-blade-4"></div>
+            <div class="af-streak af-blade-5"></div>
+        </div>
+
+        <!-- Layer 3: Sharp Fast-Moving Fire Trails & Accents -->
+        <div class="af-layer af-layer-fore">
+            <div class="af-streak af-accent-1"></div>
+            <div class="af-streak af-accent-2"></div>
+            <div class="af-streak af-accent-3"></div>
+            <div class="af-streak af-accent-4"></div>
+            <div class="af-streak af-accent-5"></div>
+        </div>
+
+        <!-- Layer 4: Perimeter & Corner Density Clusters -->
+        <div class="af-layer af-layer-edges">
+            <div class="af-streak af-edge-tr"></div>
+            <div class="af-streak af-edge-bl"></div>
+            <div class="af-streak af-edge-tl"></div>
+            <div class="af-streak af-edge-br"></div>
+        </div>
+
+        <!-- Depth Vignette -->
+        <div class="af-vignette"></div>
+    </div>
+
+    <!-- App Shell Layout -->
+    <div class="app-layout" id="appLayout">
+
+        <!-- ================= RIGHT SIDEBAR ================= -->
+        <aside class="sidebar-nav" id="sidebarNav">
+            
+            <!-- Sidebar Header / MEZO TIK Logo -->
+            <div class="sidebar-header">
+                <div class="brand-logo">
+                    <div class="mezotik-brand-wrapper" title="MEZO TIK Streaming Platform">
+                        <img src="/images/mezotik-logo.png" alt="MEZO TIK Logo" class="mezotik-logo-img">
+                        <div class="brand-badge-text">
+                            <span class="brand-tag-top">MEZO</span>
+                            <span class="brand-tag-bot">TIK</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn-sidebar-toggle" id="btnSidebarToggle" title="تصغير / تكبير القائمة">»</button>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="sidebar-menu">
                 
-                <div class="position-control-box">
-                    <p class="control-hint">تحكم في مكان ظهور الهدايا في OBS و TikTok Live Studio:</p>
-                    
-                    <div class="pos-preset-buttons">
-                        <button class="btn-pos" data-valign="top" onclick="setPosition('top', 0)">
-                            ⬆️ أعلى اليمين
-                        </button>
-                        <button class="btn-pos active" data-valign="center" onclick="setPosition('center', 0)">
-                            ⏺️ منتصف اليمين
-                        </button>
-                        <button class="btn-pos" data-valign="bottom" onclick="setPosition('bottom', 0)">
-                            ⬇️ أسفل اليمين
-                        </button>
+                <!-- 1. هدايا التيك توك -->
+                <button class="nav-item active" data-tab="giftsSection">
+                    <span class="nav-icon">🎁</span>
+                    <span class="nav-label">هدايا التيك توك</span>
+                    <span class="nav-badge hot">Live</span>
+                </button>
+
+                <!-- 2. هدايا تيك توك 2 (أوفرلاي الفرق المتنافسة) -->
+                <button class="nav-item" data-tab="teamGiftsSection">
+                    <span class="nav-icon">⚔️</span>
+                    <span class="nav-label">هدايا تيك توك 2</span>
+                    <span class="nav-badge hot">جديد 🔥</span>
+                </button>
+
+                <!-- 3. رابط آخر داعم (الشريط الناري) -->
+                <button class="nav-item" data-tab="fireSection">
+                    <span class="nav-icon">🔥</span>
+                    <span class="nav-label">رابط آخر داعم (ناري)</span>
+                    <span class="nav-badge fire">بركاني</span>
+                </button>
+
+                <!-- 4. بنرات الكاميرا (صفحة مخصصة) -->
+                <button class="nav-item" data-tab="cameraSection">
+                    <span class="nav-icon">📷</span>
+                    <span class="nav-label">بنرات الكاميرا</span>
+                    <span class="nav-badge new">جديد</span>
+                </button>
+
+                <!-- 4. Scoreboard (لوحة النتائج) -->
+                <button class="nav-item" data-tab="scoreboardSection">
+                    <span class="nav-icon">⚡</span>
+                    <span class="nav-label">Scoreboard (النتائج)</span>
+                    <span class="nav-badge score">مباشر</span>
+                </button>
+
+                <!-- 5. إدارة الحساب والمستخدمين -->
+                <button class="nav-item" data-tab="accountSection">
+                    <span class="nav-icon">👤</span>
+                    <span class="nav-label">الحساب والمستخدمين</span>
+                </button>
+
+            </nav>
+
+            <!-- Sidebar Footer / Quick User Info -->
+            <div class="sidebar-footer">
+                <div class="user-pill-card" id="userPillCard">
+                    <div class="user-avatar-circle" id="sidebarUserAvatar">👑</div>
+                    <div class="user-pill-info">
+                        <span class="user-pill-name" id="sidebarUserName">MEZO (المدير)</span>
+                        <span class="user-pill-status">🟢 متصل بالحساب</span>
+                    </div>
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- ================= MAIN CONTENT WRAPPER ================= -->
+        <div class="main-wrapper">
+
+            <!-- Top Header Bar -->
+            <header class="top-navbar">
+                <div class="navbar-left">
+                    <h2 class="active-page-title" id="activePageTitle">🎁 هدايا التيك توك · لوحة التحكم التفاعلية</h2>
+                </div>
+
+                <div class="navbar-right">
+                    <!-- Board ID Selector -->
+                    <div class="board-quick-box">
+                        <span class="board-tag-label">معرف اللوحة (UID):</span>
+                        <input type="text" id="uidInput" value="board_XXXX" class="board-uid-field" title="اضغط Enter لتغيير اللوحة">
+                        <button class="btn-tiny-neon" id="switchUidBtn">تغيير</button>
                     </div>
 
-                    <div class="slider-group">
-                        <div class="slider-header">
-                            <label>↕️ إزاحة دقيقة لأعلى ولأسفل (Y-Offset):</label>
-                            <span class="slider-badge" id="offsetYValue">0 px</span>
-                        </div>
-                        <div class="slider-controls">
-                            <span class="range-bound">⬆️ أعلى</span>
-                            <input type="range" id="offsetYSlider" min="-400" max="400" step="5" value="0">
-                            <span class="range-bound">⬇️ أسفل</span>
-                            <button class="btn-reset" onclick="resetOffsetY()" title="إعادة للصفر">↺</button>
-                        </div>
-                    </div>
+                    <!-- Quick OBS Master Links Button -->
+                    <button class="btn-nav-action btn-obs-master" onclick="openAllObsModal()">
+                        📺 روابط الـ OBS
+                    </button>
 
-                    <div class="slider-group">
-                        <div class="slider-header">
-                            <label>↔️ المحاذاة الأفقية:</label>
-                            <div class="btn-toggle-group">
-                                <button class="btn-toggle active" id="btnAlignRight" onclick="setHorizontalAlign('right')">يمين ➡️</button>
-                                <button class="btn-toggle" id="btnAlignLeft" onclick="setHorizontalAlign('left')">⬅️ يسار</button>
+                    <!-- Auth Button (Login / Logout) -->
+                    <button class="btn-nav-action btn-auth" id="btnAuthToggle" onclick="handleAuthBtnClick()">
+                        👤 تسجيل الدخول
+                    </button>
+                </div>
+            </header>
+
+            <!-- Main Content Area with Tab Sections -->
+            <main class="page-content-area">
+
+                <!-- ================= SECTION 1: هدايا التيك توك (GIFTS OVERLAY) ================= -->
+                <section class="tab-section active" id="giftsSection">
+                    <div class="dashboard-grid">
+                        
+                        <!-- Settings Column -->
+                        <div class="panel-section control-panel">
+                            
+                            <!-- Position Controls -->
+                            <div class="panel-card">
+                                <h3 class="card-title"><span>↕️ موقع ظهور الهدايا على الشاشة</span></h3>
+                                <div class="position-control-box">
+                                    <div class="pos-preset-buttons">
+                                        <button class="btn-pos" data-valign="top" onclick="setPosition('top', 0)">⬆️ أعلى اليمين</button>
+                                        <button class="btn-pos active" data-valign="center" onclick="setPosition('center', 0)">⏺️ منتصف اليمين</button>
+                                        <button class="btn-pos" data-valign="bottom" onclick="setPosition('bottom', 0)">⬇️ أسفل اليمين</button>
+                                    </div>
+                                    <div class="slider-group">
+                                        <div class="slider-header">
+                                            <label>↕️ إزاحة دقيقة لأعلى وأسفل (Y-Offset):</label>
+                                            <span class="slider-badge" id="offsetYValue">0 px</span>
+                                        </div>
+                                        <div class="slider-controls">
+                                            <span class="range-bound">⬆️ أعلى</span>
+                                            <input type="range" id="offsetYSlider" min="-400" max="400" step="5" value="0">
+                                            <span class="range-bound">⬇️ أسفل</span>
+                                            <button class="btn-reset" onclick="resetOffsetY()" title="إعادة للصفر">↺</button>
+                                        </div>
+                                    </div>
+                                    <div class="slider-group">
+                                        <div class="slider-header">
+                                            <label>↔️ المحاذاة الأفقية:</label>
+                                            <div class="btn-toggle-group">
+                                                <button class="btn-toggle active" id="btnAlignRight" onclick="setHorizontalAlign('right')">يمين ➡️</button>
+                                                <button class="btn-toggle" id="btnAlignLeft" onclick="setHorizontalAlign('left')">⬅️ يسار</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Appearance & Neon -->
+                            <div class="panel-card">
+                                <h3 class="card-title"><span>🎨 مظهر النيون والأبعاد</span></h3>
+                                <div class="color-picker-box">
+                                    <div class="color-row">
+                                        <label for="neonColor">لون النيون:</label>
+                                        <input type="color" id="neonColor" value="#a855f7">
+                                        <span id="colorHex">#a855f7</span>
+                                    </div>
+                                    <div class="color-presets">
+                                        <button class="preset-btn" style="--c:#a855f7" data-color="#a855f7"></button>
+                                        <button class="preset-btn" style="--c:#ef4444" data-color="#ef4444"></button>
+                                        <button class="preset-btn" style="--c:#3b82f6" data-color="#3b82f6"></button>
+                                        <button class="preset-btn" style="--c:#10b981" data-color="#10b981"></button>
+                                        <button class="preset-btn" style="--c:#f59e0b" data-color="#f59e0b"></button>
+                                        <button class="preset-btn" style="--c:#ec4899" data-color="#ec4899"></button>
+                                        <button class="preset-btn" style="--c:#06b6d4" data-color="#06b6d4"></button>
+                                        <button class="preset-btn" style="--c:#eab308" data-color="#eab308"></button>
+                                    </div>
+                                    <div class="slider-group mt-3">
+                                        <div class="slider-header">
+                                            <label>📏 حجم الهدايا والخط:</label>
+                                            <span class="slider-badge" id="scaleValue">100%</span>
+                                        </div>
+                                        <input type="range" id="scaleSlider" min="70" max="140" step="5" value="100">
+                                    </div>
+                                    <div class="slider-group">
+                                        <div class="slider-header">
+                                            <label>💡 قوة توهج النيون (Glow):</label>
+                                            <span class="slider-badge" id="glowValue">15 px</span>
+                                        </div>
+                                        <input type="range" id="glowSlider" min="5" max="30" step="1" value="15">
+                                    </div>
+                                    <div class="slider-group">
+                                        <div class="slider-header">
+                                            <label>🎬 تأثير الحركة (Animation):</label>
+                                            <select id="animTypeSelect" class="form-select">
+                                                <option value="slide">انزلاق سلس (Slide In/Out)</option>
+                                                <option value="fade">تلاشي لطيف (Fade)</option>
+                                                <option value="bounce">قفزة حيوية (Bounce)</option>
+                                                <option value="pulse">نبض مستمر (Pulse)</option>
+                                                <option value="none">ثابت بدون حركة (Static)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- Static Text Mode Toggle Switch (الكلام ثابت والصور بس متحركة) -->
+                                    <div class="checkbox-toggle-card" onclick="toggleTextStaticMode()">
+                                        <div class="toggle-info">
+                                            <h4>📌 تثبيت النص (الصور فقط متحركة)</h4>
+                                            <p>تبقى أسماء الهدايا ثابتة وظاهرة، بينما تتحرك أيقونات الصور فقط!</p>
+                                        </div>
+                                        <label class="switch-control" onclick="event.stopPropagation()">
+                                            <input type="checkbox" id="textStaticModeCheck" onchange="onTextStaticModeChange(this.checked)">
+                                            <span class="slider-round"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Live Simulator Card -->
+                            <div class="panel-card preview-card">
+                                <div class="card-header-flex">
+                                    <h3 class="card-title"><span>👁️ محاكي شاشة البث (OBS Live)</span></h3>
+                                    <a id="previewExternalLink" href="#" target="_blank" class="preview-external-btn">فتح بملء الشاشة ↗</a>
+                                </div>
+                                <div class="preview-screen-wrapper">
+                                    <div class="preview-screen" id="previewScreen">
+                                        <div class="preview-overlay-content" id="previewOverlayContent"></div>
+                                    </div>
+                                </div>
+                                <button class="btn-obs-full mt-3" onclick="copyCurrentOverlayUrl('gifts')">
+                                    📋 نسخ رابط أوفرلاي الهدايا لـ OBS
+                                </button>
+                            </div>
+
+                        </div>
+
+                        <!-- Gift Cards Column -->
+                        <div class="panel-section gifts-panel">
+                            
+                            <!-- Add Gifts Form -->
+                            <div class="panel-card add-gift-card">
+                                <h3 class="card-title"><span>➕ إضافة هدايا جديدة</span></h3>
+                                <div class="tabs-nav">
+                                    <button class="tab-btn active" data-tab="libraryTab">🎁 مكتبة هدايا تيك توك مصر (700+ هدية)</button>
+                                    <button class="tab-btn" data-tab="uploadTab">📁 رفع من جهازك</button>
+                                    <button class="tab-btn" data-tab="urlTab">🔗 رابط صورة مباشر</button>
+                                </div>
+
+                                <!-- Library Tab (Default: 700+ TikTok Egypt Gifts) -->
+                                <div class="tab-content active" id="libraryTab">
+                                    <div class="tiktok-catalog-header">
+                                        <div class="search-input-box">
+                                            <span class="search-icon">🔍</span>
+                                            <input type="text" id="catalogSearchInput" class="form-input" placeholder="ابحث باسم الهدية أو عدد العملات..." oninput="onCatalogSearchInput(this.value)">
+                                        </div>
+                                        <div class="price-chips-row" id="catalogPriceChips">
+                                            <button type="button" class="chip active" onclick="setCatalogPriceFilter('all')">الكل (700+)</button>
+                                            <button type="button" class="chip" onclick="setCatalogPriceFilter('1')">🪙 1 عملة</button>
+                                            <button type="button" class="chip" onclick="setCatalogPriceFilter('lt10')">🪙 2 - 9 عملات</button>
+                                            <button type="button" class="chip" onclick="setCatalogPriceFilter('lt100')">🪙 10 - 99 عملة</button>
+                                            <button type="button" class="chip" onclick="setCatalogPriceFilter('lt1000')">🪙 100 - 999 عملة</button>
+                                            <button type="button" class="chip" onclick="setCatalogPriceFilter('gt1000')">👑 1000+ الملكية</button>
+                                        </div>
+                                    </div>
+                                    <div class="catalog-status-bar">
+                                        <span id="catalogCountDisplay" style="color:#aaa; font-size:12px;">جاري تحميل مكتبة الهدايا...</span>
+                                        <span style="color:#22ff88; font-size:11px; font-weight:700;">⚡ اضغط على أي هدية لإضافتها فوراً للأوفرلاي</span>
+                                    </div>
+                                    <div class="tiktok-catalog-grid" id="tiktokCatalogGrid"></div>
+                                </div>
+
+                                <!-- Upload Tab -->
+                                <div class="tab-content" id="uploadTab">
+                                    <div class="upload-dropzone" onclick="document.getElementById('fileInput').click()" id="dropZone">
+                                        <span class="dropzone-icon">📤</span>
+                                        <h4>اضغط لاختيار صورة أو اسحبها هنا</h4>
+                                        <p>PNG, WEBP, JPG, GIF</p>
+                                        <input type="file" id="fileInput" accept="image/*" multiple hidden>
+                                    </div>
+                                    <div id="pendingBox" class="pending-box"></div>
+                                    <button id="saveAllGiftsBtn" class="btn-save-all" style="display:none" onclick="savePendingGifts()">💾 حفظ وإضافة كل الصور</button>
+                                </div>
+
+                                <!-- URL Tab -->
+                                <div class="tab-content" id="urlTab">
+                                    <div class="url-input-group">
+                                        <input type="text" id="giftUrlInput" placeholder="https://example.com/gift-icon.png" class="form-input">
+                                        <input type="text" id="giftUrlName" placeholder="✍️ اسم الهدية (مثلاً: نيزك، تيربو)" class="form-input">
+                                    </div>
+                                    <div id="urlPreviewBox" class="url-preview-box" style="display:none">
+                                        <img id="urlPreviewImg" src="" alt="معاينة">
+                                        <span id="urlPreviewName"></span>
+                                    </div>
+                                    <button class="btn-primary mt-2" onclick="addGiftByUrl()">➕ إضافة الهدية</button>
+                                </div>
+                            </div>
+
+                            <!-- Current Gifts List -->
+                            <div class="panel-card current-gifts-card">
+                                <div class="card-header-flex">
+                                    <h3 class="card-title"><span>📋 الهدايا الحالية في الـ Overlay</span></h3>
+                                    <span class="count-badge" id="giftsCountBadge">0 هدية</span>
+                                </div>
+                                <div id="giftsList" class="gifts-list"></div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- ================= SECTION 2: هدايا تيك توك 2 (أوفرلاي الفرق المزدوج) ================= -->
+                <section class="tab-section" id="teamGiftsSection">
+                    <div class="dashboard-grid">
+                        
+                        <!-- Left Column: Both Teams Config & Mutual Exclusion Library -->
+                        <div class="panel-section control-panel" style="max-width: 100%;">
+                            
+                            <!-- Master Header Card -->
+                            <div class="panel-card">
+                                <div class="card-header-flex">
+                                    <h3 class="card-title"><span>⚔️ أوفرلاي هدايا الفرق المتنافسة (Team Gifts)</span></h3>
+                                    <div class="header-badges-row">
+                                        <span class="exclusion-badge">🛡️ ميزة منع تكرار الصور مفعلة</span>
+                                    </div>
+                                </div>
+                                <p style="font-size:13px; color:#cbd5e1; margin-top:6px;">
+                                    يمكنك تخصيص أوفرلايين مختلفين للبث (مثل <strong>المساعدين</strong> و <strong>المخربين</strong>) مع تحديد كلمة مخصصة ولون نيون لكل فريق، <strong>ولا يمكن لأي صورة أن تتكرر بين الأوفرلايين إطلاقاً</strong>!
+                                </p>
+
+                                <div class="team-dual-grid mt-3">
+                                    
+                                    <!-- Team 1 Card (المساعدين) -->
+                                    <div class="team-manage-card team-1-card">
+                                        <div class="team-card-header">
+                                            <div class="team-badge-tag">الفريق 1</div>
+                                            <div class="team-color-picker-box">
+                                                <label for="team1ColorInput">اللون:</label>
+                                                <input type="color" id="team1ColorInput" value="#22ff88" onchange="onTeamColorChange('team1', this.value)">
+                                                <span id="team1ColorHex" style="font-size:12px; color:#22ff88; font-weight:800;">#22ff88</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="team1TitleInput">الكلمة أعلى الهدايا (العنوان):</label>
+                                            <input type="text" id="team1TitleInput" class="form-input" value="المساعدين" placeholder="مثلاً: المساعدين أو الداعمين" oninput="onTeamTitleChange('team1', this.value)">
+                                        </div>
+
+                                        <div class="checkbox-toggle-card mt-2" onclick="toggleTeamImageOnly('team1')">
+                                            <div class="toggle-info">
+                                                <h4 style="font-size:13px;">الصور فقط متحركة</h4>
+                                                <p style="font-size:11px;">تثبيت كلمة الفريق</p>
+                                            </div>
+                                            <label class="switch-control" onclick="event.stopPropagation()">
+                                                <input type="checkbox" id="team1ImgOnlyCheck" checked onchange="onTeamImgOnlyChange('team1', this.checked)">
+                                                <span class="slider-round"></span>
+                                            </label>
+                                        </div>
+
+                                        <div class="team-assigned-box mt-3">
+                                            <div class="slider-header">
+                                                <label>🎁 هدايا الفريق 1:</label>
+                                                <span class="count-badge" id="team1CountBadge">0 هدية</span>
+                                            </div>
+                                            <div class="team-gifts-assigned-list" id="team1AssignedList">
+                                                <!-- Dynamic items -->
+                                            </div>
+                                        </div>
+
+                                        <div class="team-actions-row mt-2">
+                                            <button class="btn-obs-action" onclick="copyTeamOverlayUrl('1')">📺 نسخ رابط OBS للفريق 1</button>
+                                            <a id="team1PreviewLink" href="/overlay-team.html?team=1" target="_blank" class="btn-open-preview">👁️ فتح</a>
+                                        </div>
+                                    </div>
+
+                                    <!-- Team 2 Card (المخربين) -->
+                                    <div class="team-manage-card team-2-card">
+                                        <div class="team-card-header">
+                                            <div class="team-badge-tag">الفريق 2</div>
+                                            <div class="team-color-picker-box">
+                                                <label for="team2ColorInput">اللون:</label>
+                                                <input type="color" id="team2ColorInput" value="#ff2a4a" onchange="onTeamColorChange('team2', this.value)">
+                                                <span id="team2ColorHex" style="font-size:12px; color:#ff2a4a; font-weight:800;">#ff2a4a</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="team2TitleInput">الكلمة أعلى الهدايا (العنوان):</label>
+                                            <input type="text" id="team2TitleInput" class="form-input" value="المخربين" placeholder="مثلاً: المخربين أو المنافسين" oninput="onTeamTitleChange('team2', this.value)">
+                                        </div>
+
+                                        <div class="checkbox-toggle-card mt-2" onclick="toggleTeamImageOnly('team2')">
+                                            <div class="toggle-info">
+                                                <h4 style="font-size:13px;">الصور فقط متحركة</h4>
+                                                <p style="font-size:11px;">تثبيت كلمة الفريق</p>
+                                            </div>
+                                            <label class="switch-control" onclick="event.stopPropagation()">
+                                                <input type="checkbox" id="team2ImgOnlyCheck" checked onchange="onTeamImgOnlyChange('team2', this.checked)">
+                                                <span class="slider-round"></span>
+                                            </label>
+                                        </div>
+
+                                        <div class="team-assigned-box mt-3">
+                                            <div class="slider-header">
+                                                <label>🎁 هدايا الفريق 2:</label>
+                                                <span class="count-badge" id="team2CountBadge">0 هدية</span>
+                                            </div>
+                                            <div class="team-gifts-assigned-list" id="team2AssignedList">
+                                                <!-- Dynamic items -->
+                                            </div>
+                                        </div>
+
+                                        <div class="team-actions-row mt-2">
+                                            <button class="btn-obs-action" onclick="copyTeamOverlayUrl('2')">📺 نسخ رابط OBS للفريق 2</button>
+                                            <a id="team2PreviewLink" href="/overlay-team.html?team=2" target="_blank" class="btn-open-preview">👁️ فتح</a>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <!-- Mutual Exclusion Gift Picker (مكتبة الاختيار المانعة للتكرار) -->
+                                <div class="exclusion-library-box mt-3">
+                                    <div class="exclusion-header-info">
+                                        <div>
+                                            <h4 style="color:#fff; font-size:14.5px;">🌟 مكتبة الهدايا وقاعدة منع تكرار الصور بين الفرق</h4>
+                                            <p style="font-size:12px; color:#94a3b8;">اضغط على أي هدية لإضافتها للفريق النشط المحدد أدناه. الهدية المستخدمة في أحد الفريقين تصبح غير متاحة للفريق الآخر!</p>
+                                        </div>
+                                        <div class="btn-toggle-group">
+                                            <button class="btn-toggle active" id="btnTargetTeam1" onclick="setActiveTargetTeam('team1')">🎯 الإضافة لـ: الفريق 1</button>
+                                            <button class="btn-toggle" id="btnTargetTeam2" onclick="setActiveTargetTeam('team2')">🎯 الإضافة لـ: الفريق 2</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="exclusion-grid-chips" id="teamGiftsLibraryGrid">
+                                        <!-- Dynamically generated with badges & mutual exclusion checks -->
+                                    </div>
+
+                                    <div class="form-actions mt-3" style="display:flex; justify-content:space-between; align-items:center;">
+                                        <button class="btn-primary" onclick="saveTeamGiftsAction()">💾 حفظ ونشر إعدادات الفريقين فوراً لـ OBS</button>
+                                        <button class="btn-danger-outline" onclick="resetTeamGiftsDefaults()">↺ استعادة الهدايا الافتراضية للفرق</button>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <!-- Live Dual Simulator Card -->
+                            <div class="panel-card mt-3">
+                                <h3 class="card-title"><span>👁️ محاكي شاشات البث المباشر المزدوج (Live OBS Preview)</span></h3>
+                                <p style="font-size:12px; color:#94a3b8; margin-bottom:12px;">معاينة حية فورية لما سيظهر على شاشة البث في OBS لكلا الفريقين في نفس الوقت:</p>
+                                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+                                    <div style="background:rgba(0,0,0,0.6); border:1.5px solid #22ff88; border-radius:14px; padding:10px;">
+                                        <h4 style="color:#22ff88; font-size:13px; margin-bottom:8px; text-align:center;">🟢 أوفرلاي الفريق 1</h4>
+                                        <iframe id="team1SimIframe" src="/overlay-team.html?team=1" style="width:100%; height:260px; border:none; border-radius:10px; background:rgba(0,0,0,0.3);"></iframe>
+                                    </div>
+                                    <div style="background:rgba(0,0,0,0.6); border:1.5px solid #ff2a4a; border-radius:14px; padding:10px;">
+                                        <h4 style="color:#ff2a4a; font-size:13px; margin-bottom:8px; text-align:center;">🔴 أوفرلاي الفريق 2</h4>
+                                        <iframe id="team2SimIframe" src="/overlay-team.html?team=2" style="width:100%; height:260px; border:none; border-radius:10px; background:rgba(0,0,0,0.3);"></iframe>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- ================= SECTION 3: رابط آخر داعم (الشريط الناري) ================= -->
+                <section class="tab-section" id="fireSection">
+                    <div class="dashboard-grid">
+                        
+                        <!-- Left Column: Controls -->
+                        <div class="panel-section control-panel">
+                            
+                            <!-- Fire Text Content -->
+                            <div class="panel-card">
+                                <h3 class="card-title"><span>🔥 تخصيص نص ورابط الدعم (الشريط الناري)</span></h3>
+                                
+                                <div class="form-group">
+                                    <label for="fireTextInput">✍️ النص المعروض في الشريط:</label>
+                                    <input type="text" id="fireTextInput" class="form-input" value="رابط الدعم بالبايو 🔥" placeholder="اكتب النص الذي تريده...">
+                                </div>
+
+                                <div class="slider-group mt-3">
+                                    <div class="slider-header">
+                                        <label>📏 حجم الخط (Font Size):</label>
+                                        <span class="slider-badge" id="fireFontSizeBadge">64 px</span>
+                                    </div>
+                                    <input type="range" id="fireFontSizeSlider" min="32" max="96" value="64">
+                                </div>
+
+                                <!-- Neon Glow Option (خيار خط نيون ولا لا) -->
+                                <div class="form-group mt-3" style="background:rgba(255,255,255,0.03); padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,0.08); display:flex; justify-content:space-between; align-items:center;">
+                                    <div>
+                                        <label style="margin:0; font-size:13px; font-weight:800; color:#fff;">💡 توهج خط النيون (Neon Glow):</label>
+                                        <div style="font-size:11px; color:#94a3b8; margin-top:2px;">تفعيل أو تعطيل التوهج الإشعاعي المشع للنص</div>
+                                    </div>
+                                    <div class="btn-toggle-group" style="margin:0;">
+                                        <button type="button" class="btn-toggle active" id="btnNeonOn" onclick="toggleFireNeon(true)">💡 نيون مفعل</button>
+                                        <button type="button" class="btn-toggle" id="btnNeonOff" onclick="toggleFireNeon(false)">⚪ بدون نيون</button>
+                                    </div>
+                                </div>
+
+                                <div class="slider-group mt-2" id="neonStrengthBox">
+                                    <div class="slider-header">
+                                        <label>✨ قوة إشعاع وتوهج النيون:</label>
+                                        <span class="slider-badge" id="fireNeonStrengthBadge">95%</span>
+                                    </div>
+                                    <input type="range" id="fireNeonStrengthSlider" min="20" max="100" value="95">
+                                </div>
+
+                                <!-- Color Customization & Palettes -->
+                                <div class="form-group mt-3">
+                                    <label>🎨 ألوان النص والتوهج:</label>
+                                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                                        <div class="color-picker-card" style="display:flex; align-items:center; gap:8px; background:rgba(0,0,0,0.4); padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.1);">
+                                            <label for="fireColorInput" style="font-size:12px; font-weight:800; color:#cbd5e1;">اللون الأساسي:</label>
+                                            <input type="color" id="fireColorInput" value="#ff1e00" onchange="onFireColorChange(this.value)" style="width:36px; height:32px; border:none; cursor:pointer; background:none;">
+                                            <span id="fireColorHex" style="font-size:12px; font-weight:800; color:#ff1e00;">#ff1e00</span>
+                                        </div>
+                                        <div class="color-picker-card" style="display:flex; align-items:center; gap:8px; background:rgba(0,0,0,0.4); padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.1);">
+                                            <label for="fireSecColorInput" style="font-size:12px; font-weight:800; color:#cbd5e1;">لون اللمعان:</label>
+                                            <input type="color" id="fireSecColorInput" value="#ffd700" onchange="onFireSecColorChange(this.value)" style="width:36px; height:32px; border:none; cursor:pointer; background:none;">
+                                            <span id="fireSecColorHex" style="font-size:12px; font-weight:800; color:#ffd700;">#ffd700</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Quick Palettes -->
+                                    <div class="price-chips-row mt-2" id="firePaletteChips">
+                                        <button type="button" class="chip active" onclick="applyFirePalette('#ff1e00', '#ffd700')">🔥 ناري بركاني</button>
+                                        <button type="button" class="chip" onclick="applyFirePalette('#ff0044', '#ff758c')">🩸 دم ياقوتي</button>
+                                        <button type="button" class="chip" onclick="applyFirePalette('#00f0ff', '#b5179e')">⚡ سايبر نيون</button>
+                                        <button type="button" class="chip" onclick="applyFirePalette('#ffb703', '#fff0a5')">👑 ذهب ملكي</button>
+                                        <button type="button" class="chip" onclick="applyFirePalette('#00ff88', '#ccff00')">🧪 إيميرالد حمضي</button>
+                                        <button type="button" class="chip" onclick="applyFirePalette('#a855f7', '#ec4899')">🔮 بلازما بنفسجية</button>
+                                        <button type="button" class="chip" onclick="applyFirePalette('#00d2ff', '#ffffff')">❄️ جليد أزرق</button>
+                                    </div>
+                                </div>
+
+                                <!-- Frame Selection (خيارات الإطار) -->
+                                <div class="form-group mt-3">
+                                    <label>🖼️ خيارات إطار النص (Frame Style):</label>
+                                    <div class="style-cards-grid mt-1" id="fireFrameChipsGrid">
+                                        <div class="style-chip active" data-framestyle="transparent" onclick="setFireBannerFrame('transparent')">
+                                            <span>✨ بدون إطار (نص حر شفاف)</span>
+                                        </div>
+                                        <div class="style-chip" data-framestyle="glass" onclick="setFireBannerFrame('glass')">
+                                            <span>🪟 إطار زجاجي فاخر</span>
+                                        </div>
+                                        <div class="style-chip" data-framestyle="cyber_neon" onclick="setFireBannerFrame('cyber_neon')">
+                                            <span>⚡ إطار سايبر نيون</span>
+                                        </div>
+                                        <div class="style-chip" data-framestyle="magma" onclick="setFireBannerFrame('magma')">
+                                            <span>🌋 شريط الحمم البركانية</span>
+                                        </div>
+                                        <div class="style-chip" data-framestyle="gold_royal" onclick="setFireBannerFrame('gold_royal')">
+                                            <span>👑 إطار ذهبي ملكي</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Display Mode: Static vs Smoke Cycle (خيار يا ثابت يا متحرك وبس) -->
+                                <div class="form-group mt-3">
+                                    <label>⏱️ وضع الظهور على شاشة البث (OBS):</label>
+                                    <div class="pos-preset-buttons">
+                                        <button type="button" class="btn-pos active" id="btnModeContinuous" onclick="setFireDisplayMode('continuous')">🟢 ثابت دائم</button>
+                                        <button type="button" class="btn-pos" id="btnModeCycle" onclick="setFireDisplayMode('cycle')">🌪️ متحرك (دخان الإخفاء والظهور)</button>
+                                    </div>
+                                </div>
+
+                                <div id="fireCycleControlsBox" class="mt-2" style="display:none; padding:14px; background:rgba(255,0,68,0.06); border-radius:12px; border:1px solid rgba(255,42,74,0.25);">
+                                    <div class="slider-group">
+                                        <div class="slider-header">
+                                            <label>👁️ مدة بقاء النص ظاهراً على الشاشة:</label>
+                                            <span class="slider-badge" id="fireHoldDurationBadge">6 ثواني</span>
+                                        </div>
+                                        <input type="range" id="fireHoldDurationSlider" min="2" max="25" value="6" oninput="onFireHoldDurationChange(this.value)">
+                                    </div>
+                                    <div class="slider-group mt-2">
+                                        <div class="slider-header">
+                                            <label>⏳ مدة الاختفاء والانتظار قبل عودة الظهور:</label>
+                                            <span class="slider-badge" id="fireLoopIntervalBadge">8 ثواني</span>
+                                        </div>
+                                        <input type="range" id="fireLoopIntervalSlider" min="2" max="30" value="8" oninput="onFireLoopIntervalChange(this.value)">
+                                    </div>
+                                </div>
+
+                                <div class="form-actions mt-3">
+                                    <button class="btn-fire-primary" onclick="saveFireSettingsAction()">
+                                        💾 حفظ وتطبيق على البث فورا
+                                    </button>
+                                    <button class="btn-obs-action" onclick="copyCurrentOverlayUrl('fire')">
+                                        📺 نسخ رابط الـ OBS للشريط
+                                    </button>
+                                </div>
+
+                            </div>
+
+                            <!-- Position Controls -->
+                            <div class="panel-card">
+                                <h3 class="card-title"><span>📍 موضع الشريط على الشاشة</span></h3>
+                                
+                                <div class="form-group">
+                                    <label>↕️ المحاذاة الرأسية:</label>
+                                    <div class="pos-preset-buttons">
+                                        <button class="btn-pos" onclick="setFirePos('top')">⬆️ أعلى الشاشة</button>
+                                        <button class="btn-pos active" onclick="setFirePos('center')">⏺️ منتصف الشاشة</button>
+                                        <button class="btn-pos" onclick="setFirePos('bottom')">⬇️ أسفل الشاشة</button>
+                                    </div>
+                                </div>
+
+                                <div class="slider-group mt-3">
+                                    <div class="slider-header">
+                                        <label>↕️ إزاحة دقيقة لأعلى وأسفل (Y-Offset):</label>
+                                        <span class="slider-badge" id="fireOffsetYBadge">0 px</span>
+                                    </div>
+                                    <input type="range" id="fireOffsetYSlider" min="-300" max="300" value="0">
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Right Column: Live Simulator -->
+                        <div class="panel-section gifts-panel">
+                            <div class="panel-card">
+                                <div class="card-header-flex">
+                                    <h3 class="card-title"><span>👁️ محاكي الشريط المباشر (OBS Simulator)</span></h3>
+                                    <a id="firePreviewExternalLink" href="/fire-text.html" target="_blank" class="preview-external-btn">شاشة كاملة ↗</a>
+                                </div>
+
+                                <div class="fire-simulator-container">
+                                    <iframe id="fireSimIframe" src="/fire-text.html" class="fire-sim-frame"></iframe>
+                                </div>
+
+                                <div class="sim-controls-row mt-3">
+                                    <button class="btn-sim" onclick="reloadFireSim()">↺ إعادة تشغيل المحاكي</button>
+                                    <button class="btn-sim" onclick="testFireSmokeCycle()">🌪️ تجربة دورة الدخان والظهور</button>
+                                </div>
+
+                                <p class="preview-note mt-3">
+                                    💡 <strong>طريقة الاستخدام:</strong> انسخ رابط الـ OBS وضعه كمصدر متصفح (Browser Source) في OBS أو TikTok Live Studio الشفافية مفعلة تلقائياً بنسبة 100%.
+                                </p>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Appearance & Neon -->
-            <div class="panel-card">
-                <h2 class="card-title">
-                    <span>🎨 مظهر النيون والحجم</span>
-                </h2>
-
-                <div class="color-picker-box">
-                    <div class="color-row">
-                        <label for="neonColor">لون النيون:</label>
-                        <input type="color" id="neonColor" value="#a855f7">
-                        <span id="colorHex">#a855f7</span>
-                    </div>
-
-                    <div class="color-presets">
-                        <button class="preset-btn" style="--c:#a855f7" data-color="#a855f7" title="بنفسجي ملكي"></button>
-                        <button class="preset-btn" style="--c:#ef4444" data-color="#ef4444" title="أحمر ناري"></button>
-                        <button class="preset-btn" style="--c:#3b82f6" data-color="#3b82f6" title="أزرق نيون"></button>
-                        <button class="preset-btn" style="--c:#10b981" data-color="#10b981" title="أخضر زمردي"></button>
-                        <button class="preset-btn" style="--c:#f59e0b" data-color="#f59e0b" title="برتقالي"></button>
-                        <button class="preset-btn" style="--c:#ec4899" data-color="#ec4899" title="وردي"></button>
-                        <button class="preset-btn" style="--c:#06b6d4" data-color="#06b6d4" title="سماوي سايبر"></button>
-                        <button class="preset-btn" style="--c:#eab308" data-color="#eab308" title="أصفر ذهبي"></button>
-                    </div>
-
-                    <div class="slider-group mt-3">
-                        <div class="slider-header">
-                            <label>📏 حجم الهدايا والخط:</label>
-                            <span class="slider-badge" id="scaleValue">100%</span>
+                                <p class="preview-note mt-3">
+                                    💡 <strong>طريقة الاستخدام:</strong> انسخ رابط الـ OBS وضعه كمصدر متصفح (Browser Source) في OBS أو TikTok Live Studio الشفافية مفعلة تلقائياً بنسبة 100%.
+                                </p>
+                            </div>
                         </div>
-                        <input type="range" id="scaleSlider" min="70" max="140" step="5" value="100">
-                    </div>
 
-                    <div class="slider-group">
-                        <div class="slider-header">
-                            <label>💡 قوة توهج النيون (Glow):</label>
-                            <span class="slider-badge" id="glowValue">15 px</span>
+                    </div>
+                </section>
+
+                <!-- ================= SECTION 3: بنرات الكاميرا (CAMERA FRAMES) ================= -->
+                <section class="tab-section" id="cameraSection">
+                    <div class="dashboard-grid">
+                        
+                        <!-- Left Column: Frame Styles & Settings -->
+                        <div class="panel-section control-panel">
+                            
+                            <!-- Style Picker -->
+                            <div class="panel-card">
+                                <h3 class="card-title"><span>🎨 اختر ستايل إطار الكاميرا (10 أنماط احترافية)</span></h3>
+                                
+                                <div class="camera-styles-grid">
+                                    
+                                    <div class="cam-style-card active" data-camstyle="volcano">
+                                        <div class="cam-style-preview flame-preview"></div>
+                                        <div class="cam-style-info">
+                                            <h4>🔥 بركان ناري نيون</h4>
+                                            <p>لهب حارق مع شرارات متطايرة</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="cam-style-card" data-camstyle="cyberpunk">
+                                        <div class="cam-style-preview cyber-preview"></div>
+                                        <div class="cam-style-info">
+                                            <h4>⚡ سايبربانك نيون</h4>
+                                            <p>سماوي ووردي بتقنية المستقبل</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="cam-style-card" data-camstyle="gold_luxury">
+                                        <div class="cam-style-preview gold-preview"></div>
+                                        <div class="cam-style-info">
+                                            <h4>👑 ملكي ذهبي فاخر</h4>
+                                            <p>ذهب عيار 24 مع بريق متلألئ</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="cam-style-card" data-camstyle="matrix_gamer">
+                                        <div class="cam-style-preview matrix-preview"></div>
+                                        <div class="cam-style-info">
+                                            <h4>🎮 جيمر ماتريكس</h4>
+                                            <p>أخضر سيبراني وخطوط ليزر</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="cam-style-card" data-camstyle="rainbow_rgb">
+                                        <div class="cam-style-preview rgb-preview"></div>
+                                        <div class="cam-style-info">
+                                            <h4>🌈 تدفق ألوان RGB</h4>
+                                            <p>إضاءة كروما متحركة 360 درجة</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="cam-style-card" data-camstyle="ice_frost">
+                                        <div class="cam-style-preview ice-preview"></div>
+                                        <div class="cam-style-info">
+                                            <h4>❄️ صقيع جليدي نيون</h4>
+                                            <p>بلورات جليد بيضاء مع دخان بارد</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="cam-style-card" data-camstyle="galaxy_purple">
+                                        <div class="cam-style-preview galaxy-preview"></div>
+                                        <div class="cam-style-info">
+                                            <h4>💜 نيون بنفسجي مجري</h4>
+                                            <p>سديم فضائي بنفسجي لامع</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="cam-style-card" data-camstyle="mezotik_crimson">
+                                        <div class="cam-style-preview crimson-preview"></div>
+                                        <div class="cam-style-info">
+                                            <h4>🔴 أحمر ميزو تيك</h4>
+                                            <p>أحمر ليزري نيون مطابق للمنصة</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="cam-style-card" data-camstyle="titanium_prism">
+                                        <div class="cam-style-preview titanium-preview"></div>
+                                        <div class="cam-style-info">
+                                            <h4>💎 ألماسي تيتانيوم</h4>
+                                            <p>انعكاسات كروم كريستالية</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="cam-style-card" data-camstyle="lightning_storm">
+                                        <div class="cam-style-preview lightning-preview"></div>
+                                        <div class="cam-style-info">
+                                            <h4>⚡ صاعقة كهربائية</h4>
+                                            <p>صدمات كهربائية زرقاء متحركة</p>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <!-- Aspect Ratio & Tag Customization -->
+                            <div class="panel-card">
+                                <h3 class="card-title"><span>📐 أبعاد الكاميرا والشارة (Tag)</span></h3>
+                                
+                                <div class="form-group">
+                                    <label>أبعاد ونسبة شاشة الكاميرا:</label>
+                                    <div class="pos-preset-buttons">
+                                        <button class="btn-pos active" onclick="setCamRatio('16-9')">🖥️ 16:9 (كاميرا قياسية)</button>
+                                        <button class="btn-pos" onclick="setCamRatio('4-3')">📺 4:3 (مربعة تقليدية)</button>
+                                        <button class="btn-pos" onclick="setCamRatio('1-1')">⏹️ 1:1 (مربع متساوي)</button>
+                                        <button class="btn-pos" onclick="setCamRatio('9-16')">📱 9:16 (بث عمودي للجوال)</button>
+                                    </div>
+                                </div>
+
+                                <div class="form-group mt-3">
+                                    <label for="camTagInput">شارة الكاميرا (Tag):</label>
+                                    <input type="text" id="camTagInput" class="form-input" value="" placeholder="بدون شارة (أو اكتب ما تريد مثلاً: @username)">
+                                </div>
+
+                                <div class="form-group mt-3">
+                                    <label>موضع الشارة:</label>
+                                    <div class="btn-toggle-group">
+                                        <button class="btn-toggle" id="btnTagBottom" onclick="setCamTagPos('bottom')">⬇️ أسفل الإطار</button>
+                                        <button class="btn-toggle" id="btnTagTop" onclick="setCamTagPos('top')">⬆️ أعلى الإطار</button>
+                                        <button class="btn-toggle active" id="btnTagNone" onclick="setCamTagPos('none')">✕ بدون شارة</button>
+                                    </div>
+                                </div>
+
+                                <div class="slider-group mt-3">
+                                    <div class="slider-header">
+                                        <label>💡 قوة توهج النيون (Glow):</label>
+                                        <span class="slider-badge" id="camGlowBadge">24 px</span>
+                                    </div>
+                                    <input type="range" id="camGlowSlider" min="6" max="45" value="24">
+                                </div>
+
+                                <div class="slider-group">
+                                    <div class="slider-header">
+                                        <label>🔲 انحناء الحواف (Border Radius):</label>
+                                        <span class="slider-badge" id="camRadiusBadge">18 px</span>
+                                    </div>
+                                    <input type="range" id="camRadiusSlider" min="0" max="36" value="18">
+                                </div>
+
+                                <div class="slider-group">
+                                    <div class="slider-header">
+                                        <label>📏 سُمك الإطار (Thickness):</label>
+                                        <span class="slider-badge" id="camThicknessBadge">4 px</span>
+                                    </div>
+                                    <input type="range" id="camThicknessSlider" min="2" max="10" value="4">
+                                </div>
+
+                                <div class="form-actions mt-3">
+                                    <button class="btn-primary" onclick="saveCameraSettingsAction()">💾 حفظ الإعدادات</button>
+                                    <button class="btn-obs-action" onclick="copyCurrentOverlayUrl('camera')">📺 نسخ رابط إطار الكاميرا لـ OBS</button>
+                                </div>
+
+                            </div>
+
                         </div>
-                        <input type="range" id="glowSlider" min="5" max="30" step="1" value="15">
-                    </div>
 
-                    <div class="slider-group">
-                        <div class="slider-header">
-                            <label>🎬 تأثير الحركة (Animation):</label>
-                            <select id="animTypeSelect" class="form-select">
-                                <option value="slide">انزلاق سلس (Slide In/Out)</option>
-                                <option value="fade">تلاشي لطيف (Fade)</option>
-                                <option value="bounce">قفزة حيوية (Bounce)</option>
-                                <option value="pulse">نبض مستمر (Pulse)</option>
-                                <option value="none">ثابت بدون حركة (Static)</option>
-                            </select>
+                        <!-- Right Column: Live Camera Simulator -->
+                        <div class="panel-section gifts-panel">
+                            <div class="panel-card">
+                                <div class="card-header-flex">
+                                    <h3 class="card-title"><span>👁️ محاكي إطار الكاميرا المباشر (Cam Preview)</span></h3>
+                                    <a id="camPreviewExternalLink" href="/camera-overlay.html" target="_blank" class="preview-external-btn">فتح بملء الشاشة ↗</a>
+                                </div>
+
+                                <div class="cam-simulator-viewport" id="camSimViewport">
+                                    <!-- Cam dummy backdrop -->
+                                    <div class="cam-dummy-video">
+                                        <span class="cam-dummy-icon">🎥</span>
+                                        <span class="cam-dummy-text">كاميرا البث المباشر (Webcam View)</span>
+                                        <span class="cam-dummy-sub">الإطار شفاف من الداخل ليتطابق مع كاميرتك في OBS</span>
+                                    </div>
+                                    <!-- Interactive Overlay Frame inside simulator -->
+                                    <iframe id="camSimIframe" src="/camera-overlay.html" class="cam-sim-iframe"></iframe>
+                                </div>
+
+                                <div class="obs-instructions mt-3">
+                                    <h4>📌 كيفية إضافة إطار الكاميرا في OBS Studio:</h4>
+                                    <ol>
+                                        <li>أضف مصدر جديد من نوع <strong>Browser (متصفح)</strong>.</li>
+                                        <li>الصق الرابط المنسوخ أعلاه.</li>
+                                        <li>ضع إطار الكاميرا فوق طبقة كاميرتك (Video Capture Device) ليحيط بها بشكل متوهج فخم!</li>
+                                    </ol>
+                                </div>
+
+                            </div>
                         </div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Mini Live Preview -->
-            <div class="panel-card preview-card">
-                <div class="card-header-flex">
-                    <h2 class="card-title">
-                        <span>👁️ معاينة حية لشاشة البث</span>
-                    </h2>
-                    <a id="previewExternalLink" href="#" target="_blank" class="preview-external-btn">فتح في نافذة كاملة ↗</a>
-                </div>
-                <div class="preview-screen-wrapper">
-                    <div class="preview-screen" id="previewScreen">
-                        <div class="preview-overlay-content" id="previewOverlayContent">
-                            <!-- Populated dynamically via JS -->
+                    </div>
+                </section>
+
+                <!-- ================= SECTION 4: SCOREBOARD (لوحة النتائج) ================= -->
+                <section class="tab-section" id="scoreboardSection">
+                    <div class="dashboard-grid">
+                        
+                        <!-- Left Column: Teams & Controls -->
+                        <div class="panel-section control-panel">
+                            
+                            <!-- Scoreboard Main Info -->
+                            <div class="panel-card">
+                                <h3 class="card-title"><span>⚡ لوحة النتائج المباشرة (Scoreboard Control)</span></h3>
+                                
+                                <div class="form-group">
+                                    <label for="sbTitleInput">🏆 عنوان التحدي:</label>
+                                    <input type="text" id="sbTitleInput" class="form-input" value="🏆 تحدي الأساطير 🏆">
+                                </div>
+
+                                <div class="scoreboard-teams-manage mt-3">
+                                    
+                                    <!-- Team A -->
+                                    <div class="team-manage-box team-a-box">
+                                        <div class="team-manage-header">
+                                            <span class="team-tag red">الفريق الأحمر</span>
+                                            <input type="text" id="sbTeamAName" class="team-name-input" value="المخربين">
+                                        </div>
+                                        <div class="score-number-display" id="sbScoreADisplay">0</div>
+                                        <div class="score-buttons-row">
+                                            <button class="btn-score red" onclick="adjustSbScore('a', 1)">+1</button>
+                                            <button class="btn-score red" onclick="adjustSbScore('a', 2)">+2</button>
+                                            <button class="btn-score red" onclick="adjustSbScore('a', 5)">+5</button>
+                                            <button class="btn-score minus" onclick="adjustSbScore('a', -1)">-1</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Team B -->
+                                    <div class="team-manage-box team-b-box">
+                                        <div class="team-manage-header">
+                                            <span class="team-tag green">الفريق الأخضر</span>
+                                            <input type="text" id="sbTeamBName" class="team-name-input" value="المساعدين">
+                                        </div>
+                                        <div class="score-number-display" id="sbScoreBDisplay">0</div>
+                                        <div class="score-buttons-row">
+                                            <button class="btn-score green" onclick="adjustSbScore('b', 1)">+1</button>
+                                            <button class="btn-score green" onclick="adjustSbScore('b', 2)">+2</button>
+                                            <button class="btn-score green" onclick="adjustSbScore('b', 5)">+5</button>
+                                            <button class="btn-score minus" onclick="adjustSbScore('b', -1)">-1</button>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="score-reset-bar mt-3">
+                                    <button class="btn-danger-outline" onclick="resetSbScores()">
+                                        🔄 تصفير النتيجة للصفر
+                                    </button>
+                                    <button class="btn-primary" onclick="saveSbTitles()">
+                                        💾 حفظ وتحديث العناوين
+                                    </button>
+                                    <button class="btn-obs-action" onclick="copyCurrentOverlayUrl('scoreboard')">
+                                        📺 نسخ رابط النتيجة لـ OBS
+                                    </button>
+                                </div>
+
+                                <!-- Scoreboard Triggers & TikFinity Webhook (مطابق لـ scoreboard الأصلي) -->
+                                <div class="sb-triggers-box">
+                                    <h4 style="color:var(--gold); font-size:14.5px; margin-bottom:6px;">⚡ روابط التراجر التلقائي وويب هوك تيك فينيتي (Triggers & Webhook)</h4>
+                                    <p style="font-size:12px; color:#cbd5e1; margin-bottom:12px;">انسخ هذه الروابط لربطها مع TikFinity أو Stream Deck أو برامج البث لتحديث النتيجة فورياً مع كل هدية أو تفاعل:</p>
+
+                                    <!-- Trigger Team A (+1) -->
+                                    <div class="sb-trigger-row">
+                                        <div class="sb-trigger-info">
+                                            <h5>⚡ إضافة نقطة للفريق الأحمر:</h5>
+                                            <code id="trigAUrl">/trigger?team=a&action=add&value=1</code>
+                                        </div>
+                                        <button class="btn-copy" onclick="copyTriggerLink('a', 1)">📋 نسخ</button>
+                                    </div>
+
+                                    <!-- Trigger Team B (+1) -->
+                                    <div class="sb-trigger-row">
+                                        <div class="sb-trigger-info">
+                                            <h5>⚡ إضافة نقطة للفريق الأخضر:</h5>
+                                            <code id="trigBUrl">/trigger?team=b&action=add&value=1</code>
+                                        </div>
+                                        <button class="btn-copy" onclick="copyTriggerLink('b', 1)">📋 نسخ</button>
+                                    </div>
+
+                                    <!-- TikFinity Webhook -->
+                                    <div class="sb-trigger-row">
+                                        <div class="sb-trigger-info">
+                                            <h5>🎁 ويب هوك تيك فينيتي المباشر (TikFinity Webhook):</h5>
+                                            <code id="webhookUrl">/webhook/tikfinity</code>
+                                        </div>
+                                        <button class="btn-copy" onclick="copyWebhookLink()">📋 نسخ</button>
+                                    </div>
+                                </div>
+
+                            </div>
+
                         </div>
+
+                        <!-- Right Column: Live Scoreboard Display Simulator -->
+                        <div class="panel-section gifts-panel">
+                            <div class="panel-card">
+                                <div class="card-header-flex">
+                                    <h3 class="card-title"><span>👁️ محاكي لوحة النتائج المباشرة (OBS Display)</span></h3>
+                                    <a id="sbPreviewExternalLink" href="/scoreboard-overlay.html" target="_blank" class="preview-external-btn">شاشة كاملة ↗</a>
+                                </div>
+
+                                <div class="scoreboard-sim-container">
+                                    <iframe id="sbSimIframe" src="/scoreboard-overlay.html" class="sb-sim-frame"></iframe>
+                                </div>
+
+                                <div class="obs-instructions mt-3">
+                                    <h4>📌 كيفية استخدام لوحة النتائج في البث:</h4>
+                                    <p>ضع هذا الرابط في OBS ليعرض النتيجة تلقائياً بخلفية شفافة وتأثيرات نيون حية، ويمكنك زيادة أو إنقاص النقاط من هاتفك أو متصفحك وستتحدث فوراً على البث!</p>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
-                </div>
-                <p class="preview-note">✨ هذه المعاينة تحاكي تماماً شكل الـ Overlay على شاشة TikTok Live Studio أو OBS في الوقت الفعلي.</p>
-            </div>
-        </section>
+                </section>
 
-        <!-- Left Column: Gift Management -->
-        <section class="panel-section gifts-panel">
-            
-            <!-- Add Gifts Form -->
-            <div class="panel-card add-gift-card">
-                <h2 class="card-title">
-                    <span>➕ إضافة هدايا جديدة</span>
-                </h2>
+                <!-- ================= SECTION 5: الحساب والمستخدمين ================= -->
+                <section class="tab-section" id="accountSection">
+                    <div class="dashboard-grid">
+                        
+                        <!-- Account Details -->
+                        <div class="panel-section control-panel">
+                            <div class="panel-card">
+                                <h3 class="card-title"><span>👤 معلومات الحساب الحالي</span></h3>
+                                
+                                <div class="account-profile-box">
+                                    <div class="profile-avatar-big" id="profileBigAvatar">👑</div>
+                                    <div class="profile-text-info">
+                                        <h3 id="profileDisplayName">MEZO (المدير)</h3>
+                                        <p class="profile-username" id="profileUsername">@mezo</p>
+                                        <span class="badge-role" id="profileRole">مدير المنصة (Admin)</span>
+                                    </div>
+                                </div>
 
-                <div class="tabs-nav">
-                    <button class="tab-btn active" data-tab="uploadTab">📁 رفع من جهازك</button>
-                    <button class="tab-btn" data-tab="urlTab">🔗 رابط صورة مباشر</button>
-                    <button class="tab-btn" data-tab="libraryTab">🌟 مكتبة هدايا تيك توك</button>
-                </div>
+                                <div class="info-table mt-3">
+                                    <div class="info-row">
+                                        <span class="info-label">معرف اللوحة المخصص (UID):</span>
+                                        <span class="info-value code" id="profileBoardId">board_XXXX</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">حالة قاعدة البيانات:</span>
+                                        <span class="info-value success">متصلة ونشطة (JSON / Cloud)</span>
+                                    </div>
+                                </div>
 
-                <!-- Tab 1: File Upload -->
-                <div class="tab-content active" id="uploadTab">
-                    <div class="upload-dropzone" onclick="document.getElementById('fileInput').click()" id="dropZone">
-                        <span class="dropzone-icon">📤</span>
-                        <h3>اضغط لاختيار صورة أو اسحبها هنا</h3>
-                        <p>يمكنك اختيار صورة واحدة أو عدة صور معاً (PNG, WEBP, JPG, GIF)</p>
-                        <input type="file" id="fileInput" accept="image/*" multiple hidden>
+                                <div class="profile-actions mt-3">
+                                    <button class="btn-danger" onclick="logoutUser()">🚪 تسجيل الخروج</button>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- Register New User Card -->
+                        <div class="panel-section gifts-panel">
+                            <div class="panel-card">
+                                <h3 class="card-title"><span>➕ إنشاء حساب مستخدم جديد</span></h3>
+                                <p class="card-hint">يمكنك إنشاء حساب جديد لأي ستريمر أو صديق يحصل على لوحاته وإعداداته الخاصة به بشكل مستقل:</p>
+
+                                <form id="registerNewUserForm" onsubmit="handleRegisterSubmit(event)" class="mt-3">
+                                    <div class="form-group">
+                                        <label for="regUsername">اسم المستخدم (Username بالإنجليزية):</label>
+                                        <input type="text" id="regUsername" required class="form-input" placeholder="مثلاً: gamer_pro">
+                                    </div>
+
+                                    <div class="form-group mt-2">
+                                        <label for="regDisplayName">الاسم الظاهر (Display Name):</label>
+                                        <input type="text" id="regDisplayName" class="form-input" placeholder="مثلاً: أحمد جيمينج">
+                                    </div>
+
+                                    <div class="form-group mt-2">
+                                        <label for="regPassword">كلمة المرور:</label>
+                                        <input type="password" id="regPassword" required class="form-input" placeholder="كلمة المرور...">
+                                    </div>
+
+                                    <button type="submit" class="btn-primary mt-3">
+                                        ✨ إنشاء الحساب الجديد
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
                     </div>
+                </section>
 
-                    <!-- Pending preview list -->
-                    <div id="pendingBox" class="pending-box"></div>
+            </main>
 
-                    <button id="saveAllGiftsBtn" class="btn-save-all" style="display:none" onclick="savePendingGifts()">
-                        💾 حفظ وإضافة كل الصور
-                    </button>
-                </div>
-
-                <!-- Tab 2: Image URL -->
-                <div class="tab-content" id="urlTab">
-                    <p class="tab-hint">💡 <strong>ميزة دائمة:</strong> الروابط المباشرة (مثل روابط تيك توك أو ديسكورد أو Imgur) لا تحذف أبداً حتى بعد إعادة تشغيل ريندر!</p>
-                    <div class="url-input-group">
-                        <input type="text" id="giftUrlInput" placeholder="https://example.com/gift-icon.png" class="form-input">
-                        <input type="text" id="giftUrlName" placeholder="✍️ اسم الهدية (مثلاً: نيزك، تيربو)" class="form-input">
-                    </div>
-                    <div id="urlPreviewBox" class="url-preview-box" style="display:none">
-                        <img id="urlPreviewImg" src="" alt="معاينة">
-                        <span id="urlPreviewName"></span>
-                    </div>
-                    <button class="btn-primary mt-2" onclick="addGiftByUrl()">
-                        ➕ إضافة الهدية
-                    </button>
-                </div>
-
-                <!-- Tab 3: Built-in Library -->
-                <div class="tab-content" id="libraryTab">
-                    <p class="tab-hint">اختر أي هدية شائعة لإضافتها فوراً بنقرة واحدة:</p>
-                    <div class="library-grid" id="libraryGrid">
-                        <!-- Populated via JS with popular TikTok icons -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Current Gifts List -->
-            <div class="panel-card current-gifts-card">
-                <div class="card-header-flex">
-                    <h2 class="card-title">
-                        <span>📋 الهدايا الحالية في الـ Overlay</span>
-                    </h2>
-                    <span class="count-badge" id="giftsCountBadge">0 هدية</span>
-                </div>
-
-                <p class="list-instructions">
-                    💡 يمكنك تعديل الاسم مباشرة (يحفظ تلقائياً) واستخدام أزرار ⬆️ ⬇️ لتحريك وترتيب الهدايا.
-                </p>
-
-                <div id="giftsList" class="gifts-list">
-                    <!-- Populated dynamically -->
-                </div>
-            </div>
-
-        </section>
-
-    </main>
-
-    <!-- Modal: OBS / TikTok Live Studio Link -->
-    <div class="modal-backdrop" id="obsModal">
-        <div class="modal-box">
-            <button class="modal-close" onclick="closeObsModal()">✕</button>
-            <h3 class="modal-title">📺 رابط الـ Overlay المخصص للبث</h3>
-            <p>أضف هذا الرابط كمصدر متصفح (Browser Source) في برنامج البث:</p>
-            
-            <div class="copy-box">
-                <input type="text" id="fullOverlayUrl" readonly>
-                <button class="btn-copy" onclick="copyOverlayUrl()">📋 نسخ الرابط</button>
-            </div>
-
-            <div class="obs-instructions">
-                <h4>📌 إعدادات Browser Source الموصى بها:</h4>
-                <ul>
-                    <li><strong>العرض (Width):</strong> 1920 (أو 1080 للبث العمودي)</li>
-                    <li><strong>الارتفاع (Height):</strong> 1080 (أو 1920 للبث العمودي)</li>
-                    <li><strong>Shutdown source when not visible:</strong> معطل (Disabled)</li>
-                    <li><strong>Refresh browser when scene becomes active:</strong> معطل</li>
-                </ul>
-            </div>
-            <div class="modal-footer">
-                <button class="btn-secondary" onclick="closeObsModal()">إغلاق</button>
-                <a id="openOverlayBtn" href="#" target="_blank" class="btn-primary">👁️ فتح الـ Overlay للتجربة</a>
-            </div>
         </div>
+
     </div>
 
-    <!-- Modal: Cloud Storage & Render Config -->
-    <div class="modal-backdrop" id="cloudModal">
+    <!-- ================= MODAL: ALL OBS LINKS ================= -->
+    <div class="modal-backdrop" id="allObsModal">
         <div class="modal-box modal-wide">
-            <button class="modal-close" onclick="closeCloudModal()">✕</button>
-            <h3 class="modal-title">☁️ إعدادات الحفظ الدائم على Render</h3>
-            
-            <div class="cloud-info-box">
-                <p><strong>لماذا تُحذف الصور عند إعادة تشغيل ريندر؟</strong></p>
-                <p>استضافة Render في خطتها المجانية تستخدم أقراصاً مؤقتة (Ephemeral Containers)، وعند كل ريستارت أو دخول السيرفر في وضع النوم يعود الملف إلى حالته الأصلية وتُمسح الصور المخزنة في مجلد المشروع.</p>
-                <p class="highlight-text">💡 <strong>الحل الجذري والسهل:</strong> ربط خدمة تخزين سحابية مجانية 100% مثل <strong>Cloudinary</strong> أو <strong>ImgBB</strong> أو استخدام <strong>MongoDB Atlas</strong> لحفظ البيانات!</p>
-            </div>
+            <button class="modal-close" onclick="closeAllObsModal()">✕</button>
+            <h3 class="modal-title">📺 مركز روابط الـ OBS لجميع الأوفرلاي</h3>
+            <p>انسخ أي رابط تريده بنقرة واحدة وضعه كـ Browser Source في OBS Studio أو TikTok Live Studio:</p>
 
-            <div class="config-tabs">
-                <div class="config-step">
-                    <h4>🌟 الطريقة 1 (الأفضل والموصى بها): Cloudinary مجاني 25GB</h4>
-                    <ol>
-                        <li>أنشئ حساباً مجانياً من <a href="https://cloudinary.com" target="_blank">Cloudinary.com</a>.</li>
-                        <li>انسخ الـ <strong>Cloud Name</strong> و <strong>API Key</strong> و <strong>API Secret</strong> من لوحة التحكم.</li>
-                        <li>في حسابك على <a href="https://dashboard.render.com" target="_blank">Render.com</a>، افتح مشروعك، ثم اذهب إلى <strong>Environment</strong> وأضف:
-                            <pre>CLOUDINARY_CLOUD_NAME=اسم_حسابك
-CLOUDINARY_API_KEY=مفتاح_api
-CLOUDINARY_API_SECRET=الرمز_السري</pre>
-                        </li>
-                    </ol>
+            <div class="obs-links-list mt-3">
+                
+                <!-- 1. هدايا التيك توك -->
+                <div class="obs-link-card">
+                    <div class="obs-link-meta">
+                        <span class="obs-icon">🎁</span>
+                        <div>
+                            <h4>أوفرلاي هدايا التيك توك</h4>
+                            <p>يعرض بطاقات الهدايا مع صورها وأسمائها ونيون البث</p>
+                        </div>
+                    </div>
+                    <div class="obs-copy-row">
+                        <input type="text" id="linkGiftsUrl" readonly>
+                        <button class="btn-copy" onclick="copyInput('linkGiftsUrl')">📋 نسخ</button>
+                        <a id="openGiftsUrl" href="#" target="_blank" class="btn-open-preview">👁️ فتح</a>
+                    </div>
                 </div>
 
-                <div class="config-step">
-                    <h4>⚡ الطريقة 2: ImgBB (مفتاح مجاني خلال 10 ثوانٍ)</h4>
-                    <p>احصل على مفتاح مجاني بدون بطاقة ائتمان من <a href="https://api.imgbb.com" target="_blank">api.imgbb.com</a> ثم أضف في ريندر:</p>
-                    <pre>IMGBB_API_KEY=مفتاحك_هنا</pre>
+                <!-- 1.2 أوفرلاي هدايا الفرق 1 (المساعدين) -->
+                <div class="obs-link-card">
+                    <div class="obs-link-meta">
+                        <span class="obs-icon">⚔️</span>
+                        <div>
+                            <h4>أوفرلاي هدايا الفرق 1 (المساعدين)</h4>
+                            <p>أوفرلاي الفريق الأول مع اسم مخصص ولون نيون وميزة منع التكرار</p>
+                        </div>
+                    </div>
+                    <div class="obs-copy-row">
+                        <input type="text" id="linkTeam1Url" readonly>
+                        <button class="btn-copy" onclick="copyInput('linkTeam1Url')">📋 نسخ</button>
+                        <a id="openTeam1Url" href="#" target="_blank" class="btn-open-preview">👁️ فتح</a>
+                    </div>
                 </div>
 
-                <div class="config-step" style="border: 1px solid #10b981; background: rgba(16, 185, 129, 0.1);">
-                    <h4 style="color: #a7f3d0;">⚡ ميزة منع النوم 24/7 (مفعلة تلقائياً في الكود بدون أي تسجيل!)</h4>
-                    <p>لقد قمنا ببرمجة نظام <strong>Anti-Sleep Keep-Alive</strong> داخل السيرفر مباشرة؛ بمجرد رفع المشروع على Render، يكتشف السيرفر رابطه تلقائياً ويرسل نبضة تنشيط كل 8 دقائق، مما يمنع الخادم من النوم نهائياً ويجعله شغالاً 24 ساعة طوال الشهر بدون أن تضطر للتسجيل في أي موقع خارجي!</p>
+                <!-- 1.3 أوفرلاي هدايا الفرق 2 (المخربين) -->
+                <div class="obs-link-card">
+                    <div class="obs-link-meta">
+                        <span class="obs-icon">🔥</span>
+                        <div>
+                            <h4>أوفرلاي هدايا الفرق 2 (المخربين)</h4>
+                            <p>أوفرلاي الفريق الثاني مع اسم مخصص ولون نيون وميزة منع التكرار</p>
+                        </div>
+                    </div>
+                    <div class="obs-copy-row">
+                        <input type="text" id="linkTeam2Url" readonly>
+                        <button class="btn-copy" onclick="copyInput('linkTeam2Url')">📋 نسخ</button>
+                        <a id="openTeam2Url" href="#" target="_blank" class="btn-open-preview">👁️ فتح</a>
+                    </div>
                 </div>
+
+                <!-- 2. رابط آخر داعم (الشريط الناري) -->
+                <div class="obs-link-card">
+                    <div class="obs-link-meta">
+                        <span class="obs-icon">🔥</span>
+                        <div>
+                            <h4>رابط آخر داعم (الشريط الناري البركاني)</h4>
+                            <p>شريط النص الناري المتحرك مع حمم بركانية وشرارات</p>
+                        </div>
+                    </div>
+                    <div class="obs-copy-row">
+                        <input type="text" id="linkFireUrl" readonly>
+                        <button class="btn-copy" onclick="copyInput('linkFireUrl')">📋 نسخ</button>
+                        <a id="openFireUrl" href="#" target="_blank" class="btn-open-preview">👁️ فتح</a>
+                    </div>
+                </div>
+
+                <!-- 3. بنرات وإطارات الكاميرا -->
+                <div class="obs-link-card">
+                    <div class="obs-link-meta">
+                        <span class="obs-icon">📷</span>
+                        <div>
+                            <h4>إطار وبنر الكاميرا (Webcam Border)</h4>
+                            <p>إطار نيون متحرك محيط بكاميرتك بـ 10 ستايلات مختلفة</p>
+                        </div>
+                    </div>
+                    <div class="obs-copy-row">
+                        <input type="text" id="linkCameraUrl" readonly>
+                        <button class="btn-copy" onclick="copyInput('linkCameraUrl')">📋 نسخ</button>
+                        <a id="openCameraUrl" href="#" target="_blank" class="btn-open-preview">👁️ فتح</a>
+                    </div>
+                </div>
+
+                <!-- 4. Scoreboard لوحة النتائج -->
+                <div class="obs-link-card">
+                    <div class="obs-link-meta">
+                        <span class="obs-icon">⚡</span>
+                        <div>
+                            <h4>لوحة نتائج التحدي (Scoreboard Live)</h4>
+                            <p>شاشة نقاط الفريقين مباشرة بخلفية شفافة</p>
+                        </div>
+                    </div>
+                    <div class="obs-copy-row">
+                        <input type="text" id="linkScoreboardUrl" readonly>
+                        <button class="btn-copy" onclick="copyInput('linkScoreboardUrl')">📋 نسخ</button>
+                        <a id="openScoreboardUrl" href="#" target="_blank" class="btn-open-preview">👁️ فتح</a>
+                    </div>
+                </div>
+
             </div>
 
             <div class="modal-footer">
-                <button class="btn-secondary" onclick="closeCloudModal()">حسناً، فهمت</button>
+                <button class="btn-secondary" onclick="closeAllObsModal()">إغلاق</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal: Backup & Restore -->
-    <div class="modal-backdrop" id="backupModal">
-        <div class="modal-box">
-            <button class="modal-close" onclick="closeBackupModal()">✕</button>
-            <h3 class="modal-title">💾 النسخ الاحتياطي واستعادة البيانات</h3>
-            <p>احتفظ بنسخة من جميع الهدايا وإعداداتها لاستعادتها في أي وقت بضغطة زر:</p>
-
-            <div class="backup-actions-grid">
-                <div class="backup-action-card">
-                    <h4>📥 تحميل نسخة احتياطية (JSON)</h4>
-                    <p>تنزيل ملف يحتوي على كل الهدايا والألوان والإزاحات.</p>
-                    <a href="/api/backup" download="gifts-overlay-backup.json" class="btn-primary">
-                        💾 تحميل ملف النسخة الاحتياطية
-                    </a>
-                </div>
-
-                <div class="backup-action-card">
-                    <h4>📤 استعادة من ملف</h4>
-                    <p>ارفع ملف JSON سبق تحميله لاستعادة كل الهدايا فوراً.</p>
-                    <input type="file" id="restoreFileInput" accept=".json" hidden>
-                    <button class="btn-secondary" onclick="document.getElementById('restoreFileInput').click()">
-                        📂 اختيار ملف للاستعادة
-                    </button>
-                </div>
+    <!-- ================= MODAL: AUTHENTICATION (تسجيل الدخول) ================= -->
+    <!-- ================= AUTH MODAL (ADMIN ONLY) ================= -->
+    <div class="modal-backdrop" id="authModal">
+        <div class="modal-box modal-auth">
+            <button class="modal-close" onclick="closeAuthModal()">✕</button>
+            
+            <div class="auth-header">
+                <img src="/images/mezotik-logo.png" alt="MEZO TIK" style="width:68px; height:68px; border-radius:16px; margin-bottom:10px; filter:drop-shadow(0 0 18px #ff2a4a);">
+                <h3 style="color:#fff; font-size:22px; font-weight:900;">تسجيل دخول مدير المنصة</h3>
+                <p style="color:#aaa; font-size:13px; margin-top:4px;">حساب المدير العام لـ MEZO TIK للتحكم بجميع أوفرلاي البث</p>
             </div>
 
-            <div class="local-restore-box mt-3" id="localRestoreBox" style="display:none">
-                <p>🔄 <strong>تم العثور على نسخة محفوظة تلقائياً في متصفحك!</strong></p>
-                <button class="btn-neon" onclick="restoreFromLocal()">استعادة من ذاكرة المتصفح</button>
-            </div>
+            <!-- Single Admin Login Form -->
+            <form id="loginForm" onsubmit="handleLoginSubmit(event)" class="auth-form active mt-3">
+                <div class="form-group">
+                    <label style="color:#ddd; font-weight:700;">اسم المستخدم (Admin):</label>
+                    <input type="text" id="loginUsername" required class="form-input" value="MEZO" placeholder="MEZO">
+                </div>
+                <div class="form-group mt-2">
+                    <label style="color:#ddd; font-weight:700;">كلمة المرور:</label>
+                    <input type="password" id="loginPassword" required class="form-input" placeholder="أدخل كلمة المرور (MOAZ1234)">
+                </div>
+                <button type="submit" class="btn-primary mt-3 btn-full" style="padding:14px; font-size:16px; font-weight:900; background:linear-gradient(135deg, #ff0044, #990022); box-shadow:0 0 20px rgba(255,0,68,0.5);">
+                    👑 دخول لوحة التحكم (MEZO)
+                </button>
+            </form>
+        </div>
+    </div>
 
-            <div class="modal-footer">
-                <button class="btn-secondary" onclick="closeBackupModal()">إغلاق</button>
+    <!-- ================= TOAST NOTIFICATION CONTAINER ================= -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="/socket.io/socket.io.js"></script>
     <script src="/control.js"></script>
 </body>
 </html>
