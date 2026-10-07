@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔥 شريط النص الناري | Fire Text Widget</title>
+    <title>🔥 شريط الدعم والنيون | Support Bio Neon Widget</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Tajawal:wght@800;900&family=Almarai:wght@800;900&family=Changa:wght@800;900&family=El+Messiri:wght@700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -49,16 +49,6 @@
             transition: transform 0.3s ease;
         }
 
-        /* Spark Embers Canvas */
-        .spark-canvas {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 15;
-        }
-
         /* ================= BANNER BOX CONTAINER ================= */
         .fire-banner-box {
             position: relative;
@@ -67,9 +57,10 @@
             justify-content: center;
             padding: 16px 44px;
             border-radius: 20px;
-            transition: border 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
-            z-index: 20; /* IN FRONT OF SMOKE */
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 10;
             opacity: 1;
+            will-change: transform, opacity, filter;
         }
 
         /* 1. Transparent Frame (بدون إطار إطلاقاً - نص حر شفاف) */
@@ -82,57 +73,55 @@
             padding: 10px 24px !important;
         }
 
-        /* 2. Glass Frame (إطار زجاجي فاخر) */
+        /* 2. Glass Frame (إطار زجاجي راقي) */
         .frame-glass {
-            background: rgba(10, 10, 18, 0.88);
-            border: 2px solid rgba(255, 69, 0, 0.65);
+            background: rgba(12, 10, 18, 0.85);
+            border: 2px solid rgba(255, 255, 255, 0.18);
+            border-radius: 18px;
+            box-shadow: 
+                0 10px 30px rgba(0, 0, 0, 0.8),
+                0 0 20px var(--fire-c, #ff1e00);
+            backdrop-filter: blur(12px);
+        }
+
+        /* 3. Magma Frame (إطار نيون أحمر) */
+        .frame-magma {
+            background: rgba(22, 6, 10, 0.9);
+            border: 2.5px solid var(--shine-c, #ffd700);
+            border-radius: 18px;
             box-shadow: 
                 0 10px 35px rgba(0, 0, 0, 0.85),
-                0 0 25px rgba(255, 30, 0, 0.45),
-                inset 0 0 20px rgba(255, 69, 0, 0.25);
-            backdrop-filter: blur(14px);
+                0 0 25px var(--fire-c, #ff1e00);
+            backdrop-filter: blur(12px);
         }
 
-        /* 3. Magma Frame (شريط الحمم البركانية) */
-        .frame-magma {
-            background: linear-gradient(135deg, rgba(35, 10, 10, 0.94), rgba(15, 6, 8, 0.94));
-            border: 2.5px solid var(--shine-c, #ffd700);
-            box-shadow: 
-                0 10px 40px rgba(0, 0, 0, 0.9),
-                0 0 35px var(--fire-c, #ff1e00),
-                inset 0 0 25px rgba(255, 69, 0, 0.35);
-            backdrop-filter: blur(14px);
-        }
-
-        /* 4. Cyber Neon Frame (إطار سايبر نيون) */
+        /* 4. Cyber Neon Frame (إطار سايبر نيون متوهج بحواف أنيقة) */
         .frame-cyber_neon {
-            background: rgba(10, 15, 25, 0.92);
+            background: rgba(8, 12, 22, 0.9);
             border: 2px solid var(--shine-c, #00f0ff);
-            border-radius: 14px;
+            border-radius: 16px;
             box-shadow: 
-                0 0 25px var(--shine-c, #00f0ff),
-                0 0 50px rgba(0, 240, 255, 0.4),
-                inset 0 0 18px rgba(0, 240, 255, 0.25);
-            backdrop-filter: blur(14px);
+                0 8px 30px rgba(0, 0, 0, 0.9),
+                0 0 20px var(--shine-c, #00f0ff);
+            backdrop-filter: blur(12px);
         }
 
         /* 5. Royal Gold Frame (إطار ذهبي ملكي) */
         .frame-gold_royal {
-            background: linear-gradient(135deg, rgba(28, 20, 5, 0.94), rgba(12, 8, 2, 0.94));
+            background: rgba(20, 15, 5, 0.9);
             border: 2px solid #ffd700;
             border-radius: 18px;
             box-shadow: 
-                0 10px 40px rgba(0, 0, 0, 0.9),
-                0 0 30px #ffd700,
-                inset 0 0 22px rgba(255, 215, 0, 0.35);
-            backdrop-filter: blur(14px);
+                0 10px 35px rgba(0, 0, 0, 0.9),
+                0 0 25px rgba(255, 215, 0, 0.6);
+            backdrop-filter: blur(12px);
         }
 
         /* ================= TEXT ELEMENTS ================= */
         .fire-text-wrapper {
             position: relative;
             display: inline-block;
-            z-index: 22;
+            z-index: 12;
             white-space: nowrap;
         }
 
@@ -145,9 +134,11 @@
             font-weight: 900;
             line-height: 1.15;
             white-space: nowrap;
-            color: #1a0000;
+            color: #000;
             pointer-events: none;
             z-index: 1;
+            opacity: 0.65;
+            filter: blur(3px);
         }
 
         .fire-text-front {
@@ -157,67 +148,70 @@
             white-space: nowrap;
             color: #ffffff;
             z-index: 2;
-            will-change: transform, filter, opacity;
-            -webkit-text-stroke: 1.5px rgba(25, 0, 0, 0.95);
-            text-shadow: 0 3px 6px rgba(0, 0, 0, 0.9);
-            transition: filter 0.3s ease;
+            will-change: transform, opacity;
+            -webkit-text-stroke: 1px rgba(0, 0, 0, 0.85);
+            transition: all 0.3s ease;
         }
 
-        /* ================= FootageCrate Appear From Sky Smoke Layer (خلف النص) ================= */
+        /* ================= FootageCrate Appear Smoke Layer (يعدي فوق النص) ================= */
         .sky-smoke-video {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 760px;
-            height: 560px;
+            width: 820px;
+            max-width: 95vw;
+            height: 540px;
             object-fit: contain;
             pointer-events: none;
-            z-index: 5; /* خلف النص تماماً */
+            z-index: 35; /* فوق النص تماماً */
+            opacity: 0;
             display: none;
-            filter: drop-shadow(0 0 24px var(--fire-c, #ff1e00)) contrast(115%);
+            transition: opacity 0.2s ease;
+        }
+
+        .sky-smoke-video.active {
+            opacity: 1;
+            display: block;
         }
 
         /* ================= ANIMATION CHOREOGRAPHY ================= */
         
-        /* 1. Natural Clean Appearance (الظهور الطبيعي) */
-        .banner-natural-in {
-            animation: animNaturalIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        @keyframes animNaturalIn {
-            0% {
-                opacity: 0;
-                transform: scale(0.95);
-                filter: blur(6px);
-            }
-            100% {
-                opacity: 1;
-                transform: scale(1);
-                filter: blur(0px);
-            }
-        }
-
-        /* 2. Holding state */
+        /* 1. Holding State (النص ثابت وظاهر بوضوح تام) */
         .banner-holding {
-            opacity: 1;
-            transform: scale(1);
-            filter: blur(0px);
+            opacity: 1 !important;
+            transform: translateY(0) scale(1) !important;
+            filter: blur(0px) !important;
         }
 
-        /* 3. Soft Fade Outro under the smoke (يجي الدخان يشيلها وتتلاشى بنعومة) */
+        /* 2. Smoke Wipe Out (الدخان لما يعدي فوقيه يختفي النص بسلاسة) */
         .banner-smoke-out {
-            animation: animSmokeFadeOut 0.75s ease-in-out forwards;
+            opacity: 0 !important;
+            transform: translateY(15px) scale(0.94) !important;
+            filter: blur(7px) !important;
+            transition: opacity 0.45s ease-out, transform 0.45s ease-out, filter 0.45s ease-out !important;
         }
-        @keyframes animSmokeFadeOut {
+
+        /* 3. Smooth Slide In (يظهر بسلاسة SLIDE IN) */
+        .banner-slide-in {
+            animation: animNeonSlideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+        }
+
+        @keyframes animNeonSlideIn {
             0% {
+                opacity: 0;
+                transform: translateY(40px) scale(0.92);
+                filter: blur(5px);
+            }
+            65% {
                 opacity: 1;
-                transform: scale(1);
+                transform: translateY(-3px) scale(1.02);
                 filter: blur(0px);
             }
             100% {
-                opacity: 0;
-                transform: scale(1.03);
-                filter: blur(10px);
+                opacity: 1;
+                transform: translateY(0) scale(1);
+                filter: blur(0px);
             }
         }
     </style>
@@ -227,11 +221,8 @@
     <div class="stage-wrapper" id="stageWrapper">
         <div class="stage-inner" id="stageInner">
 
-            <!-- FootageCrate Smoke Vortex Layer (Descent & Wipe - BEHIND TEXT) -->
-            <video id="skySmokeVideo" class="sky-smoke-video" src="/videos/appear_from_sky.webm" playsinline muted preload="auto"></video>
-
-            <!-- Fire Banner Box (IN FRONT OF SMOKE) -->
-            <div class="fire-banner-box frame-transparent" id="bannerBox">
+            <!-- Fire Banner Box -->
+            <div class="fire-banner-box frame-transparent banner-holding" id="bannerBox">
                 <!-- Text Wrapper -->
                 <div class="fire-text-wrapper" id="textWrapper">
                     <div class="fire-text-back" id="textBack">رابط الدعم في البايو 🔥</div>
@@ -239,11 +230,11 @@
                 </div>
             </div>
 
+            <!-- FootageCrate Smoke Vortex Layer (Descent & Sweep - OVER TEXT) -->
+            <video id="skySmokeVideo" class="sky-smoke-video" src="/videos/appear_from_sky.webm" playsinline muted preload="auto"></video>
+
         </div>
     </div>
-
-    <!-- Canvas for subtle atmospheric sparks -->
-    <canvas id="sparkCanvas" class="spark-canvas"></canvas>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
@@ -258,7 +249,7 @@
             neon_enabled: true,
             neon_strength: 95,
             banner_style: 'transparent',
-            display_mode: 'continuous', // 'continuous' or 'cycle'
+            display_mode: 'continuous',
             smoke_enabled: true,
             hold_duration: 6,
             loop_interval: 8,
@@ -273,7 +264,6 @@
         const stageWrapper = document.getElementById('stageWrapper');
         const stageInner = document.getElementById('stageInner');
         const skySmokeVideo = document.getElementById('skySmokeVideo');
-        const sparkCanvas = document.getElementById('sparkCanvas');
 
         // Apply Styles to DOM
         function applyStyles() {
@@ -314,34 +304,34 @@
 
             // Frame Style
             const frameStyle = settings.banner_style || 'transparent';
-            bannerBox.className = `fire-banner-box frame-${frameStyle}`;
+            if (!bannerBox.classList.contains('banner-smoke-out') && !bannerBox.classList.contains('banner-slide-in')) {
+                bannerBox.className = `fire-banner-box frame-${frameStyle} banner-holding`;
+            }
 
-            // Neon Glow Styling (خيار خط نيون ولا لا)
+            // Neon Styling (نيون نقي وواضح بدون توهج حارق أو شرار)
             const isNeon = settings.neon_enabled !== false && settings.neon_enabled !== 0;
             if (isNeon) {
-                const str = (settings.neon_strength || 95) / 100;
-                const g1 = Math.round(8 * str);
-                const g2 = Math.round(20 * str);
-                const g3 = Math.round(42 * str);
-                const g4 = Math.round(68 * str);
+                const str = Math.max(0.4, (settings.neon_strength || 85) / 100);
+                const g1 = Math.round(4 * str);
+                const g2 = Math.round(12 * str);
+                const g3 = Math.round(24 * str);
+                const g4 = Math.round(42 * str);
 
-                textFront.style.filter = `
-                    drop-shadow(0 0 ${g1}px #ffffff)
-                    drop-shadow(0 0 ${g2}px ${sec})
-                    drop-shadow(0 0 ${g3}px ${pri})
-                    drop-shadow(0 0 ${g4}px ${pri})
+                textFront.style.color = '#ffffff';
+                textFront.style.textShadow = `
+                    0 0 ${g1}px #ffffff,
+                    0 0 ${g2}px ${sec},
+                    0 0 ${g3}px ${pri},
+                    0 0 ${g4}px ${pri}
                 `;
-                textFront.style.background = `linear-gradient(180deg, #ffffff 0%, #fff8b3 20%, ${sec} 50%, ${pri} 85%, #4a0000 100%)`;
-                textFront.style.webkitBackgroundClip = 'text';
-                textFront.style.backgroundClip = 'text';
-                textFront.style.webkitTextFillColor = 'transparent';
+                textFront.style.webkitTextFillColor = '#ffffff';
+                textFront.style.filter = 'none';
             } else {
                 // Non-neon clean text
-                textFront.style.filter = 'drop-shadow(0 3px 6px rgba(0, 0, 0, 0.9))';
-                textFront.style.background = `linear-gradient(180deg, #ffffff 15%, ${sec} 65%, ${pri} 100%)`;
-                textFront.style.webkitBackgroundClip = 'text';
-                textFront.style.backgroundClip = 'text';
-                textFront.style.webkitTextFillColor = 'transparent';
+                textFront.style.color = '#ffffff';
+                textFront.style.textShadow = '0 3px 10px rgba(0, 0, 0, 0.9)';
+                textFront.style.webkitTextFillColor = '#ffffff';
+                textFront.style.filter = 'none';
             }
         }
 
@@ -353,172 +343,86 @@
             clearTimeout(cycleTimeout);
             isCycleRunning = false;
 
-            const frame = settings.banner_style || 'transparent';
             const isSmokeOn = settings.smoke_enabled !== false && settings.smoke_enabled !== 0 && settings.smoke_enabled !== 'false';
+            const frame = settings.banner_style || 'transparent';
 
-            if (settings.display_mode === 'continuous') {
-                // Static display: always visible!
-                if (isSmokeOn && skySmokeVideo) {
-                    skySmokeVideo.style.display = 'block';
-                    skySmokeVideo.loop = true;
-                    skySmokeVideo.play().catch(() => {});
-                } else if (skySmokeVideo) {
-                    skySmokeVideo.style.display = 'none';
+            if (!isSmokeOn) {
+                // Smoke disabled: keep text holding in place smoothly
+                if (skySmokeVideo) {
+                    skySmokeVideo.classList.remove('active');
                     skySmokeVideo.pause();
                 }
                 bannerBox.className = `fire-banner-box frame-${frame} banner-holding`;
                 bannerBox.style.opacity = '1';
-                bannerBox.style.transform = 'scale(1)';
-            } else {
-                // Timed Cycle mode: Natural appearance -> Hold -> Smoke vortex wipes it from behind -> Loop
-                if (skySmokeVideo) skySmokeVideo.loop = false;
-                runCycle();
+                return;
             }
+
+            // Smoke enabled: run the smoke wipe -> vanish -> slide in cycle!
+            runSmokeSlideCycle();
         }
 
-        function runCycle() {
-            if (settings.display_mode === 'continuous') return;
+        function runSmokeSlideCycle() {
+            const isSmokeOn = settings.smoke_enabled !== false && settings.smoke_enabled !== 0 && settings.smoke_enabled !== 'false';
+            if (!isSmokeOn) {
+                const frame = settings.banner_style || 'transparent';
+                bannerBox.className = `fire-banner-box frame-${frame} banner-holding`;
+                bannerBox.style.opacity = '1';
+                return;
+            }
+
             clearTimeout(cycleTimeout);
             isCycleRunning = true;
 
             const frame = settings.banner_style || 'transparent';
-            const holdMs = Math.max(2, (settings.hold_duration || 6)) * 1000;
+            const holdMs = Math.max(3, (settings.hold_duration || 6)) * 1000;
             const intervalMs = Math.max(2, (settings.loop_interval || 8)) * 1000;
-            const isSmokeOn = settings.smoke_enabled !== false && settings.smoke_enabled !== 0 && settings.smoke_enabled !== 'false';
 
-            // 1. Natural Appearance (يظهر الكلمة طبيعي)
+            // 1. Text is visible and holding in crisp Neon
+            bannerBox.className = `fire-banner-box frame-${frame} banner-holding`;
             bannerBox.style.opacity = '1';
-            bannerBox.className = `fire-banner-box frame-${frame} banner-natural-in`;
-            burstSparks(15);
 
-            // After appearance completes, transition to holding
+            // Wait for hold duration before starting smoke wipe
             cycleTimeout = setTimeout(() => {
-                bannerBox.className = `fire-banner-box frame-${frame} banner-holding`;
+                // 2. Smoke video descends and sweeps OVER the text
+                if (skySmokeVideo) {
+                    skySmokeVideo.classList.add('active');
+                    skySmokeVideo.currentTime = 0;
+                    skySmokeVideo.play().catch(() => {});
+                }
 
-                // 2. Hold Duration (مدة بقاء الكلمة)
+                // 3. At peak smoke density (~820ms), the text vanishes underneath the smoke
                 cycleTimeout = setTimeout(() => {
-                    // 3. Smoke Wipe Outro (يجي الدخان من ورا يشيلها إذا كان مفعل)
-                    if (isSmokeOn && skySmokeVideo) {
-                        skySmokeVideo.style.display = 'block';
-                        skySmokeVideo.currentTime = 0;
-                        skySmokeVideo.play().catch(() => {});
-                    } else if (skySmokeVideo) {
-                        skySmokeVideo.style.display = 'none';
-                    }
+                    bannerBox.className = `fire-banner-box frame-${frame} banner-smoke-out`;
 
-                    // At peak smoke density (~700ms), the banner dissolves smoothly underneath
+                    // 4. At ~1900ms, smoke clears out
                     cycleTimeout = setTimeout(() => {
-                        bannerBox.className = `fire-banner-box frame-${frame} banner-smoke-out`;
-                        burstSparks(12);
+                        if (skySmokeVideo) {
+                            skySmokeVideo.classList.remove('active');
+                        }
 
-                        // Smoke finishes clearing around 2200ms
+                        // 5. Short pause, then text reappears with smooth SLIDE IN!
                         cycleTimeout = setTimeout(() => {
-                            if (skySmokeVideo) skySmokeVideo.style.display = 'none';
-                            bannerBox.style.opacity = '0';
-                            bannerBox.className = `fire-banner-box frame-${frame}`;
+                            bannerBox.className = `fire-banner-box frame-${frame} banner-slide-in`;
 
-                            // 4. Wait Interval (الانتظار) & Reappear Naturally (ويرجع يظهر تاني بطبييعي)
+                            // Once slide-in animation finishes (800ms), transition back to holding
                             cycleTimeout = setTimeout(() => {
-                                runCycle();
-                            }, intervalMs);
+                                bannerBox.className = `fire-banner-box frame-${frame} banner-holding`;
 
-                        }, 1500);
+                                // 6. Wait interval before next smoke sweep
+                                cycleTimeout = setTimeout(() => {
+                                    runSmokeSlideCycle();
+                                }, intervalMs);
 
-                    }, 700);
+                            }, 800);
 
-                }, holdMs);
+                        }, 300);
 
-            }, 800);
+                    }, 1100);
+
+                }, 820);
+
+            }, holdMs);
         }
-
-        // ================= Subtle Sparks Particle Engine ================= //
-        const sCtx = sparkCanvas.getContext('2d');
-        let sWidth = window.innerWidth, sHeight = window.innerHeight;
-        let sparks = [];
-
-        function resizeSparks() {
-            sparkCanvas.width = sWidth = window.innerWidth;
-            sparkCanvas.height = sHeight = window.innerHeight;
-        }
-        window.addEventListener('resize', resizeSparks);
-        resizeSparks();
-
-        class Spark {
-            constructor(x, y, isBurst = false) {
-                this.reset(x, y, isBurst);
-            }
-            reset(x, y, isBurst = false) {
-                const rect = bannerBox.getBoundingClientRect();
-                const rw = rect.width > 20 ? rect.width : 300;
-                const rx = rect.left > 0 ? rect.left : (sWidth / 2 - 150);
-                const ry = rect.bottom > 0 ? rect.bottom : (sHeight / 2 + 20);
-
-                this.x = x !== undefined ? x : rx + Math.random() * rw;
-                this.y = y !== undefined ? y : ry - Math.random() * 15;
-
-                if (isBurst) {
-                    const angle = Math.random() * Math.PI * 2;
-                    const speed = 2 + Math.random() * 5.5;
-                    this.vx = Math.cos(angle) * speed;
-                    this.vy = Math.sin(angle) * speed - 1.5;
-                    this.life = 0.6 + Math.random() * 0.5;
-                } else {
-                    this.vx = (Math.random() - 0.5) * 1.4;
-                    this.vy = -(1.2 + Math.random() * 2.8);
-                    this.life = 0.7 + Math.random() * 0.4;
-                }
-                this.maxLife = this.life;
-                this.decay = 0.02 + Math.random() * 0.02;
-                this.size = 2 + Math.random() * 3;
-
-                const pri = settings.color || '#ff1e00';
-                const sec = settings.shine_color || '#ffd700';
-                const colors = ['#ffffff', sec, sec, pri];
-                this.color = colors[Math.floor(Math.random() * colors.length)];
-            }
-            update() {
-                this.x += this.vx;
-                this.y += this.vy;
-                this.life -= this.decay;
-                this.size = Math.max(0.5, this.size * 0.98);
-                if (this.life <= 0) this.reset();
-            }
-            draw() {
-                const alpha = Math.max(0, this.life / this.maxLife);
-                sCtx.save();
-                sCtx.globalAlpha = alpha;
-                sCtx.fillStyle = this.color;
-                sCtx.shadowColor = this.color;
-                sCtx.shadowBlur = 8;
-                sCtx.beginPath();
-                sCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                sCtx.fill();
-                sCtx.restore();
-            }
-        }
-
-        for (let i = 0; i < 22; i++) sparks.push(new Spark());
-
-        function burstSparks(count = 15) {
-            const rect = bannerBox.getBoundingClientRect();
-            const cx = rect.left + rect.width / 2;
-            const cy = rect.top + rect.height / 2;
-            for (let i = 0; i < count; i++) sparks.push(new Spark(cx, cy, true));
-        }
-
-        function renderSparks() {
-            sCtx.clearRect(0, 0, sWidth, sHeight);
-            if (bannerBox.style.opacity !== '0') {
-                for (let i = sparks.length - 1; i >= 0; i--) {
-                    const p = sparks[i];
-                    p.update();
-                    p.draw();
-                    if (p.life <= 0 && sparks.length > 22) sparks.splice(i, 1);
-                }
-            }
-            requestAnimationFrame(renderSparks);
-        }
-        renderSparks();
 
         // ================= Message Listener (for live preview iframe in dashboard) ================= //
         window.addEventListener('message', (e) => {
@@ -530,35 +434,32 @@
                 setupAnimationMode();
             } else if (data.type === 'test_action') {
                 if (data.action === 'smoke_cycle') {
-                    // Trigger live demonstration of smoke wipe
+                    // Trigger instant live demo of the smoke sweep + slide-in
                     clearTimeout(cycleTimeout);
                     const frame = settings.banner_style || 'transparent';
-                    bannerBox.style.opacity = '1';
-                    bannerBox.className = `fire-banner-box frame-${frame} banner-holding`;
+                    
+                    if (skySmokeVideo) {
+                        skySmokeVideo.classList.add('active');
+                        skySmokeVideo.currentTime = 0;
+                        skySmokeVideo.play().catch(() => {});
+                    }
 
                     setTimeout(() => {
-                        if (skySmokeVideo) {
-                            skySmokeVideo.style.display = 'block';
-                            skySmokeVideo.currentTime = 0;
-                            skySmokeVideo.play().catch(() => {});
-                        }
+                        bannerBox.className = `fire-banner-box frame-${frame} banner-smoke-out`;
+                        
                         setTimeout(() => {
-                            bannerBox.className = `fire-banner-box frame-${frame} banner-smoke-out`;
-                            burstSparks(15);
+                            if (skySmokeVideo) skySmokeVideo.classList.remove('active');
+                            
                             setTimeout(() => {
-                                if (skySmokeVideo) skySmokeVideo.style.display = 'none';
-                                bannerBox.style.opacity = '0';
+                                bannerBox.className = `fire-banner-box frame-${frame} banner-slide-in`;
                                 setTimeout(() => {
-                                    bannerBox.className = `fire-banner-box frame-${frame} banner-natural-in`;
-                                    bannerBox.style.opacity = '1';
-                                    burstSparks(15);
-                                    setTimeout(() => {
-                                        bannerBox.className = `fire-banner-box frame-${frame} banner-holding`;
-                                    }, 800);
-                                }, 1200);
-                            }, 1500);
-                        }, 700);
-                    }, 400);
+                                    bannerBox.className = `fire-banner-box frame-${frame} banner-holding`;
+                                }, 800);
+                            }, 300);
+
+                        }, 1100);
+
+                    }, 820);
                 }
             }
         });

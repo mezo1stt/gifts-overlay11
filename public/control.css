@@ -30,20 +30,29 @@
 
 body.app-body {
     font-family: 'Cairo', 'Tajawal', sans-serif;
-    background-color: #ee1249;
+    background-color: #0b0205;
+    background-image: 
+        radial-gradient(circle at 50% 0%, #220612 0%, transparent 60%),
+        radial-gradient(circle at 100% 100%, #16030a 0%, transparent 50%),
+        linear-gradient(180deg, #100206 0%, #060103 100%);
     color: var(--text-main);
     min-height: 100vh;
     direction: rtl;
     overflow-x: hidden;
+    margin: 0;
+    padding: 0;
 }
 
 /* ================= APP LAYOUT ================= */
 .app-layout {
     display: flex;
     min-height: 100vh;
-    width: 100vw;
+    width: 100%;
+    max-width: 100vw;
     position: relative;
     z-index: 10;
+    overflow-x: hidden;
+    box-sizing: border-box;
 }
 
 /* ================= RIGHT SIDEBAR (مطابق تماماً لصورة تيك أليرت) ================= */
@@ -299,15 +308,22 @@ body.app-body {
 /* ================= MAIN WRAPPER ================= */
 .main-wrapper {
     flex: 1;
+    min-width: 0;
     margin-right: var(--sidebar-width);
+    width: calc(100% - var(--sidebar-width));
+    max-width: calc(100% - var(--sidebar-width));
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    transition: margin-right 0.3s ease;
+    transition: margin-right 0.3s ease, width 0.3s ease, max-width 0.3s ease;
+    overflow-x: hidden;
+    box-sizing: border-box;
 }
 
 .sidebar-nav.collapsed ~ .main-wrapper {
     margin-right: var(--sidebar-collapsed-width);
+    width: calc(100% - var(--sidebar-collapsed-width));
+    max-width: calc(100% - var(--sidebar-collapsed-width));
 }
 
 /* Top Navbar */
@@ -421,12 +437,19 @@ body.app-body {
 .page-content-area {
     flex: 1;
     padding: 24px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
 }
 
 /* Tab Sections */
 .tab-section {
     display: none;
     animation: fadeInTab 0.3s ease-out;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .tab-section.active {
@@ -441,14 +464,17 @@ body.app-body {
 /* ================= DASHBOARD GRID ================= */
 .dashboard-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
     gap: 24px;
     align-items: start;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1250px) {
     .dashboard-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
     }
 }
 
@@ -456,6 +482,9 @@ body.app-body {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 /* ================= CARDS ================= */
@@ -1238,11 +1267,13 @@ input[type="range"] {
 /* ================= SECTION 3: CAMERA FRAMES SPECIFICS ================= */
 .camera-styles-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 10px;
     max-height: 380px;
     overflow-y: auto;
     padding-left: 4px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .cam-style-card {
@@ -1351,8 +1382,10 @@ input[type="range"] {
 /* ================= SECTION 4: SCOREBOARD SPECIFICS ================= */
 .scoreboard-teams-manage {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 16px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .team-manage-box {
@@ -2180,6 +2213,9 @@ input[type="range"] {
     border-radius: 14px;
     padding: 16px;
     margin-top: 16px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 .sb-trigger-row {
@@ -2192,6 +2228,15 @@ input[type="range"] {
     border-radius: 10px;
     padding: 10px 14px;
     margin-top: 10px;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.sb-trigger-info {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
 }
 
 .sb-trigger-info h5 {
@@ -2199,13 +2244,20 @@ input[type="range"] {
     font-weight: 800;
     color: var(--gold);
     margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .sb-trigger-info code {
-    font-size: 12px;
+    font-size: 11.5px;
     color: #94a3b8;
     direction: ltr;
-    display: inline-block;
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /* ================= SECTION 5: صراع الحكام (JUDGES CHALLENGE / ROBLOX RACE) ================= */

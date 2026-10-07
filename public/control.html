@@ -6,52 +6,9 @@
     <title>MEZO TIK · منصة أدوات البث المباشر والأوفرلاي</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Changa:wght@700;800;900&family=Tajawal:wght@700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/control.css">
-    <link rel="stylesheet" href="/css/abstract-fire-bg.css">
     <link rel="icon" type="image/png" href="/images/mezotik-logo.png">
 </head>
 <body class="app-body">
-
-    <!-- ================= 100% PURE HTML/CSS ABSTRACT FIRE BACKGROUND ================= -->
-    <div class="abstract-fire-bg" id="abstractFireBg" aria-hidden="true">
-        <!-- Ambient lighting pulse -->
-        <div class="af-ambient-glow"></div>
-
-        <!-- Layer 1: Deep Crimson & Dark Orange Under-Streaks -->
-        <div class="af-layer af-layer-back">
-            <div class="af-streak af-streak-back-1"></div>
-            <div class="af-streak af-streak-back-2"></div>
-            <div class="af-streak af-streak-back-3"></div>
-        </div>
-
-        <!-- Layer 2: Primary Massive Vivid Orange Flame Blades -->
-        <div class="af-layer af-layer-mid">
-            <div class="af-streak af-blade-1"></div>
-            <div class="af-streak af-blade-2"></div>
-            <div class="af-streak af-blade-3"></div>
-            <div class="af-streak af-blade-4"></div>
-            <div class="af-streak af-blade-5"></div>
-        </div>
-
-        <!-- Layer 3: Sharp Fast-Moving Fire Trails & Accents -->
-        <div class="af-layer af-layer-fore">
-            <div class="af-streak af-accent-1"></div>
-            <div class="af-streak af-accent-2"></div>
-            <div class="af-streak af-accent-3"></div>
-            <div class="af-streak af-accent-4"></div>
-            <div class="af-streak af-accent-5"></div>
-        </div>
-
-        <!-- Layer 4: Perimeter & Corner Density Clusters -->
-        <div class="af-layer af-layer-edges">
-            <div class="af-streak af-edge-tr"></div>
-            <div class="af-streak af-edge-bl"></div>
-            <div class="af-streak af-edge-tl"></div>
-            <div class="af-streak af-edge-br"></div>
-        </div>
-
-        <!-- Depth Vignette -->
-        <div class="af-vignette"></div>
-    </div>
 
     <!-- App Shell Layout -->
     <div class="app-layout" id="appLayout">
@@ -622,12 +579,12 @@
                                     </div>
                                 </div>
 
-                                <!-- Smoke Effect Behind Text Toggle (الدخان يظهر من ورا وخليه وضع لوحده كدا يا اشغله يا لا) -->
+                                <!-- Smoke Effect Toggle (يمر الدخان فوق النص ويختفي ثم يظهر بسلاسة) -->
                                 <div class="form-group mt-3">
-                                    <label>🌪️ تأثير دوامة الدخان (خلف النص):</label>
+                                    <label>🌪️ تأثير دوامة الدخان (يمسح الكلمة وتظهر SLIDE IN):</label>
                                     <div class="pos-preset-buttons">
-                                        <button type="button" class="btn-pos active" id="btnSmokeOn" onclick="setFireSmokeEnabled(true)">✅ مفعل (دخان خلف الكلمة)</button>
-                                        <button type="button" class="btn-pos" id="btnSmokeOff" onclick="setFireSmokeEnabled(false)">❌ معطل (بدون دخان)</button>
+                                        <button type="button" class="btn-pos active" id="btnSmokeOn" onclick="setFireSmokeEnabled(true)">✅ مفعل (دخان + إخفاء + SLIDE IN)</button>
+                                        <button type="button" class="btn-pos" id="btnSmokeOff" onclick="setFireSmokeEnabled(false)">❌ معطل (نص نيون ثابت بدون دخان)</button>
                                     </div>
                                 </div>
 
