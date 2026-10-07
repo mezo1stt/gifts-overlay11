@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚔️ صراع الحكام · شاشة البث المباشر (OBS Overlay)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Changa:wght@700;800;900&family=Tajawal:wght@800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/race-overlay.css">
+</head>
+<body>
+
+    <div class="overlay-stage" id="overlayStage">
+        <div class="judges-tower">
+            
+            <!-- Tower Header -->
+            <div class="tower-header">
+                <span class="header-icon">⚔️</span>
+                <span class="header-title" id="towerTitle">صراع الحكام · TOP 3</span>
+                <span class="header-crown">👑</span>
+            </div>
+
+            <!-- Top 1 Leader Card (أعلى عدد وينات - صورته كبيرة دائماً) -->
+            <div class="top1-leader-card" id="top1Card">
+                <div class="crown-bob">👑</div>
+                
+                <div class="leader-main-flex">
+                    <!-- Big Avatar -->
+                    <div class="leader-avatar-wrapper">
+                        <img id="top1Avatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=waiting" alt="Leader" class="leader-avatar">
+                        <span class="leader-rank-badge" id="top1RankBadge">#1 المتصدر</span>
+                    </div>
+
+                    <!-- Details -->
+                    <div class="leader-details">
+                        <div class="leader-role" id="top1Role">المتصدر الأول 👑</div>
+                        <h2 class="leader-name" id="top1Name">في انتظار الحكام...</h2>
+                        <span class="leader-handle" id="top1Handle">@username</span>
+                    </div>
+
+                    <!-- Giant Wins Box with Floating Win Tag Container -->
+                    <div class="leader-wins-box" id="top1WinsBox">
+                        <span class="floating-win-tag" id="top1FloatTag">+1 WIN 🏆</span>
+                        <span class="wins-caption">الانتصارات</span>
+                        <div class="wins-digits-row">
+                            <span class="trophy-ico">🏆</span>
+                            <span class="wins-big-digits" id="top1Wins">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- The Leaderboard List (Top 3 only: #2 and #3) -->
+            <div class="leaderboard-tower-list" id="towerList">
+                <!-- Dynamically populated rows for #2 and #3 -->
+            </div>
+
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/race-overlay.js"></script>
+</body>
+</html>

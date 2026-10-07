@@ -111,7 +111,14 @@
                     <span class="nav-badge score">مباشر</span>
                 </button>
 
-                <!-- 5. إدارة الحساب والمستخدمين -->
+                <!-- 5. صراع الحكام (تحدي الروبلوكس والتيك توك) -->
+                <button class="nav-item" data-tab="raceSection">
+                    <span class="nav-icon">⚔️</span>
+                    <span class="nav-label">صراع الحكام</span>
+                    <span class="nav-badge hot">جديد 👑</span>
+                </button>
+
+                <!-- 6. إدارة الحساب والمستخدمين -->
                 <button class="nav-item" data-tab="accountSection">
                     <span class="nav-icon">👤</span>
                     <span class="nav-label">الحساب والمستخدمين</span>
@@ -615,6 +622,15 @@
                                     </div>
                                 </div>
 
+                                <!-- Smoke Effect Behind Text Toggle (الدخان يظهر من ورا وخليه وضع لوحده كدا يا اشغله يا لا) -->
+                                <div class="form-group mt-3">
+                                    <label>🌪️ تأثير دوامة الدخان (خلف النص):</label>
+                                    <div class="pos-preset-buttons">
+                                        <button type="button" class="btn-pos active" id="btnSmokeOn" onclick="setFireSmokeEnabled(true)">✅ مفعل (دخان خلف الكلمة)</button>
+                                        <button type="button" class="btn-pos" id="btnSmokeOff" onclick="setFireSmokeEnabled(false)">❌ معطل (بدون دخان)</button>
+                                    </div>
+                                </div>
+
                                 <div id="fireCycleControlsBox" class="mt-2" style="display:none; padding:14px; background:rgba(255,0,68,0.06); border-radius:12px; border:1px solid rgba(255,42,74,0.25);">
                                     <div class="slider-group">
                                         <div class="slider-header">
@@ -1011,7 +1027,175 @@
                     </div>
                 </section>
 
-                <!-- ================= SECTION 5: الحساب والمستخدمين ================= -->
+                <!-- ================= SECTION 5: صراع الحكام (JUDGES CHALLENGE / ROBLOX RACE) ================= -->
+                <section class="tab-section" id="raceSection">
+                    <div class="dashboard-grid">
+                        
+                        <!-- Left Column: Add Judge & Active Spotlight -->
+                        <div class="panel-section control-panel">
+
+                            <!-- 1. Add / Lookup Form (اكتب اليوزر وهو يجيب صورته واسمه) -->
+                            <div class="panel-card add-card">
+                                <div class="card-header-flex">
+                                    <h3 class="card-title"><span>➕ إضافة أو تحديث حكم / متسابق</span></h3>
+                                    <span class="badge-tag">جلب تلقائي للصورة والاسم ✨</span>
+                                </div>
+                                
+                                <form id="addRaceJudgeForm" onsubmit="handleAddRaceJudge(event)" class="add-form mt-2">
+                                    
+                                    <!-- Platform Selector -->
+                                    <div class="form-group">
+                                        <label>🌐 منصة الحساب:</label>
+                                        <div class="platform-tabs">
+                                            <button type="button" class="btn-plat active" id="platTikTok" onclick="setRacePlatform('tiktok')">
+                                                📱 تيك توك (TikTok)
+                                            </button>
+                                            <button type="button" class="btn-plat" id="platRoblox" onclick="setRacePlatform('roblox')">
+                                                🎮 روبلوكس (Roblox)
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Username & Fetch Button -->
+                                    <div class="form-group mt-2">
+                                        <label for="raceUsernameInput">👤 اسم المستخدم (Username):</label>
+                                        <div class="user-input-group">
+                                            <span class="at-tag" id="racePlatIcon">@</span>
+                                            <input type="text" id="raceUsernameInput" class="form-input" placeholder="اكتب اسم الحساب هنا..." required autocomplete="off">
+                                            <button type="button" class="btn-fetch" id="btnRaceFetch" onclick="handleRaceLookupUser()">🔍 فحص الحساب</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Fetched Preview Box (Appears when user is checked) -->
+                                    <div class="fetched-preview-box mt-2" id="raceFetchedBox" style="display:none;">
+                                        <img id="raceFetchedAvatar" src="" alt="Avatar" class="fetched-avatar">
+                                        <div class="fetched-info">
+                                            <span class="fetched-label">✓ تم العثور على الحساب بنجاح:</span>
+                                            <div class="fetched-name" id="raceFetchedName">اسم الحساب</div>
+                                            <div class="fetched-handle" id="raceFetchedHandle">@username</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Wins & Role Input ("وانا هكتب كام ون") -->
+                                    <div class="form-row-2col mt-2">
+                                        <div class="form-group">
+                                            <label for="raceWinsInput">🏆 كم ون؟ (عدد الانتصارات):</label>
+                                            <input type="number" id="raceWinsInput" class="form-input" min="0" value="0" placeholder="0">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="raceRoleInput">🏷️ اللقب / الصفة:</label>
+                                            <input type="text" id="raceRoleInput" class="form-input" value="الحكم" placeholder="الحكم / المتحدي">
+                                        </div>
+                                    </div>
+
+                                    <!-- Submit Button -->
+                                    <button type="submit" class="btn-primary mt-3" id="btnRaceSubmit" style="width:100%;">
+                                        💾 إضافة / تحديث في صراع الحكام
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- 2. Active Judge Spotlight Card -->
+                            <div class="panel-card spotlight-card mt-3" id="raceSpotlightCard">
+                                <div class="crown-badge">👑 الحكم المعروض على شاشة البث (Spotlight) 👑</div>
+
+                                <div class="spotlight-content" id="raceSpotlightContent">
+                                    <div class="spotlight-avatar-box">
+                                        <img id="raceActiveAvatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=judge" alt="Avatar" class="spotlight-avatar">
+                                        <span class="spotlight-badge" id="raceActiveRole">الحكم</span>
+                                    </div>
+
+                                    <div class="spotlight-info">
+                                        <h3 id="raceActiveName" class="spotlight-name">في انتظار إضافة حكم...</h3>
+                                        <span id="raceActiveHandle" class="spotlight-handle">@username</span>
+                                        <span id="raceActivePlatBadge" class="plat-badge">TikTok</span>
+                                    </div>
+
+                                    <!-- BIG WINS COUNTER -->
+                                    <div class="spotlight-wins-box">
+                                        <span class="wins-label">🏆 إجمالي الانتصارات</span>
+                                        
+                                        <div class="wins-display-row">
+                                            <span class="trophy-icon">🏆</span>
+                                            <span id="raceActiveWinsDigits" class="wins-number">0</span>
+                                            <span class="wins-unit">فوز</span>
+                                        </div>
+
+                                        <!-- Add Win +1 Button -->
+                                        <div class="wins-action-buttons">
+                                            <button class="btn-big-win" onclick="addRaceWinToActive()" title="إضافة فوز جديد لهذا الحكم">
+                                                🏆 +1 WIN (تسجيل فوز)
+                                            </button>
+                                            <div class="wins-sub-btns">
+                                                <button class="btn-sub-small" onclick="minusRaceWinActive()" title="إنقاص فوز">-1</button>
+                                                <button class="btn-sub-small" onclick="promptSetRaceWinsActive()" title="تعديل الرقم مباشرة">✏️ كتابة رقم</button>
+                                                <button class="btn-sub-small" onclick="resetRaceWinActive()" title="تصفير">↺ تصفير</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="raceSpotlightEmpty" class="spotlight-empty" style="display:none;">
+                                    <p>قم بكتابة يوزر الحكم في النموذج أعلاه لعرضه وتسجيل انتصاراته!</p>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Right Column: Judges Leaderboard & Simulator -->
+                        <div class="panel-section gifts-panel">
+                            
+                            <!-- Judges Leaderboard Card -->
+                            <div class="panel-card">
+                                <div class="card-header-flex">
+                                    <h3 class="card-title"><span>📋 قائمة الحكام المسجلين (<span id="raceJudgesCount">0</span>) · التوب 3 على البث</span></h3>
+                                    <button class="btn-text-danger" onclick="resetAllRaceWins()">🔄 تصفير كل الانتصارات</button>
+                                </div>
+
+                                <div class="judges-list mt-2" id="raceJudgesList">
+                                    <div class="empty-list">لم تقم بإضافة أي حكام حتى الآن</div>
+                                </div>
+                            </div>
+
+                            <!-- Live Race Overlay Simulator -->
+                            <div class="panel-card mt-3">
+                                <div class="card-header-flex">
+                                    <h3 class="card-title"><span>👁️ محاكي شاشة صراع الحكام (OBS Preview)</span></h3>
+                                    <a id="racePreviewExternalLink" href="/race-overlay.html" target="_blank" class="preview-external-btn">شاشة كاملة ↗</a>
+                                </div>
+
+                                <div class="race-sim-container" style="height:320px; border-radius:16px; overflow:hidden; position:relative; background:#070a14; border:1px solid rgba(255,215,0,0.25);">
+                                    <iframe id="raceSimIframe" src="/race-overlay.html" style="width:100%; height:100%; border:none; background:transparent;"></iframe>
+                                </div>
+
+                                <div class="form-actions mt-3">
+                                    <button class="btn-obs-action" onclick="copyCurrentOverlayUrl('race')">
+                                        📺 نسخ رابط صراع الحكام لـ OBS
+                                    </button>
+                                    <a href="/race-overlay.html" target="_blank" class="btn-secondary" style="text-decoration:none; display:inline-flex; align-items:center;">
+                                        👁️ فتح شاشة البث
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Activity Log Card -->
+                            <div class="panel-card log-card mt-3">
+                                <div class="card-header-flex">
+                                    <h3 class="card-title"><span>📜 سجل انتصارات صراع الحكام</span></h3>
+                                </div>
+                                <div class="log-list mt-2" id="raceLogList">
+                                    <div class="log-item info">
+                                        <span>👋 مرحباً بك في صراع الحكام! اكتب اليوزر واضغط إضافة للبدء.</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- ================= SECTION 6: الحساب والمستخدمين ================= -->
                 <section class="tab-section" id="accountSection">
                     <div class="dashboard-grid">
                         
@@ -1190,6 +1374,22 @@
                     </div>
                 </div>
 
+                <!-- 5. صراع الحكام (Judges Challenge) -->
+                <div class="obs-link-card">
+                    <div class="obs-link-meta">
+                        <span class="obs-icon">👑</span>
+                        <div>
+                            <h4>شاشة صراع الحكام (Judges Challenge Overlay)</h4>
+                            <p>برج المتصدرين التوب 3 لانتصارات الحكام والمتسابقين في روبلوكس وتيك توك</p>
+                        </div>
+                    </div>
+                    <div class="obs-copy-row">
+                        <input type="text" id="linkRaceUrl" readonly>
+                        <button class="btn-copy" onclick="copyInput('linkRaceUrl')">📋 نسخ</button>
+                        <a id="openRaceUrl" href="/race-overlay.html" target="_blank" class="btn-open-preview">👁️ فتح</a>
+                    </div>
+                </div>
+
             </div>
 
             <div class="modal-footer">
@@ -1224,6 +1424,15 @@
                     👑 دخول لوحة التحكم (MEZO)
                 </button>
             </form>
+        </div>
+    </div>
+
+    <!-- Celebration Banner for Race Wins -->
+    <div id="raceCelebrationBanner" class="celebration-banner">
+        <span class="banner-icon">🏆</span>
+        <div class="banner-text">
+            <h4 id="raceBannerWinnerName">الحكم</h4>
+            <p>أحرز فوزاً جديداً في صراع الحكام! (الإجمالي: <span id="raceBannerWinsCount">1</span> 🏆)</p>
         </div>
     </div>
 

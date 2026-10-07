@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const http = require('http');
+const https = require('https');
 const { Server } = require('socket.io');
 const cors = require('cors');
 const path = require('path');
@@ -632,7 +633,8 @@ app.get('/api/device-board', (req, res) => {
 // Default Fire Settings
 function getDefaultFireSettings() {
     return {
-        text: 'رابط الدعم بالبايو 🔥',
+        text: 'رابط الدعم في البايو 🔥',
+        smoke_enabled: true,
         color: '#ff1e00',
         shine_color: '#ffd700',
         font_size: 64,
@@ -1096,8 +1098,437 @@ app.put('/api/gifts/:uid/reorder', (req, res) => {
     res.json({ success: true, gifts: reordered });
 });
 
+// ================= صراع الحكام (JUDGES CHALLENGE / ROBLOX RACE) ================= //
+const raceDataPath = path.join(dataDir, 'race-data.json');
+
+function getDefaultRaceState() {
+    return {
+        title: 'صراع الحكام',
+        activeJudgeId: null,
+        judges: {},
+        history: [],
+        settings: {
+            soundEnabled: true,
+            overlayScale: 100,
+            showLeaderboard: true
+        }
+    };
+}
+
+let raceState = getDefaultRaceState();
+if (fs.existsSync(raceDataPath)) {
+    try {
+        const raw = fs.readFileSync(raceDataPath, 'utf8');
+        const parsed = JSON.parse(raw);
+        raceState = { ...getDefaultRaceState(), ...parsed };
+    } catch (e) {
+        console.error('Error reading race-data.json:', e.message);
+    }
+}
+
+function saveRaceState() {
+    try {
+        fs.writeFileSync(raceDataPath, JSON.stringify(raceState, null, 2), 'utf8');
+    } catch (e) {
+        console.error('Error saving race-data.json:', e.message);
+    }
+}
+
+function getRaceLeaderboard() {
+    const list = Object.values(raceState.judges || {});
+    list.sort((a, b) => (b.wins || 0) - (a.wins || 0));
+    return list;
+}
+
+function getRaceActiveJudge() {
+    if (raceState.activeJudgeId && raceState.judges && raceState.judges[raceState.activeJudgeId]) {
+        return raceState.judges[raceState.activeJudgeId];
+    }
+    const lb = getRaceLeaderboard();
+    return lb.length > 0 ? lb[0] : null;
+}
+
+function broadcastRaceState() {
+    const payload = {
+        title: raceState.title || 'صراع الحكام',
+        activeJudge: getRaceActiveJudge(),
+        leaderboard: getRaceLeaderboard(),
+        settings: raceState.settings,
+        history: (raceState.history || []).slice(0, 30)
+    };
+    io.emit('race_state_update', payload);
+    io.emit('state_update', payload);
+}
+
+function addRaceHistory(type, text) {
+    if (!raceState.history) raceState.history = [];
+    raceState.history.unshift({
+        id: Date.now() + Math.random().toString(36).substr(2, 4),
+        type,
+        text,
+        time: new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+    });
+    if (raceState.history.length > 100) raceState.history.pop();
+}
+
+// 1. TikTok User Info Fetcher
+function fetchTikTokUser(username) {
+    return new Promise((resolve) => {
+        const cleanUser = username.trim().replace(/^@/, '');
+        const url = `https://www.tiktok.com/@${cleanUser}`;
+
+        https.get(url, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.5'
+            }
+        }, (res) => {
+            let html = '';
+            res.on('data', chunk => html += chunk);
+            res.on('end', () => {
+                let nickname = cleanUser;
+                let avatar = '';
+
+                const sgiMatch = html.match(/<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__"[^>]*>([\s\S]*?)<\/script>/);
+                if (sgiMatch && sgiMatch[1]) {
+                    try {
+                        const parsed = JSON.parse(sgiMatch[1]);
+                        const userDetail = parsed['__DEFAULT_SCOPE__']?.['webapp.user-detail']?.userInfo?.user;
+                        if (userDetail) {
+                            nickname = userDetail.nickname || userDetail.uniqueId || cleanUser;
+                            avatar = userDetail.avatarLarger || userDetail.avatarMedium || userDetail.avatarThumb || '';
+                        }
+                    } catch (e) {}
+                }
+
+                if (!avatar) {
+                    const avatarMatch = html.match(/"avatarLarger":"([^"]+)"/) || html.match(/"avatarMedium":"([^"]+)"/);
+                    if (avatarMatch) avatar = avatarMatch[1].replace(/\\u002F/g, '/');
+                }
+                if (nickname === cleanUser) {
+                    const nickMatch = html.match(/"nickname":"([^"]+)"/);
+                    if (nickMatch) nickname = nickMatch[1];
+                }
+
+                if (!avatar) {
+                    avatar = `https://api.dicebear.com/7.x/bottts/svg?seed=${cleanUser}`;
+                }
+
+                resolve({
+                    platform: 'tiktok',
+                    username: cleanUser,
+                    nickname,
+                    avatar
+                });
+            });
+        }).on('error', () => {
+            resolve({
+                platform: 'tiktok',
+                username: cleanUser,
+                nickname: cleanUser,
+                avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${cleanUser}`
+            });
+        });
+    });
+}
+
+// 2. Roblox User Info Fetcher
+function fetchRobloxUser(username) {
+    return new Promise((resolve) => {
+        const cleanUser = username.trim();
+        const postData = JSON.stringify({
+            usernames: [cleanUser],
+            excludeBannedUsers: false
+        });
+
+        const req = https.request('https://users.roblox.com/v1/usernames/users', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(postData)
+            }
+        }, (res) => {
+            let data = '';
+            res.on('data', chunk => data += chunk);
+            res.on('end', () => {
+                try {
+                    const json = JSON.parse(data);
+                    if (json.data && json.data.length > 0) {
+                        const user = json.data[0];
+                        const userId = user.id;
+                        const displayName = user.displayName || user.name;
+
+                        https.get(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`, (tRes) => {
+                            let tData = '';
+                            tRes.on('data', c => tData += c);
+                            tRes.on('end', () => {
+                                let avatar = '';
+                                try {
+                                    const tJson = JSON.parse(tData);
+                                    if (tJson.data && tJson.data.length > 0) {
+                                        avatar = tJson.data[0].imageUrl;
+                                    }
+                                } catch (e) {}
+
+                                resolve({
+                                    platform: 'roblox',
+                                    userId,
+                                    username: user.name,
+                                    nickname: displayName,
+                                    avatar: avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${cleanUser}`
+                                });
+                            });
+                        });
+                    } else {
+                        resolve({
+                            platform: 'roblox',
+                            username: cleanUser,
+                            nickname: cleanUser,
+                            avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${cleanUser}`
+                        });
+                    }
+                } catch (e) {
+                    resolve({
+                        platform: 'roblox',
+                        username: cleanUser,
+                        nickname: cleanUser,
+                        avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${cleanUser}`
+                    });
+                }
+            });
+        });
+
+        req.on('error', () => {
+            resolve({
+                platform: 'roblox',
+                username: cleanUser,
+                nickname: cleanUser,
+                avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${cleanUser}`
+            });
+        });
+
+        req.write(postData);
+        req.end();
+    });
+}
+
+async function fetchRaceUserInfo(platform, username) {
+    if (platform === 'roblox') {
+        return await fetchRobloxUser(username);
+    }
+    return await fetchTikTokUser(username);
+}
+
+// Race API Endpoints
+const handleGetRaceState = (req, res) => {
+    res.json({
+        success: true,
+        title: raceState.title || 'صراع الحكام',
+        activeJudge: getRaceActiveJudge(),
+        leaderboard: getRaceLeaderboard(),
+        settings: raceState.settings,
+        history: (raceState.history || []).slice(0, 30)
+    });
+};
+app.get('/api/race/state', handleGetRaceState);
+app.get('/api/state', handleGetRaceState);
+
+const handleRaceUserLookup = async (req, res) => {
+    const { platform, username } = req.body;
+    if (!username || !username.trim()) {
+        return res.status(400).json({ error: 'يرجى إدخال اسم المستخدم' });
+    }
+    try {
+        const info = await fetchRaceUserInfo(platform || 'tiktok', username.trim());
+        res.json({ success: true, user: info });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+app.post('/api/race/user/lookup', handleRaceUserLookup);
+app.post('/api/user/lookup', handleRaceUserLookup);
+
+const handleAddOrUpdateJudge = async (req, res) => {
+    const { username, platform, wins, role, customNickname, customAvatar } = req.body;
+    if (!username || !username.trim()) {
+        return res.status(400).json({ error: 'يرجى إدخال اسم المستخدم' });
+    }
+
+    const plat = platform || 'tiktok';
+    const cleanUser = username.trim().replace(/^@/, '');
+    const id = `${plat}_${cleanUser.toLowerCase()}`;
+
+    const fetched = await fetchRaceUserInfo(plat, cleanUser);
+    const initialWins = parseInt(wins !== undefined ? wins : 0);
+    const nickname = customNickname || fetched.nickname || cleanUser;
+    const avatar = customAvatar || fetched.avatar;
+
+    if (!raceState.judges) raceState.judges = {};
+    raceState.judges[id] = {
+        id,
+        username: cleanUser,
+        platform: plat,
+        nickname,
+        avatar,
+        wins: Math.max(0, initialWins),
+        role: role || 'حكم',
+        updatedAt: Date.now()
+    };
+
+    if (!raceState.activeJudgeId || req.body.setActive) {
+        raceState.activeJudgeId = id;
+    }
+
+    addRaceHistory('add', `👤 تم إضافة: ${nickname} (@${cleanUser}) برصيد ${initialWins} فوز`);
+    saveRaceState();
+    broadcastRaceState();
+
+    res.json({ success: true, judge: raceState.judges[id] });
+};
+app.post('/api/race/judge', handleAddOrUpdateJudge);
+app.post('/api/judge', handleAddOrUpdateJudge);
+
+const handleActivateJudge = (req, res) => {
+    const { id } = req.params;
+    if (!raceState.judges || !raceState.judges[id]) {
+        return res.status(404).json({ error: 'غير موجود' });
+    }
+    raceState.activeJudgeId = id;
+    saveRaceState();
+    broadcastRaceState();
+    res.json({ success: true, activeJudge: raceState.judges[id] });
+};
+app.post('/api/race/judge/:id/activate', handleActivateJudge);
+app.post('/api/judge/:id/activate', handleActivateJudge);
+
+const handleJudgeWin = (req, res) => {
+    const { id } = req.params;
+    const count = parseInt(req.body.count || 1);
+
+    if (!raceState.judges || !raceState.judges[id]) {
+        return res.status(404).json({ error: 'غير موجود' });
+    }
+
+    raceState.judges[id].wins = Math.max(0, (raceState.judges[id].wins || 0) + count);
+    const judge = raceState.judges[id];
+
+    addRaceHistory('win', `🏆 فوز جديد لـ ${judge.nickname}! (+${count} فوز) الإجمالي: ${judge.wins} 🏆`);
+    saveRaceState();
+    broadcastRaceState();
+
+    const celebData = {
+        id: judge.id,
+        nickname: judge.nickname,
+        username: judge.username,
+        avatar: judge.avatar,
+        wins: judge.wins,
+        addedWins: count
+    };
+    io.emit('race_win_celebration', celebData);
+    io.emit('win_celebration', celebData);
+
+    res.json({ success: true, wins: judge.wins, judge });
+};
+app.post('/api/race/judge/:id/win', handleJudgeWin);
+app.post('/api/judge/:id/win', handleJudgeWin);
+
+const handleJudgeMinus = (req, res) => {
+    const { id } = req.params;
+    if (!raceState.judges || !raceState.judges[id]) return res.status(404).json({ error: 'غير موجود' });
+
+    raceState.judges[id].wins = Math.max(0, (raceState.judges[id].wins || 0) - 1);
+    saveRaceState();
+    broadcastRaceState();
+    res.json({ success: true, wins: raceState.judges[id].wins });
+};
+app.post('/api/race/judge/:id/minus', handleJudgeMinus);
+app.post('/api/judge/:id/minus', handleJudgeMinus);
+
+const handleJudgeSetWins = (req, res) => {
+    const { id } = req.params;
+    const count = parseInt(req.body.wins || 0);
+
+    if (!raceState.judges || !raceState.judges[id]) return res.status(404).json({ error: 'غير موجود' });
+
+    raceState.judges[id].wins = Math.max(0, count);
+    const judge = raceState.judges[id];
+
+    addRaceHistory('update', `✏️ تم تعديل انتصارات ${judge.nickname} إلى ${judge.wins} فوز`);
+    saveRaceState();
+    broadcastRaceState();
+
+    const celebData = {
+        id: judge.id,
+        nickname: judge.nickname,
+        username: judge.username,
+        avatar: judge.avatar,
+        wins: judge.wins,
+        addedWins: 0
+    };
+    io.emit('race_win_celebration', celebData);
+    io.emit('win_celebration', celebData);
+
+    res.json({ success: true, wins: judge.wins, judge });
+};
+app.post('/api/race/judge/:id/set-wins', handleJudgeSetWins);
+app.post('/api/judge/:id/set-wins', handleJudgeSetWins);
+
+const handleDeleteJudge = (req, res) => {
+    const { id } = req.params;
+    if (raceState.judges && raceState.judges[id]) {
+        delete raceState.judges[id];
+        if (raceState.activeJudgeId === id) {
+            raceState.activeJudgeId = null;
+        }
+        saveRaceState();
+        broadcastRaceState();
+    }
+    res.json({ success: true });
+};
+app.delete('/api/race/judge/:id', handleDeleteJudge);
+app.delete('/api/judge/:id', handleDeleteJudge);
+
+const handleResetAllWins = (req, res) => {
+    if (raceState.judges) {
+        Object.keys(raceState.judges).forEach(k => {
+            raceState.judges[k].wins = 0;
+        });
+    }
+    addRaceHistory('reset', '🔄 تم تصفير جميع عدادات الفوز');
+    saveRaceState();
+    broadcastRaceState();
+    res.json({ success: true });
+};
+app.post('/api/race/reset-all-wins', handleResetAllWins);
+app.post('/api/reset-all-wins', handleResetAllWins);
+
+const handleRaceSettings = (req, res) => {
+    if (req.body.title) raceState.title = req.body.title.trim();
+    if (req.body.settings) raceState.settings = { ...(raceState.settings || {}), ...req.body.settings };
+    saveRaceState();
+    broadcastRaceState();
+    res.json({ success: true });
+};
+app.post('/api/race/settings', handleRaceSettings);
+app.post('/api/settings', handleRaceSettings);
+
 // Socket.io Connection & Event Forwarding
 io.on('connection', (socket) => {
+    socket.emit('race_state_update', {
+        title: raceState.title || 'صراع الحكام',
+        activeJudge: getRaceActiveJudge(),
+        leaderboard: getRaceLeaderboard(),
+        settings: raceState.settings,
+        history: (raceState.history || []).slice(0, 30)
+    });
+    socket.emit('state_update', {
+        title: raceState.title || 'صراع الحكام',
+        activeJudge: getRaceActiveJudge(),
+        leaderboard: getRaceLeaderboard(),
+        settings: raceState.settings,
+        history: (raceState.history || []).slice(0, 30)
+    });
     socket.on('corner_trigger', (data) => {
         io.emit('corner_trigger', data);
     });

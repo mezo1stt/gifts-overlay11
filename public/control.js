@@ -122,6 +122,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadFireData();
     loadCameraData();
     loadScoreboardData();
+    loadRaceState();
 
     // 5. Populate Library
     populateGiftsLibrary();
@@ -142,6 +143,7 @@ function setupSidebarNav() {
         fireSection: '🔥 رابط آخر داعم (الشريط الناري) · إعدادات البث',
         cameraSection: '📷 بنرات الكاميرا · 10 أنماط إطارات نيون للبث',
         scoreboardSection: '⚡ لوحة النتائج (Scoreboard) · نقاط الفرق والتحديات والتراجر',
+        raceSection: '⚔️ صراع الحكام 👑 · نظام تسجيل انتصارات الحكام والمتسابقين في روبلوكس وتيك توك',
         accountSection: '👤 إدارة الحساب والمستخدمين · قاعدة البيانات'
     };
 
@@ -795,8 +797,21 @@ async function loadFireData() {
             document.querySelectorAll('#fireFrameChipsGrid .style-chip').forEach(c => {
                 c.classList.toggle('active', c.dataset.framestyle === bannerFrame);
             });
+
+            // Smoke toggle (يا اشغله يا لا)
+            const isSmoke = fireConfig.smoke_enabled !== false && fireConfig.smoke_enabled !== 0 && fireConfig.smoke_enabled !== 'false';
+            setFireSmokeEnabled(isSmoke, false);
         }
     } catch (e) {}
+}
+
+function setFireSmokeEnabled(enabled, updateSim = true) {
+    fireConfig.smoke_enabled = !!enabled;
+    const btnOn = document.getElementById('btnSmokeOn');
+    const btnOff = document.getElementById('btnSmokeOff');
+    if (btnOn) btnOn.classList.toggle('active', !!enabled);
+    if (btnOff) btnOff.classList.toggle('active', !enabled);
+    if (updateSim) updateFireSimLive();
 }
 
 function toggleFireNeon(enabled, updateSim = true) {
@@ -1484,6 +1499,11 @@ function openAllObsModal() {
     document.getElementById('linkScoreboardUrl').value = `${origin}/scoreboard-overlay.html?id=${currentUid}`;
     document.getElementById('openScoreboardUrl').href = `${origin}/scoreboard-overlay.html?id=${currentUid}`;
 
+    const linkRace = document.getElementById('linkRaceUrl');
+    if (linkRace) linkRace.value = `${origin}/race-overlay.html`;
+    const openRace = document.getElementById('openRaceUrl');
+    if (openRace) openRace.href = `${origin}/race-overlay.html`;
+
     document.getElementById('allObsModal').classList.add('open');
 }
 
@@ -1510,9 +1530,10 @@ function copyCurrentOverlayUrl(type) {
     else if (type === 'fire') url = `${origin}/fire-text.html?uid=${currentUid}`;
     else if (type === 'camera') url = `${origin}/camera-overlay.html?uid=${currentUid}`;
     else if (type === 'scoreboard') url = `${origin}/scoreboard-overlay.html?id=${currentUid}`;
+    else if (type === 'race') url = `${origin}/race-overlay.html`;
 
     navigator.clipboard.writeText(url);
-    showToast(`📺 تم نسخ رابط (${type}) بنجاح!`, 'copy');
+    showToast(`📺 تم نسخ رابط (${type === 'race' ? 'صراع الحكام' : type}) بنجاح!`, 'copy');
 }
 
 // ================= SOCKET.IO & EVENT LISTENERS ================= //
@@ -1544,6 +1565,26 @@ function setupSocket() {
                 currentTeamGifts = data.teamGifts;
                 renderTeamGiftsUI();
             }
+        });
+
+        socket.on('race_state_update', (data) => {
+            if (data) {
+                currentRaceState = { ...currentRaceState, ...data };
+                renderRaceUI();
+            }
+        });
+        socket.on('state_update', (data) => {
+            if (data && data.leaderboard) {
+                currentRaceState = { ...currentRaceState, ...data };
+                renderRaceUI();
+            }
+        });
+
+        socket.on('race_win_celebration', (data) => {
+            triggerRaceCelebration(data);
+        });
+        socket.on('win_celebration', (data) => {
+            triggerRaceCelebration(data);
         });
     } catch (e) {}
 }
@@ -1664,4 +1705,384 @@ function setupEventListeners() {
             document.getElementById(btn.dataset.tab).classList.add('active');
         });
     });
+}
+
+// ================= SECTION 5: صراع الحكام (JUDGES CHALLENGE) ================= //
+let currentRacePlatform = 'tiktok';
+let raceFetchedUserData = null;
+
+let currentRaceState = {
+    title: 'صراع الحكام',
+    activeJudge: null,
+    leaderboard: [],
+    settings: { soundEnabled: true },
+    history: []
+};
+
+// Victory fanfare sound for dashboard
+let raceAudioCtx = null;
+function playRaceVictorySound() {
+    try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        if (!raceAudioCtx) raceAudioCtx = new AudioCtx();
+        if (raceAudioCtx.state === 'suspended') raceAudioCtx.resume();
+
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, idx) => {
+            const osc = raceAudioCtx.createOscillator();
+            const gain = raceAudioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, raceAudioCtx.currentTime + idx * 0.1);
+
+            gain.gain.setValueAtTime(0, raceAudioCtx.currentTime + idx * 0.1);
+            gain.gain.linearRampToValueAtTime(0.3, raceAudioCtx.currentTime + idx * 0.1 + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.001, raceAudioCtx.currentTime + idx * 0.1 + 0.65);
+
+            osc.connect(gain);
+            gain.connect(raceAudioCtx.destination);
+
+            osc.start(raceAudioCtx.currentTime + idx * 0.1);
+            osc.stop(raceAudioCtx.currentTime + idx * 0.1 + 0.7);
+        });
+    } catch (e) {}
+}
+
+function setRacePlatform(plat) {
+    currentRacePlatform = plat;
+    const btnTik = document.getElementById('platTikTok');
+    const btnRob = document.getElementById('platRoblox');
+    const ico = document.getElementById('racePlatIcon');
+    if (btnTik) btnTik.classList.toggle('active', plat === 'tiktok');
+    if (btnRob) btnRob.classList.toggle('active', plat === 'roblox');
+    if (ico) ico.textContent = plat === 'tiktok' ? '@' : '🎮';
+    raceFetchedUserData = null;
+    const box = document.getElementById('raceFetchedBox');
+    if (box) box.style.display = 'none';
+}
+
+async function handleRaceLookupUser() {
+    const input = document.getElementById('raceUsernameInput');
+    const btn = document.getElementById('btnRaceFetch');
+    const user = input ? input.value.trim().replace(/^@/, '') : '';
+    if (!user) {
+        showToast('⚠️ يرجى كتابة اسم المستخدم أولاً!', 'error');
+        if (input) input.focus();
+        return;
+    }
+
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = '⏳ جاري الفحص...';
+    }
+
+    try {
+        const res = await fetch('/api/race/user/lookup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ platform: currentRacePlatform, username: user })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+
+        raceFetchedUserData = data.user;
+        const box = document.getElementById('raceFetchedBox');
+        const av = document.getElementById('raceFetchedAvatar');
+        const nm = document.getElementById('raceFetchedName');
+        const hnd = document.getElementById('raceFetchedHandle');
+        if (av) av.src = raceFetchedUserData.avatar;
+        if (nm) nm.textContent = raceFetchedUserData.nickname;
+        if (hnd) hnd.textContent = `@${raceFetchedUserData.username} (${currentRacePlatform === 'tiktok' ? 'تيك توك' : 'روبلوكس'})`;
+        if (box) box.style.display = 'flex';
+        showToast(`✅ تم العثور على: ${raceFetchedUserData.nickname}`, 'success');
+    } catch (err) {
+        showToast('فشل فحص الحساب: ' + err.message, 'error');
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = '🔍 فحص الحساب';
+        }
+    }
+}
+
+async function handleAddRaceJudge(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    const input = document.getElementById('raceUsernameInput');
+    const winsInput = document.getElementById('raceWinsInput');
+    const roleInput = document.getElementById('raceRoleInput');
+    const btn = document.getElementById('btnRaceSubmit');
+
+    const user = input ? input.value.trim().replace(/^@/, '') : '';
+    if (!user) {
+        showToast('يرجى كتابة اسم المستخدم', 'error');
+        return;
+    }
+
+    const wins = parseInt(winsInput ? winsInput.value : 0) || 0;
+    const role = roleInput ? roleInput.value.trim() : 'الحكم';
+
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = '⏳ جاري الحفظ...';
+    }
+
+    try {
+        const payload = {
+            username: user,
+            platform: currentRacePlatform,
+            wins: wins,
+            role: role || 'الحكم',
+            setActive: true,
+            customNickname: raceFetchedUserData ? raceFetchedUserData.nickname : null,
+            customAvatar: raceFetchedUserData ? raceFetchedUserData.avatar : null
+        };
+
+        const res = await fetch('/api/race/judge', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+
+        if (input) input.value = '';
+        if (winsInput) winsInput.value = '0';
+        raceFetchedUserData = null;
+        const box = document.getElementById('raceFetchedBox');
+        if (box) box.style.display = 'none';
+
+        showToast(`🎉 تم حفظ ${data.judge.nickname} في صراع الحكام!`, 'success');
+    } catch (err) {
+        showToast('حدث خطأ: ' + err.message, 'error');
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = '💾 إضافة / تحديث في صراع الحكام';
+        }
+    }
+}
+
+function renderRaceUI() {
+    const active = currentRaceState.activeJudge;
+    const content = document.getElementById('raceSpotlightContent');
+    const empty = document.getElementById('raceSpotlightEmpty');
+    const av = document.getElementById('raceActiveAvatar');
+    const nm = document.getElementById('raceActiveName');
+    const hnd = document.getElementById('raceActiveHandle');
+    const rol = document.getElementById('raceActiveRole');
+    const plat = document.getElementById('raceActivePlatBadge');
+    const wins = document.getElementById('raceActiveWinsDigits');
+
+    if (active) {
+        if (content) content.style.display = 'flex';
+        if (empty) empty.style.display = 'none';
+        if (av) av.src = active.avatar || ('https://api.dicebear.com/7.x/bottts/svg?seed=' + active.username);
+        if (nm) nm.textContent = active.nickname || active.username;
+        if (hnd) hnd.textContent = `@${active.username}`;
+        if (rol) rol.textContent = active.role || 'الحكم';
+        if (plat) plat.textContent = active.platform === 'tiktok' ? '📱 TikTok' : '🎮 Roblox';
+        if (wins) wins.textContent = active.wins || 0;
+    } else {
+        if (content) content.style.display = 'none';
+        if (empty) empty.style.display = 'block';
+    }
+
+    renderRaceJudgesList(currentRaceState.leaderboard);
+    renderRaceLog(currentRaceState.history);
+}
+
+function renderRaceJudgesList(list) {
+    const countEl = document.getElementById('raceJudgesCount');
+    const listEl = document.getElementById('raceJudgesList');
+    if (countEl) countEl.textContent = list ? list.length : 0;
+    if (!listEl) return;
+
+    listEl.innerHTML = '';
+    if (!list || list.length === 0) {
+        listEl.innerHTML = '<div class="empty-list">لم تقم بإضافة أي حكام حتى الآن</div>';
+        return;
+    }
+
+    const activeId = currentRaceState.activeJudge ? currentRaceState.activeJudge.id : null;
+
+    list.forEach((item, idx) => {
+        const isActive = item.id === activeId;
+        let rankBadge = '';
+        let streamTag = '';
+
+        if (idx === 0) {
+            rankBadge = '👑 1';
+            streamTag = '<span class="judge-badge-stream top1">👑 المتصدر على البث (Top 1)</span>';
+        } else if (idx === 1) {
+            rankBadge = '🥈 2';
+            streamTag = '<span class="judge-badge-stream top2">🥈 معروض بالبث (Top 2)</span>';
+        } else if (idx === 2) {
+            rankBadge = '🥉 3';
+            streamTag = '<span class="judge-badge-stream top3">🥉 معروض بالبث (Top 3)</span>';
+        } else {
+            rankBadge = '#' + (idx + 1);
+            streamTag = `<span class="judge-badge-stream saved">💾 محفوظ باللوحة (#${idx + 1})</span>`;
+        }
+
+        const div = document.createElement('div');
+        div.className = `judge-item ${isActive ? 'is-active' : ''}`;
+        div.innerHTML = `
+            <span class="judge-rank">${rankBadge}</span>
+            <img class="judge-avatar" src="${item.avatar || ('https://api.dicebear.com/7.x/bottts/svg?seed=' + item.username)}" alt="${escapeHtml(item.nickname)}" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=${item.username}'">
+            <div class="judge-details">
+                <div class="judge-name-row">
+                    <span class="judge-name">${escapeHtml(item.nickname)}</span>
+                    ${streamTag}
+                </div>
+                <div class="judge-meta">@${escapeHtml(item.username)} · ${item.role || 'حكم'} · ${item.platform === 'tiktok' ? 'تيك توك' : 'روبلوكس'}</div>
+            </div>
+            <div class="judge-wins-display">
+                <span>🏆</span>
+                <span>${item.wins || 0}</span>
+            </div>
+            <div class="judge-actions">
+                <button class="btn-action-mini" onclick="addRaceWinToJudge('${item.id}')" title="إضافة فوز">+1</button>
+                <button class="btn-action-mini" onclick="promptSetRaceWins('${item.id}', '${escapeHtml(item.nickname)}', ${item.wins || 0})" title="تعديل عدد الانتصارات">✏️</button>
+                <button class="btn-action-mini" onclick="activateRaceJudge('${item.id}')" title="عرض على شاشة البث كحكم رئيسي">👁️</button>
+                <button class="btn-action-mini del" onclick="deleteRaceJudge('${item.id}')" title="حذف">✕</button>
+            </div>
+        `;
+        listEl.appendChild(div);
+    });
+}
+
+function renderRaceLog(history) {
+    const logEl = document.getElementById('raceLogList');
+    if (!logEl) return;
+    logEl.innerHTML = '';
+    if (!history || history.length === 0) {
+        logEl.innerHTML = '<div class="log-item info"><span>لا توجد سجلات حتى الآن</span></div>';
+        return;
+    }
+
+    history.forEach(item => {
+        const div = document.createElement('div');
+        div.className = `log-item ${item.type || 'info'}`;
+        div.innerHTML = `
+            <span>${escapeHtml(item.text)}</span>
+            <span class="log-time" style="font-size:11px; color:#94a3b8; direction:ltr;">${item.time || ''}</span>
+        `;
+        logEl.appendChild(div);
+    });
+}
+
+async function addRaceWinToActive() {
+    if (!currentRaceState.activeJudge) {
+        showToast('يرجى تحديد أو إضافة حكم أولاً!', 'error');
+        return;
+    }
+    await addRaceWinToJudge(currentRaceState.activeJudge.id);
+}
+
+async function addRaceWinToJudge(id) {
+    try {
+        const res = await fetch(`/api/race/judge/${encodeURIComponent(id)}/win`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ count: 1 })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+    } catch (err) {
+        showToast('حدث خطأ: ' + err.message, 'error');
+    }
+}
+
+async function minusRaceWinActive() {
+    if (!currentRaceState.activeJudge) return;
+    try {
+        await fetch(`/api/race/judge/${encodeURIComponent(currentRaceState.activeJudge.id)}/minus`, { method: 'POST' });
+    } catch (e) {}
+}
+
+async function resetRaceWinActive() {
+    if (!currentRaceState.activeJudge) return;
+    if (!confirm(`هل أنت متأكد من تصفير انتصارات ${currentRaceState.activeJudge.nickname}؟`)) return;
+    try {
+        await fetch(`/api/race/judge/${encodeURIComponent(currentRaceState.activeJudge.id)}/set-wins`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ wins: 0 })
+        });
+    } catch (e) {}
+}
+
+function promptSetRaceWinsActive() {
+    if (!currentRaceState.activeJudge) return;
+    promptSetRaceWins(currentRaceState.activeJudge.id, currentRaceState.activeJudge.nickname, currentRaceState.activeJudge.wins || 0);
+}
+
+async function promptSetRaceWins(id, name, currentWins) {
+    const val = prompt(`أدخل عدد الانتصارات (Wins) الجديد لـ ${name}:`, currentWins);
+    if (val === null) return;
+    const wins = parseInt(val);
+    if (isNaN(wins) || wins < 0) {
+        showToast('يرجى كتابة رقم صحيح', 'error');
+        return;
+    }
+
+    try {
+        await fetch(`/api/race/judge/${encodeURIComponent(id)}/set-wins`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ wins })
+        });
+    } catch (e) {
+        showToast('خطأ أثناء التعديل', 'error');
+    }
+}
+
+async function activateRaceJudge(id) {
+    try {
+        await fetch(`/api/race/judge/${encodeURIComponent(id)}/activate`, { method: 'POST' });
+    } catch (e) {}
+}
+
+async function deleteRaceJudge(id) {
+    if (!confirm('هل تريد حذف هذا المتسابق من صراع الحكام؟')) return;
+    try {
+        await fetch(`/api/race/judge/${encodeURIComponent(id)}`, { method: 'DELETE' });
+    } catch (e) {}
+}
+
+async function resetAllRaceWins() {
+    if (!confirm('هل أنت متأكد من تصفير جميع انتصارات الحكام والمتسابقين؟')) return;
+    try {
+        await fetch('/api/race/reset-all-wins', { method: 'POST' });
+    } catch (e) {}
+}
+
+function triggerRaceCelebration(data) {
+    if (!data) return;
+    playRaceVictorySound();
+    const banner = document.getElementById('raceCelebrationBanner');
+    const nameEl = document.getElementById('raceBannerWinnerName');
+    const countEl = document.getElementById('raceBannerWinsCount');
+
+    if (nameEl) nameEl.textContent = data.nickname || data.username;
+    if (countEl) countEl.textContent = data.wins || 1;
+
+    if (banner) {
+        banner.classList.add('show');
+        setTimeout(() => {
+            banner.classList.remove('show');
+        }, 3800);
+    }
+}
+
+function loadRaceState() {
+    fetch('/api/race/state')
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                currentRaceState = { ...currentRaceState, ...data };
+                renderRaceUI();
+            }
+        })
+        .catch(() => {});
 }

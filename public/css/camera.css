@@ -23,12 +23,14 @@ html, body {
 }
 
 .cam-frame-stage {
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: 16px;
+    direction: ltr !important;
+    box-sizing: border-box;
 }
 
 /* ================= BASE FRAME BOX ================= */
@@ -39,30 +41,28 @@ html, body {
     display: flex;
     align-items: center;
     justify-content: center;
+    direction: ltr !important;
+    box-sizing: border-box;
 }
 
-/* Aspect Ratios */
+/* Aspect Ratios - Mathematically centered and constrained to viewport */
 .cam-frame-box.ratio-16-9 {
-    width: 90vw;
-    max-width: 1280px;
+    width: min(calc(100vw - 40px), calc((100vh - 40px) * 16 / 9));
     aspect-ratio: 16 / 9;
 }
 
 .cam-frame-box.ratio-4-3 {
-    width: 80vw;
-    max-width: 960px;
+    width: min(calc(100vw - 40px), calc((100vh - 40px) * 4 / 3));
     aspect-ratio: 4 / 3;
 }
 
 .cam-frame-box.ratio-1-1 {
-    width: 75vmin;
-    max-width: 700px;
+    width: min(calc(100vw - 40px), calc(100vh - 40px));
     aspect-ratio: 1 / 1;
 }
 
 .cam-frame-box.ratio-9-16 {
-    height: 90vh;
-    max-height: 1200px;
+    height: min(calc(100vh - 40px), calc((100vw - 40px) * 16 / 9));
     aspect-ratio: 9 / 16;
 }
 
@@ -281,26 +281,29 @@ html, body {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: rgba(10, 5, 8, 0.9);
-    border: 1.5px solid rgba(255, 255, 255, 0.3);
-    padding: 4px 14px;
+    background: rgba(10, 5, 8, 0.92);
+    border: 1.5px solid rgba(255, 255, 255, 0.35);
+    padding: 5px 16px;
     border-radius: 20px;
     color: #fff;
-    font-size: 13px;
+    font-size: 13.5px;
     font-weight: 900;
     backdrop-filter: blur(8px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
-    z-index: 10;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.85);
+    z-index: 30;
+    direction: rtl;
+    white-space: nowrap;
+    pointer-events: none;
 }
 
 .cam-tag-badge.pos-bottom {
-    bottom: -16px;
+    bottom: -18px;
     left: 50%;
     transform: translateX(-50%);
 }
 
 .cam-tag-badge.pos-top {
-    top: -16px;
+    top: -18px;
     left: 50%;
     transform: translateX(-50%);
 }

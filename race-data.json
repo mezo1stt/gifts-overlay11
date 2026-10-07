@@ -1,0 +1,583 @@
+{
+  "title": "تحدي الحكام",
+  "activeJudgeId": "tiktok_superclean_1st",
+  "judges": {
+    "tiktok_mezo_1st": {
+      "id": "tiktok_mezo_1st",
+      "username": "mezo_1st",
+      "platform": "tiktok",
+      "nickname": "MEZO",
+      "avatar": "https://p16-common-sign.tiktokcdn.com/tos-alisg-avt-0068/efebc69735bed611542788c11d66ecb0~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=eab5a1e9&x-expires=1791385200&x-signature=Uk%2BLlIEAkbRDI6QNqESD2TOzXtA%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my",
+      "wins": 0,
+      "role": "الحكم",
+      "updatedAt": 1791212573198
+    },
+    "tiktok_b176271": {
+      "id": "tiktok_b176271",
+      "username": "b176271",
+      "platform": "tiktok",
+      "nickname": "نــــــ ◕ ‿ ◕ مِــــــــر",
+      "avatar": "https://p16-common-sign.tiktokcdn.com/tos-useast2a-avt-0068-euttp/8b40ffc8f8614d138ded8ffc6260c4cb~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=0da9f674&x-expires=1791399600&x-signature=u4N2prs6ykJAmTpDMbaQ%2BYtUKAU%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my",
+      "wins": 3,
+      "role": "الحكم",
+      "updatedAt": 1791229423467
+    },
+    "tiktok_n676f": {
+      "id": "tiktok_n676f",
+      "username": "n676f",
+      "platform": "tiktok",
+      "nickname": "نواف NAWAF",
+      "avatar": "https://p16-common-sign.tiktokcdn.com/tos-alisg-avt-0068/782c71831adb787f2a24c7a309d0fc20~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=44244682&x-expires=1791453600&x-signature=8WTjjBg9B7HItActYTYCRp8M0CE%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my",
+      "wins": 7,
+      "role": "الحكم",
+      "updatedAt": 1791281135167
+    },
+    "tiktok_c..7172": {
+      "id": "tiktok_c..7172",
+      "username": "c..7172",
+      "platform": "tiktok",
+      "nickname": "C.Ř.7",
+      "avatar": "https://p16-common-sign.tiktokcdn.com/tos-maliva-avt-0068/97061c372432cdce3fcef65aa5b86cdc~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=bfbba308&x-expires=1791453600&x-signature=tx3%2B8SNwkKOpW9QoCm13Lp0i%2Beg%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my",
+      "wins": 3,
+      "role": "الحكم",
+      "updatedAt": 1791283507474
+    },
+    "tiktok_emarati.aldhaheri": {
+      "id": "tiktok_emarati.aldhaheri",
+      "username": "emarati.aldhaheri",
+      "platform": "tiktok",
+      "nickname": "Emarati1🇦🇪",
+      "avatar": "https://p16-common-sign.tiktokcdn.com/tos-alisg-avt-0068/741a68f5b2378fe7eee9fe22808aba8f~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=7e236a00&x-expires=1791464400&x-signature=BFs5ZdDrvgPxZ9WZ%2BpBIniHcvYM%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my",
+      "wins": 1,
+      "role": "الحكم",
+      "updatedAt": 1791294734810
+    },
+    "tiktok_aseem_salah": {
+      "id": "tiktok_aseem_salah",
+      "username": "aseem_salah",
+      "platform": "tiktok",
+      "nickname": "عاٰصــم",
+      "avatar": "https://p16-common-sign.tiktokcdn.com/tos-alisg-avt-0068/997db1cf1d2fd9ac5e76e2b23c43295b~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=cfe49e45&x-expires=1791468000&x-signature=TvwziJmAKaNnJ2UIrBUD4XGJp1I%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my",
+      "wins": 1,
+      "role": "الحكم",
+      "updatedAt": 1791295464981
+    },
+    "tiktok_sadam94472": {
+      "id": "tiktok_sadam94472",
+      "username": "sadam94472",
+      "platform": "tiktok",
+      "nickname": "Sadam",
+      "avatar": "https://p16-common-sign.tiktokcdn.com/musically-maliva-obj/1594805258216454~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=77616fd3&x-expires=1791468000&x-signature=EmuliqY4fwBHYsPhym0rkJEfauM%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my",
+      "wins": 3,
+      "role": "الحكم",
+      "updatedAt": 1791297491898
+    },
+    "tiktok_l_m7cc": {
+      "id": "tiktok_l_m7cc",
+      "username": "l_m7cc",
+      "platform": "tiktok",
+      "nickname": "M/:",
+      "avatar": "https://p16-common-sign.tiktokcdn.com/tos-alisg-avt-0068/46dccb53dfad3a27e39531018f641144~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=99a9ecea&x-expires=1791471600&x-signature=YcHRb6NFI76sGv%2FP0p%2F2oFQIKVw%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my",
+      "wins": 1,
+      "role": "الحكم",
+      "updatedAt": 1791299978133
+    },
+    "tiktok_superclean_1st": {
+      "id": "tiktok_superclean_1st",
+      "username": "SUPERCLEAN_1ST",
+      "platform": "tiktok",
+      "nickname": "✨✅SuperClean",
+      "avatar": "https://p16-common-sign.tiktokcdn.com/tos-alisg-avt-0068/8f6d18a85207f300bda4e5287c4510d4~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=3cb97485&x-expires=1791471600&x-signature=mvFJXg%2F0XzCfGj0GB4kd%2Bmd88Bs%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my",
+      "wins": 2,
+      "role": "الحكم",
+      "updatedAt": 1791300721022
+    }
+  },
+  "history": [
+    {
+      "id": "1791300723121xvi8",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ ✨✅SuperClean! (+1 فوز) الإجمالي: 2 🏆",
+      "time": "٠٦:٣٢:٠٣ م"
+    },
+    {
+      "id": "1791300721022hz01",
+      "type": "add",
+      "text": "👤 تم إضافة: ✨✅SuperClean (@SUPERCLEAN_1ST) برصيد 1 فوز",
+      "time": "٠٦:٣٢:٠١ م"
+    },
+    {
+      "id": "1791299978133ahhp",
+      "type": "add",
+      "text": "👤 تم إضافة: M/: (@l_m7cc) برصيد 1 فوز",
+      "time": "٠٦:١٩:٣٨ م"
+    },
+    {
+      "id": "1791299483723pnna",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ Sadam! (+1 فوز) الإجمالي: 4 🏆",
+      "time": "٠٦:١١:٢٣ م"
+    },
+    {
+      "id": "179129944052759m2",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ Sadam! (+1 فوز) الإجمالي: 3 🏆",
+      "time": "٠٦:١٠:٤٠ م"
+    },
+    {
+      "id": "1791297492722ty53",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ Sadam! (+1 فوز) الإجمالي: 2 🏆",
+      "time": "٠٥:٣٨:١٢ م"
+    },
+    {
+      "id": "1791297491898616a",
+      "type": "add",
+      "text": "👤 تم إضافة: Sadam (@sadam94472) برصيد 1 فوز",
+      "time": "٠٥:٣٨:١١ م"
+    },
+    {
+      "id": "17912969730515qyw",
+      "type": "add",
+      "text": "👤 تم إضافة: Sadam (@sadam94472) برصيد 1 فوز",
+      "time": "٠٥:٢٩:٣٣ م"
+    },
+    {
+      "id": "1791295464981zitg",
+      "type": "add",
+      "text": "👤 تم إضافة: عاٰصــم (@aseem_salah) برصيد 1 فوز",
+      "time": "٠٥:٠٤:٢٤ م"
+    },
+    {
+      "id": "17912947348103lxc",
+      "type": "add",
+      "text": "👤 تم إضافة: Emarati1🇦🇪 (@emarati.aldhaheri) برصيد 1 فوز",
+      "time": "٠٤:٥٢:١٤ م"
+    },
+    {
+      "id": "1791285961584v64l",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ نــــــ ◕ ‿ ◕ مِــــــــر! (+1 فوز) الإجمالي: 3 🏆",
+      "time": "٠٢:٢٦:٠١ م"
+    },
+    {
+      "id": "1791285408200p7rm",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ C.Ř.7! (+1 فوز) الإجمالي: 3 🏆",
+      "time": "٠٢:١٦:٤٨ م"
+    },
+    {
+      "id": "17912848989048fpx",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ نواف NAWAF! (+1 فوز) الإجمالي: 7 🏆",
+      "time": "٠٢:٠٨:١٨ م"
+    },
+    {
+      "id": "1791284394051zz1i",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ نواف NAWAF! (+1 فوز) الإجمالي: 6 🏆",
+      "time": "٠١:٥٩:٥٤ م"
+    },
+    {
+      "id": "1791284031558ed96",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ C.Ř.7! (+1 فوز) الإجمالي: 2 🏆",
+      "time": "٠١:٥٣:٥١ م"
+    },
+    {
+      "id": "1791283507474agy4",
+      "type": "add",
+      "text": "👤 تم إضافة: C.Ř.7 (@c..7172) برصيد 1 فوز",
+      "time": "٠١:٤٥:٠٧ م"
+    },
+    {
+      "id": "1791282932182d0xs",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ نواف NAWAF! (+1 فوز) الإجمالي: 5 🏆",
+      "time": "٠١:٣٥:٣٢ م"
+    },
+    {
+      "id": "1791282424167pgss",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ نواف NAWAF! (+1 فوز) الإجمالي: 4 🏆",
+      "time": "٠١:٢٧:٠٤ م"
+    },
+    {
+      "id": "1791281894205vdsk",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ نواف NAWAF! (+1 فوز) الإجمالي: 3 🏆",
+      "time": "٠١:١٨:١٤ م"
+    },
+    {
+      "id": "1791281894016co2j",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ نواف NAWAF! (+1 فوز) الإجمالي: 2 🏆",
+      "time": "٠١:١٨:١٤ م"
+    },
+    {
+      "id": "1791281416469bt5i",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ نواف NAWAF! (+1 فوز) الإجمالي: 2 🏆",
+      "time": "٠١:١٠:١٦ م"
+    },
+    {
+      "id": "1791281135167rzfb",
+      "type": "add",
+      "text": "👤 تم إضافة: نواف NAWAF (@n676f) برصيد 1 فوز",
+      "time": "٠١:٠٥:٣٥ م"
+    },
+    {
+      "id": "1791280112616dl06",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ نــــــ ◕ ‿ ◕ مِــــــــر! (+1 فوز) الإجمالي: 3 🏆",
+      "time": "١٢:٤٨:٣٢ م"
+    },
+    {
+      "id": "1791229757268jfpu",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ نــــــ ◕ ‿ ◕ مِــــــــر! (+1 فوز) الإجمالي: 2 🏆",
+      "time": "١٠:٤٩:١٧ م"
+    },
+    {
+      "id": "1791229423467kcb3",
+      "type": "add",
+      "text": "👤 تم إضافة: نــــــ ◕ ‿ ◕ مِــــــــر (@b176271) برصيد 1 فوز",
+      "time": "١٠:٤٣:٤٣ م"
+    },
+    {
+      "id": "1791228851458tibm",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ MEZO! (+1 فوز) الإجمالي: 1 🏆",
+      "time": "١٠:٣٤:١١ م"
+    },
+    {
+      "id": "1791228738046mdz0",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ Mohamed Abbas! (+1 فوز) الإجمالي: 1 🏆",
+      "time": "١٠:٣٢:١٨ م"
+    },
+    {
+      "id": "17912287341717z43",
+      "type": "add",
+      "text": "👤 تم إضافة: Mohamed Abbas (@mohamedabbas_2) برصيد 0 فوز",
+      "time": "١٠:٣٢:١٤ م"
+    },
+    {
+      "id": "1791213267323smb0",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ MEZO! (+1 فوز) الإجمالي: 5 🏆",
+      "time": "٠٦:١٤:٢٧ م"
+    },
+    {
+      "id": "1791213230508ezg4",
+      "type": "add",
+      "text": "👤 تم إضافة: شسي (@شسي) برصيد 0 فوز",
+      "time": "٠٦:١٣:٥٠ م"
+    },
+    {
+      "id": "1791213225717jvz1",
+      "type": "add",
+      "text": "👤 تم إضافة: شسيش (@شسيش) برصيد 0 فوز",
+      "time": "٠٦:١٣:٤٥ م"
+    },
+    {
+      "id": "17912132230173qq0",
+      "type": "add",
+      "text": "👤 تم إضافة: ؤرءرسي (@ؤرءرسي) برصيد 0 فوز",
+      "time": "٠٦:١٣:٤٣ م"
+    },
+    {
+      "id": "1791213218456z0c9",
+      "type": "add",
+      "text": "👤 تم إضافة: سشيشس (@سشيشس) برصيد 0 فوز",
+      "time": "٠٦:١٣:٣٨ م"
+    },
+    {
+      "id": "1791213205932y56m",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ MEZO! (+1 فوز) الإجمالي: 4 🏆",
+      "time": "٠٦:١٣:٢٥ م"
+    },
+    {
+      "id": "1791213204274wb34",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ MEZO! (+1 فوز) الإجمالي: 3 🏆",
+      "time": "٠٦:١٣:٢٤ م"
+    },
+    {
+      "id": "1791213203965x1r1",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ MEZO! (+1 فوز) الإجمالي: 2 🏆",
+      "time": "٠٦:١٣:٢٣ م"
+    },
+    {
+      "id": "1791213191565uxbk",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ MEZO! (+1 فوز) الإجمالي: 1 🏆",
+      "time": "٠٦:١٣:١١ م"
+    },
+    {
+      "id": "1791213162018n17x",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ حرباية&باندا🎮جيمينج! (+1 فوز) الإجمالي: 1 🏆",
+      "time": "٠٦:١٢:٤٢ م"
+    },
+    {
+      "id": "1791213154458sxph",
+      "type": "reset",
+      "text": "🔄 تم تصفير جميع عدادات الفوز",
+      "time": "٠٦:١٢:٣٤ م"
+    },
+    {
+      "id": "1791213090113zwop",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ 𓆩𝕸𝖆𝖗𝖞𝖆𝖒𓆪 🔥🎮! (+3 فوز) الإجمالي: 8 🏆",
+      "time": "٠٦:١١:٣٠ م"
+    },
+    {
+      "id": "1791212718143l3u6",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ MEZO! (+1 فوز) الإجمالي: 7 🏆",
+      "time": "٠٦:٠٥:١٨ م"
+    },
+    {
+      "id": "1791212709970camu",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ 𓆩𝕸𝖆𝖗𝖞𝖆𝖒𓆪 🔥🎮! (+1 فوز) الإجمالي: 7 🏆",
+      "time": "٠٦:٠٥:٠٩ م"
+    },
+    {
+      "id": "1791212709253zoby",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ 𓆩𝕸𝖆𝖗𝖞𝖆𝖒𓆪 🔥🎮! (+1 فوز) الإجمالي: 6 🏆",
+      "time": "٠٦:٠٥:٠٩ م"
+    },
+    {
+      "id": "1791212708977x27f",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ 𓆩𝕸𝖆𝖗𝖞𝖆𝖒𓆪 🔥🎮! (+1 فوز) الإجمالي: 5 🏆",
+      "time": "٠٦:٠٥:٠٨ م"
+    },
+    {
+      "id": "179121270866235zy",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ 𓆩𝕸𝖆𝖗𝖞𝖆𝖒𓆪 🔥🎮! (+1 فوز) الإجمالي: 4 🏆",
+      "time": "٠٦:٠٥:٠٨ م"
+    },
+    {
+      "id": "179121270797242ub",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ 𓆩𝕸𝖆𝖗𝖞𝖆𝖒𓆪 🔥🎮! (+1 فوز) الإجمالي: 3 🏆",
+      "time": "٠٦:٠٥:٠٧ م"
+    },
+    {
+      "id": "1791212706414izsc",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ 𓆩𝕸𝖆𝖗𝖞𝖆𝖒𓆪 🔥🎮! (+1 فوز) الإجمالي: 2 🏆",
+      "time": "٠٦:٠٥:٠٦ م"
+    },
+    {
+      "id": "1791212703771sg4v",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ MEZO! (+1 فوز) الإجمالي: 6 🏆",
+      "time": "٠٦:٠٥:٠٣ م"
+    },
+    {
+      "id": "1791212697961yt6h",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ MEZO! (+1 فوز) الإجمالي: 5 🏆",
+      "time": "٠٦:٠٤:٥٧ م"
+    },
+    {
+      "id": "1791212690695o4cc",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ حرباية&باندا🎮جيمينج! (+1 فوز) الإجمالي: 5 🏆",
+      "time": "٠٦:٠٤:٥٠ م"
+    },
+    {
+      "id": "1791212690519n4qf",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ MEZO! (+1 فوز) الإجمالي: 4 🏆",
+      "time": "٠٦:٠٤:٥٠ م"
+    },
+    {
+      "id": "1791212690331x7o4",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ MEZO! (+1 فوز) الإجمالي: 3 🏆",
+      "time": "٠٦:٠٤:٥٠ م"
+    },
+    {
+      "id": "1791212644511ubxj",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ MEZO! (+1 فوز) الإجمالي: 2 🏆",
+      "time": "٠٦:٠٤:٠٤ م"
+    },
+    {
+      "id": "17912126432984dzs",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ 𓆩𝕸𝖆𝖗𝖞𝖆𝖒𓆪 🔥🎮! (+1 فوز) الإجمالي: 1 🏆",
+      "time": "٠٦:٠٤:٠٣ م"
+    },
+    {
+      "id": "1791212639936xgoh",
+      "type": "add",
+      "text": "👤 تم إضافة: 𓆩𝕸𝖆𝖗𝖞𝖆𝖒𓆪 🔥🎮 (@mariamnour38) برصيد 0 فوز",
+      "time": "٠٦:٠٣:٥٩ م"
+    },
+    {
+      "id": "17912126105425ggb",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ حرباية&باندا🎮جيمينج! (+1 فوز) الإجمالي: 4 🏆",
+      "time": "٠٦:٠٣:٣٠ م"
+    },
+    {
+      "id": "179121260880376wp",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ حرباية&باندا🎮جيمينج! (+1 فوز) الإجمالي: 3 🏆",
+      "time": "٠٦:٠٣:٢٨ م"
+    },
+    {
+      "id": "1791212595798vymu",
+      "type": "add",
+      "text": "👤 تم إضافة: حرباية&باندا🎮جيمينج (@xdg911) برصيد 2 فوز",
+      "time": "٠٦:٠٣:١٥ م"
+    },
+    {
+      "id": "1791212573198wd3k",
+      "type": "add",
+      "text": "👤 تم إضافة: MEZO (@mezo_1st) برصيد 1 فوز",
+      "time": "٠٦:٠٢:٥٣ م"
+    },
+    {
+      "id": "17912123817420fsd",
+      "type": "update",
+      "text": "✏️ تم تعديل انتصارات TikTok إلى 7 فوز",
+      "time": "٠٥:٥٩:٤١ م"
+    },
+    {
+      "id": "1791212381740ll3x",
+      "type": "win",
+      "text": "🏆 فوز جديد لـ TikTok! (+1 فوز) الإجمالي: 4 🏆",
+      "time": "٠٥:٥٩:٤١ م"
+    },
+    {
+      "id": "17912123817245yfb",
+      "type": "add",
+      "text": "👤 تم إضافة: TikTok (@tiktok) برصيد 3 فوز",
+      "time": "٠٥:٥٩:٤١ م"
+    },
+    {
+      "id": "17912121002792h18",
+      "type": "reset",
+      "text": "🔄 تم تصفير جميع عدادات الفوز لكل المتسابقين",
+      "time": "٠٥:٥٥:٠٠ م"
+    },
+    {
+      "id": "17912120969040aos",
+      "type": "reset",
+      "text": "⚡ تم بدء جلسة لايف جديدة وتصفير الكوينات",
+      "time": "٠٥:٥٤:٥٦ م"
+    },
+    {
+      "id": "1791212082379xvep",
+      "type": "win",
+      "text": "🏆 فاز سارة كوين 👑 بجولة في روبلوكس! (+1 فوز) إجمالي الانتصارات: 9",
+      "time": "٠٥:٥٤:٤٢ م",
+      "uniqueId": "sara_vip",
+      "wins": 9
+    },
+    {
+      "id": "17912120821796x2m",
+      "type": "win",
+      "text": "🏆 فاز سارة كوين 👑 بجولة في روبلوكس! (+1 فوز) إجمالي الانتصارات: 8",
+      "time": "٠٥:٥٤:٤٢ م",
+      "uniqueId": "sara_vip",
+      "wins": 8
+    },
+    {
+      "id": "1791212081990pohs",
+      "type": "win",
+      "text": "🏆 فاز سارة كوين 👑 بجولة في روبلوكس! (+1 فوز) إجمالي الانتصارات: 7",
+      "time": "٠٥:٥٤:٤١ م",
+      "uniqueId": "sara_vip",
+      "wins": 7
+    },
+    {
+      "id": "1791212081788j5y5",
+      "type": "win",
+      "text": "🏆 فاز سارة كوين 👑 بجولة في روبلوكس! (+1 فوز) إجمالي الانتصارات: 6",
+      "time": "٠٥:٥٤:٤١ م",
+      "uniqueId": "sara_vip",
+      "wins": 6
+    },
+    {
+      "id": "1791212081589us95",
+      "type": "win",
+      "text": "🏆 فاز سارة كوين 👑 بجولة في روبلوكس! (+1 فوز) إجمالي الانتصارات: 5",
+      "time": "٠٥:٥٤:٤١ م",
+      "uniqueId": "sara_vip",
+      "wins": 5
+    },
+    {
+      "id": "1791212081354vj4z",
+      "type": "win",
+      "text": "🏆 فاز سارة كوين 👑 بجولة في روبلوكس! (+1 فوز) إجمالي الانتصارات: 4",
+      "time": "٠٥:٥٤:٤١ م",
+      "uniqueId": "sara_vip",
+      "wins": 4
+    },
+    {
+      "id": "1791212080943k2gs",
+      "type": "win",
+      "text": "🏆 فاز سارة كوين 👑 بجولة في روبلوكس! (+1 فوز) إجمالي الانتصارات: 3",
+      "time": "٠٥:٥٤:٤٠ م",
+      "uniqueId": "sara_vip",
+      "wins": 3
+    },
+    {
+      "id": "1791212080118xlez",
+      "type": "win",
+      "text": "🏆 فاز سارة كوين 👑 بجولة في روبلوكس! (+1 فوز) إجمالي الانتصارات: 2",
+      "time": "٠٥:٥٤:٤٠ م",
+      "uniqueId": "sara_vip",
+      "wins": 2
+    },
+    {
+      "id": "1791211913543atzl",
+      "type": "win",
+      "text": "🏆 فاز سارة كوين 👑 بجولة في روبلوكس! (+1 فوز) إجمالي الانتصارات: 1",
+      "time": "٠٥:٥١:٥٣ م",
+      "uniqueId": "sara_vip",
+      "wins": 1
+    },
+    {
+      "id": "1791211913540jy42",
+      "type": "gift",
+      "text": "🎁 [تجريبي] أرسل سارة كوين 👑 هدية صاروخ 🚀 (+1500 كوين)",
+      "time": "٠٥:٥١:٥٣ م",
+      "uniqueId": "sara_vip",
+      "coins": 1500
+    },
+    {
+      "id": "17912119135313cd0",
+      "type": "gift",
+      "text": "🎁 [تجريبي] أرسل أحمد البطل هدية وردة 🌹 (+500 كوين)",
+      "time": "٠٥:٥١:٥٣ م",
+      "uniqueId": "ahmed_pro",
+      "coins": 500
+    }
+  ],
+  "settings": {
+    "soundEnabled": false,
+    "overlayTheme": "gaming-neon",
+    "overlayScale": 100,
+    "showLeaderboard": true,
+    "leaderboardCount": 3,
+    "confettiDuration": 4000
+  },
+  "tiktokUsername": "xdg911",
+  "isConnected": false,
+  "connectedRoomId": null,
+  "totalLiveCoins": 0,
+  "supporters": {}
+}

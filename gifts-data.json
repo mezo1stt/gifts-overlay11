@@ -68,7 +68,8 @@
     "animationType": "bounce",
     "animationDuration": 7,
     "fireSettings": {
-      "text": "رابط الدعم والمتجر في البايو",
+      "text": "رابط الدعم في البايو 🔥",
+      "smoke_enabled": true,
       "color": "#ffffff",
       "shine_color": "#ff0000",
       "font_size": 52,

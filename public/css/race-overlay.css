@@ -1,0 +1,517 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: transparent !important;
+    font-family: 'Cairo', 'Tajawal', sans-serif;
+    direction: rtl;
+    user-select: none;
+}
+
+/* Overlay Stage Position */
+.overlay-stage {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 100;
+}
+
+/* ================= JUDGES TOWER (القائمة الطويلة) ================= */
+.judges-tower {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 440px;
+    max-width: 460px;
+}
+
+/* Tower Header */
+.tower-header {
+    background: linear-gradient(135deg, rgba(14, 18, 36, 0.95), rgba(28, 22, 10, 0.95));
+    border: 1.5px solid rgba(255, 215, 0, 0.55);
+    border-radius: 14px;
+    padding: 8px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+}
+
+.header-icon {
+    font-size: 22px;
+}
+
+.header-title {
+    font-size: 17px;
+    font-weight: 900;
+    color: #ffd700;
+    letter-spacing: 0.5px;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+}
+
+.header-crown {
+    font-size: 20px;
+    animation: crownFloat 2s ease-in-out infinite alternate;
+}
+
+@keyframes crownFloat {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-4px); }
+}
+
+/* ================= TOP 1 LEADER CARD (أعلى عدد وينات - صورته كبيرة دائماً) ================= */
+.top1-leader-card {
+    position: relative;
+    background: linear-gradient(145deg, rgba(30, 22, 10, 0.96), rgba(14, 18, 36, 0.96));
+    border: 3px solid #ffd700;
+    border-radius: 20px;
+    padding: 14px 16px;
+    box-shadow: 
+        0 8px 30px rgba(0, 0, 0, 0.85),
+        0 0 25px rgba(255, 215, 0, 0.45),
+        inset 0 0 15px rgba(255, 215, 0, 0.12);
+    backdrop-filter: blur(12px);
+    transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
+
+.top1-leader-card.win-flash {
+    animation: cardWinFlash 1.6s ease-out;
+}
+
+@keyframes cardWinFlash {
+    0% {
+        box-shadow: 
+            0 0 45px rgba(255, 215, 0, 1),
+            0 0 25px #ffffff,
+            inset 0 0 25px rgba(255, 215, 0, 0.6);
+        border-color: #ffffff;
+        transform: scale(1.03);
+    }
+    100% {
+        box-shadow: 
+            0 8px 30px rgba(0, 0, 0, 0.85),
+            0 0 25px rgba(255, 215, 0, 0.45),
+            inset 0 0 15px rgba(255, 215, 0, 0.12);
+        border-color: #ffd700;
+        transform: scale(1);
+    }
+}
+
+.crown-bob {
+    position: absolute;
+    top: -22px;
+    right: 22px;
+    font-size: 34px;
+    filter: drop-shadow(0 0 10px #ffd700);
+    animation: crownBobAnim 1.6s ease-in-out infinite alternate;
+    z-index: 10;
+}
+
+@keyframes crownBobAnim {
+    0% { transform: translateY(0) rotate(-6deg); }
+    100% { transform: translateY(-5px) rotate(4deg); }
+}
+
+.leader-main-flex {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+/* Big Avatar Container (صورة كبيرة للمتصدر) */
+.leader-avatar-wrapper {
+    position: relative;
+    width: 110px;
+    height: 110px;
+    flex-shrink: 0;
+}
+
+.leader-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #ffd700;
+    box-shadow: 0 0 26px rgba(255, 215, 0, 0.85);
+    background: #000;
+}
+
+.leader-rank-badge {
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #ffd700, #ff8c00);
+    color: #000;
+    font-size: 12px;
+    font-weight: 900;
+    padding: 2px 10px;
+    border-radius: 10px;
+    border: 1.5px solid #fff;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+/* Leader Details */
+.leader-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.leader-role {
+    font-size: 13px;
+    font-weight: 900;
+    color: #ffd700;
+    margin-bottom: 2px;
+    text-shadow: 0 0 6px rgba(255, 215, 0, 0.5);
+}
+
+.leader-name {
+    font-size: 24px;
+    font-weight: 900;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.25;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.95), 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+.leader-handle {
+    display: block;
+    font-size: 12.5px;
+    color: #94a3b8;
+    font-family: monospace;
+    margin-top: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Leader Giant Wins Box */
+.leader-wins-box {
+    position: relative;
+    background: linear-gradient(135deg, rgba(20, 15, 5, 0.95), rgba(40, 30, 10, 0.95));
+    border: 2px solid #ffd700;
+    border-radius: 16px;
+    padding: 8px 16px;
+    text-align: center;
+    flex-shrink: 0;
+    box-shadow: 0 0 18px rgba(255, 215, 0, 0.4);
+}
+
+.wins-caption {
+    display: block;
+    font-size: 10px;
+    font-weight: 900;
+    color: #cbd5e1;
+    text-transform: uppercase;
+}
+
+.wins-digits-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.trophy-ico {
+    font-size: 22px;
+    filter: drop-shadow(0 0 8px #ffd700);
+}
+
+.wins-big-digits {
+    font-family: 'Changa', 'Cairo', sans-serif;
+    font-size: 46px;
+    font-weight: 900;
+    line-height: 1;
+    color: #ffd700;
+    text-shadow: 
+        0 1px 0 #b38600,
+        0 2px 0 #806000,
+        0 3px 0 #4d3a00,
+        0 0 15px rgba(255, 215, 0, 0.85);
+    transition: transform 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28), color 0.2s ease;
+}
+
+.wins-big-digits.bump {
+    transform: scale(1.35);
+    color: #ffffff;
+}
+
+/* ================= FLOATING WIN INDICATOR (+1 WIN 🏆) ================= */
+.floating-win-tag {
+    position: absolute;
+    top: -24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(0);
+    background: linear-gradient(135deg, #ffd700, #ff8c00);
+    color: #000;
+    font-size: 12px;
+    font-weight: 900;
+    padding: 2px 10px;
+    border-radius: 12px;
+    border: 1.5px solid #fff;
+    opacity: 0;
+    pointer-events: none;
+    white-space: nowrap;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.9);
+    z-index: 50;
+}
+
+.floating-win-tag.animate {
+    animation: floatWinAnim 1.8s ease-out forwards;
+}
+
+@keyframes floatWinAnim {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(8px) scale(0.6);
+    }
+    18% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-6px) scale(1.2);
+    }
+    38% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-10px) scale(1);
+    }
+    75% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-38px) scale(0.9);
+    }
+}
+
+/* ================= TOP 2 & TOP 3 LIST ================= */
+.leaderboard-tower-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 260px;
+    overflow: hidden;
+    padding-left: 2px;
+}
+
+/* Tower Item Row */
+.tower-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(10, 14, 28, 0.92);
+    border: 2px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    padding: 10px 14px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(10px);
+    transition: all 0.25s ease;
+}
+
+.tower-item.rank-2 {
+    border-color: rgba(226, 232, 240, 0.55);
+    background: linear-gradient(135deg, rgba(20, 26, 46, 0.96), rgba(15, 20, 36, 0.96));
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.65), 0 0 16px rgba(226, 232, 240, 0.22);
+}
+
+.tower-item.rank-2 .tower-rank-num {
+    color: #f1f5f9;
+    text-shadow: 0 0 8px rgba(241, 245, 249, 0.7);
+}
+
+.tower-item.rank-3 {
+    border-color: rgba(245, 158, 11, 0.55);
+    background: linear-gradient(135deg, rgba(32, 22, 16, 0.96), rgba(18, 15, 28, 0.96));
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.65), 0 0 16px rgba(245, 158, 11, 0.22);
+}
+
+.tower-item.rank-3 .tower-rank-num {
+    color: #f59e0b;
+    text-shadow: 0 0 8px rgba(245, 158, 11, 0.7);
+}
+
+.tower-item.win-flash {
+    animation: rowWinFlash 1.6s ease-out;
+}
+
+@keyframes rowWinFlash {
+    0% {
+        box-shadow: 0 0 28px #ffd700, inset 0 0 18px rgba(255, 215, 0, 0.45);
+        border-color: #ffd700;
+        transform: scale(1.03);
+    }
+    100% {
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.65);
+        border-color: rgba(255, 255, 255, 0.12);
+        transform: scale(1);
+    }
+}
+
+/* Rank column */
+.tower-rank-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    flex-shrink: 0;
+}
+
+.tower-rank-badge {
+    font-size: 22px;
+    line-height: 1;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+}
+
+.tower-rank-num {
+    font-size: 12px;
+    font-weight: 900;
+    color: #cbd5e1;
+    margin-top: 1px;
+}
+
+/* Big Avatar Container for Top 2 & 3 */
+.tower-avatar-wrapper {
+    position: relative;
+    width: 72px;
+    height: 72px;
+    flex-shrink: 0;
+}
+
+.tower-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #000;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.tower-item.rank-2 .tower-avatar {
+    border: 3.5px solid #e2e8f0;
+    box-shadow: 0 0 16px rgba(226, 232, 240, 0.65);
+}
+
+.tower-item.rank-3 .tower-avatar {
+    border: 3.5px solid #f59e0b;
+    box-shadow: 0 0 16px rgba(245, 158, 11, 0.65);
+}
+
+/* Info: Big Name & Handle */
+.tower-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.tower-name {
+    font-size: 18.5px;
+    font-weight: 900;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.25;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.95);
+}
+
+.tower-handle {
+    font-size: 12px;
+    color: #94a3b8;
+    font-family: monospace;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 2px;
+}
+
+/* Tower Wins Badge with Floating Tag */
+.tower-wins-badge {
+    position: relative;
+    background: rgba(255, 215, 0, 0.16);
+    border: 1.5px solid rgba(255, 215, 0, 0.5);
+    color: #ffd700;
+    padding: 6px 14px;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.2);
+}
+
+.tower-trophy-ico {
+    font-size: 18px;
+    filter: drop-shadow(0 0 6px #ffd700);
+}
+
+.tower-wins-badge .win-digit {
+    font-family: 'Changa', 'Cairo', sans-serif;
+    font-size: 24px;
+    font-weight: 900;
+    color: #fff;
+    line-height: 1;
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.tower-wins-badge .win-digit.bump {
+    transform: scale(1.35);
+    color: #ffd700;
+}
+
+/* Mini Floating Win Tag inside tower row */
+.tower-float-win {
+    position: absolute;
+    top: -24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(0);
+    background: linear-gradient(135deg, #ffd700, #ff8c00);
+    color: #000;
+    font-size: 12px;
+    font-weight: 900;
+    padding: 2px 9px;
+    border-radius: 10px;
+    border: 1px solid #fff;
+    opacity: 0;
+    pointer-events: none;
+    white-space: nowrap;
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.95);
+    z-index: 20;
+}
+
+.tower-float-win.animate {
+    animation: floatTowerWinAnim 1.6s ease-out forwards;
+}
+
+@keyframes floatTowerWinAnim {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(4px) scale(0.7);
+    }
+    20% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-4px) scale(1.15);
+    }
+    40% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-6px) scale(1);
+    }
+    75% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-24px) scale(0.85);
+    }
+}

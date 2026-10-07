@@ -68,7 +68,7 @@
             padding: 16px 44px;
             border-radius: 20px;
             transition: border 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
-            z-index: 10;
+            z-index: 20; /* IN FRONT OF SMOKE */
             opacity: 1;
         }
 
@@ -132,7 +132,7 @@
         .fire-text-wrapper {
             position: relative;
             display: inline-block;
-            z-index: 12;
+            z-index: 22;
             white-space: nowrap;
         }
 
@@ -163,19 +163,19 @@
             transition: filter 0.3s ease;
         }
 
-        /* ================= FootageCrate Appear From Sky Smoke Layer ================= */
+        /* ================= FootageCrate Appear From Sky Smoke Layer (خلف النص) ================= */
         .sky-smoke-video {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 720px;
-            height: 520px;
+            width: 760px;
+            height: 560px;
             object-fit: contain;
             pointer-events: none;
-            z-index: 40;
+            z-index: 5; /* خلف النص تماماً */
             display: none;
-            filter: drop-shadow(0 0 20px var(--fire-c, #ff1e00)) contrast(115%);
+            filter: drop-shadow(0 0 24px var(--fire-c, #ff1e00)) contrast(115%);
         }
 
         /* ================= ANIMATION CHOREOGRAPHY ================= */
@@ -227,17 +227,17 @@
     <div class="stage-wrapper" id="stageWrapper">
         <div class="stage-inner" id="stageInner">
 
-            <!-- Fire Banner Box -->
+            <!-- FootageCrate Smoke Vortex Layer (Descent & Wipe - BEHIND TEXT) -->
+            <video id="skySmokeVideo" class="sky-smoke-video" src="/videos/appear_from_sky.webm" playsinline muted preload="auto"></video>
+
+            <!-- Fire Banner Box (IN FRONT OF SMOKE) -->
             <div class="fire-banner-box frame-transparent" id="bannerBox">
                 <!-- Text Wrapper -->
                 <div class="fire-text-wrapper" id="textWrapper">
-                    <div class="fire-text-back" id="textBack">رابط الدعم بالبايو 🔥</div>
-                    <div class="fire-text-front" id="textFront">رابط الدعم بالبايو 🔥</div>
+                    <div class="fire-text-back" id="textBack">رابط الدعم في البايو 🔥</div>
+                    <div class="fire-text-front" id="textFront">رابط الدعم في البايو 🔥</div>
                 </div>
             </div>
-
-            <!-- FootageCrate Smoke Vortex Layer (Descent & Wipe) -->
-            <video id="skySmokeVideo" class="sky-smoke-video" src="/videos/appear_from_sky.webm" playsinline muted preload="auto"></video>
 
         </div>
     </div>
@@ -251,7 +251,7 @@
         let uid = params.get('uid') || localStorage.getItem('gifts_last_uid') || 'board_XXXX';
 
         let settings = {
-            text: 'رابط الدعم بالبايو 🔥',
+            text: 'رابط الدعم في البايو 🔥',
             color: '#ff1e00',
             shine_color: '#ffd700',
             font_size: 64,
@@ -259,6 +259,7 @@
             neon_strength: 95,
             banner_style: 'transparent',
             display_mode: 'continuous', // 'continuous' or 'cycle'
+            smoke_enabled: true,
             hold_duration: 6,
             loop_interval: 8,
             position_v: 'center',
@@ -277,7 +278,7 @@
         // Apply Styles to DOM
         function applyStyles() {
             // Text Content
-            const txt = settings.text || 'رابط الدعم بالبايو 🔥';
+            const txt = settings.text || 'رابط الدعم في البايو 🔥';
             textFront.textContent = txt;
             textBack.textContent = txt;
 
@@ -353,15 +354,24 @@
             isCycleRunning = false;
 
             const frame = settings.banner_style || 'transparent';
+            const isSmokeOn = settings.smoke_enabled !== false && settings.smoke_enabled !== 0 && settings.smoke_enabled !== 'false';
 
             if (settings.display_mode === 'continuous') {
                 // Static display: always visible!
-                if (skySmokeVideo) skySmokeVideo.style.display = 'none';
+                if (isSmokeOn && skySmokeVideo) {
+                    skySmokeVideo.style.display = 'block';
+                    skySmokeVideo.loop = true;
+                    skySmokeVideo.play().catch(() => {});
+                } else if (skySmokeVideo) {
+                    skySmokeVideo.style.display = 'none';
+                    skySmokeVideo.pause();
+                }
                 bannerBox.className = `fire-banner-box frame-${frame} banner-holding`;
                 bannerBox.style.opacity = '1';
                 bannerBox.style.transform = 'scale(1)';
             } else {
-                // Timed Cycle mode: Natural appearance -> Hold -> Smoke vortex wipes it -> Loop
+                // Timed Cycle mode: Natural appearance -> Hold -> Smoke vortex wipes it from behind -> Loop
+                if (skySmokeVideo) skySmokeVideo.loop = false;
                 runCycle();
             }
         }
@@ -374,6 +384,7 @@
             const frame = settings.banner_style || 'transparent';
             const holdMs = Math.max(2, (settings.hold_duration || 6)) * 1000;
             const intervalMs = Math.max(2, (settings.loop_interval || 8)) * 1000;
+            const isSmokeOn = settings.smoke_enabled !== false && settings.smoke_enabled !== 0 && settings.smoke_enabled !== 'false';
 
             // 1. Natural Appearance (يظهر الكلمة طبيعي)
             bannerBox.style.opacity = '1';
@@ -386,11 +397,13 @@
 
                 // 2. Hold Duration (مدة بقاء الكلمة)
                 cycleTimeout = setTimeout(() => {
-                    // 3. Smoke Wipe Outro (يجي الدخان يشيلها)
-                    if (skySmokeVideo) {
+                    // 3. Smoke Wipe Outro (يجي الدخان من ورا يشيلها إذا كان مفعل)
+                    if (isSmokeOn && skySmokeVideo) {
                         skySmokeVideo.style.display = 'block';
                         skySmokeVideo.currentTime = 0;
                         skySmokeVideo.play().catch(() => {});
+                    } else if (skySmokeVideo) {
+                        skySmokeVideo.style.display = 'none';
                     }
 
                     // At peak smoke density (~700ms), the banner dissolves smoothly underneath
