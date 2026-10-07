@@ -87,42 +87,83 @@ async function loadData() {
             document.body.classList.remove('static-text');
         }
 
-        // 5. Gifts List
-        const gifts = boardData.gifts || [];
+        // 5. Gifts & Cards Rendering
+        const isMcRoyaleMode = boardData.giftDisplayMode === 'mcroyale';
+        
+        if (isMcRoyaleMode) {
+            column.className = 'mcroyale-column';
+            const cards = boardData.mcroyaleCards && boardData.mcroyaleCards.length > 0
+                ? boardData.mcroyaleCards
+                : [
+                    { id: 1, cardType: 'skeleton_bandana', count: 1, giftName: 'وردة', giftImage: '/images/rose.png' },
+                    { id: 2, cardType: 'evoker_mage', count: 1, giftName: 'عطر', giftImage: '/images/perfume.png' },
+                    { id: 3, cardType: 'skeleton_cap', count: 2, giftName: 'دونات', giftImage: '/images/donut.png' },
+                    { id: 4, cardType: 'hog_rider', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' },
+                    { id: 5, cardType: 'golem_pumpkin', count: 1, giftName: 'آيس كريم', giftImage: '/images/icecream.png' }
+                ];
 
-        // Check if items changed
-        const currentIds = Array.from(column.children).map(c => c.getAttribute('data-id'));
-        const newIds = gifts.map(g => String(g.id));
+            const currentKey = Array.from(column.children).map(c => c.getAttribute('data-card-key')).join('|');
+            const newKey = cards.map(c => `${c.id}_${c.cardType}_${c.count}_${c.giftImage}`).join('|');
 
-        const isDifferent = currentIds.length !== newIds.length || !currentIds.every((id, idx) => id === newIds[idx]);
-
-        if (isDifferent) {
-            column.innerHTML = '';
-            gifts.forEach((gift) => {
-                const div = document.createElement('div');
-                div.className = 'gift-item';
-                div.setAttribute('data-id', gift.id);
-                div.innerHTML = `
-                    <span>${escapeHtml(gift.name)}</span>
-                    <img src="${getImageSrc(gift.image)}" alt="${escapeHtml(gift.name)}" onerror="this.src='/images/rose.png'">
-                `;
-                column.appendChild(div);
-            });
+            if (currentKey !== newKey) {
+                column.innerHTML = '';
+                cards.forEach((card) => {
+                    const div = document.createElement('div');
+                    div.className = 'mcroyale-card-item';
+                    div.setAttribute('data-card-key', `${card.id}_${card.cardType}_${card.count}_${card.giftImage}`);
+                    div.setAttribute('data-card-id', card.id);
+                    
+                    const cardImgSrc = `/images/mcroyale/${card.cardType || 'skeleton_bandana'}.png`;
+                    const giftImgSrc = getImageSrc(card.giftImage || 'rose.png');
+                    
+                    div.innerHTML = `
+                        <div class="mcroyale-gift-corner-badge" title="${escapeHtml(card.giftName || 'هدية')}">
+                            <img src="${giftImgSrc}" alt="${escapeHtml(card.giftName || '')}" onerror="this.src='/images/rose.png'">
+                        </div>
+                        <img class="mcroyale-card-img" src="${cardImgSrc}" alt="MC Royale Card" onerror="this.src='/images/mcroyale/skeleton_bandana.png'">
+                        <div class="mcroyale-troop-count">X${card.count || 1}</div>
+                    `;
+                    column.appendChild(div);
+                });
+            }
         } else {
-            // Update contents in place
-            gifts.forEach((gift, i) => {
-                const itemEl = column.children[i];
-                if (!itemEl) return;
-                const span = itemEl.querySelector('span');
-                const img = itemEl.querySelector('img');
-                if (span && span.textContent !== gift.name) {
-                    span.textContent = gift.name;
-                }
-                const targetSrc = getImageSrc(gift.image);
-                if (img && img.getAttribute('src') !== targetSrc) {
-                    img.setAttribute('src', targetSrc);
-                }
-            });
+            column.className = 'gift-column';
+            const gifts = boardData.gifts || [];
+
+            // Check if items changed
+            const currentIds = Array.from(column.children).map(c => c.getAttribute('data-id'));
+            const newIds = gifts.map(g => String(g.id));
+
+            const isDifferent = currentIds.length !== newIds.length || !currentIds.every((id, idx) => id === newIds[idx]);
+
+            if (isDifferent) {
+                column.innerHTML = '';
+                gifts.forEach((gift) => {
+                    const div = document.createElement('div');
+                    div.className = 'gift-item';
+                    div.setAttribute('data-id', gift.id);
+                    div.innerHTML = `
+                        <span>${escapeHtml(gift.name)}</span>
+                        <img src="${getImageSrc(gift.image)}" alt="${escapeHtml(gift.name)}" onerror="this.src='/images/rose.png'">
+                    `;
+                    column.appendChild(div);
+                });
+            } else {
+                // Update contents in place
+                gifts.forEach((gift, i) => {
+                    const itemEl = column.children[i];
+                    if (!itemEl) return;
+                    const span = itemEl.querySelector('span');
+                    const img = itemEl.querySelector('img');
+                    if (span && span.textContent !== gift.name) {
+                        span.textContent = gift.name;
+                    }
+                    const targetSrc = getImageSrc(gift.image);
+                    if (img && img.getAttribute('src') !== targetSrc) {
+                        img.setAttribute('src', targetSrc);
+                    }
+                });
+            }
         }
     } catch (err) {
         console.error('Error loading overlay data:', err);
@@ -132,6 +173,21 @@ async function loadData() {
 function escapeHtml(str) {
     if (!str) return '';
     return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// Socket.io Real-time reaction
+if (typeof io !== 'undefined') {
+    const socket = io();
+    socket.on('board_settings_update', (msg) => {
+        if (!msg || !msg.uid || msg.uid === uid) {
+            loadData();
+        }
+    });
+    socket.on('board_update', (msg) => {
+        if (!msg || !msg.uid || msg.uid === uid) {
+            loadData();
+        }
+    });
 }
 
 loadData();

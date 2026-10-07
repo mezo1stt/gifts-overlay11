@@ -275,6 +275,14 @@ function getDefaultBoard(uid = 'default') {
         animationType: 'slide',  // 'slide', 'fade', 'bounce', 'pulse', 'none'
         animationDuration: 7,    // seconds
         textStaticMode: false,   // Keeps text static while only images animate
+        giftDisplayMode: 'classic', // 'classic' or 'mcroyale'
+        mcroyaleCards: [
+            { id: 1, cardType: 'skeleton_bandana', count: 1, giftName: 'وردة', giftImage: '/images/rose.png' },
+            { id: 2, cardType: 'evoker_mage', count: 1, giftName: 'عطر', giftImage: '/images/perfume.png' },
+            { id: 3, cardType: 'skeleton_cap', count: 2, giftName: 'دونات', giftImage: '/images/donut.png' },
+            { id: 4, cardType: 'hog_rider', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' },
+            { id: 5, cardType: 'golem_pumpkin', count: 1, giftName: 'آيس كريم', giftImage: '/images/icecream.png' }
+        ],
         gifts: [...PERMANENT_DEFAULT_GIFTS],
         teamGifts: getDefaultTeamGifts()
     };
@@ -867,7 +875,8 @@ app.post('/api/restore', (req, res) => {
 app.get('/api/data/:uid', (req, res) => {
     const uid = req.params.uid;
     const data = readData();
-    const board = data[uid] || getDefaultBoard(uid);
+    const def = getDefaultBoard(uid);
+    const board = { ...def, ...(data[uid] || {}) };
     res.json(board);
 });
 
@@ -875,7 +884,12 @@ app.get('/api/data/:uid', (req, res) => {
 app.all(['/api/board/:uid/settings', '/api/board/:uid'], (req, res) => {
     const uid = req.params.uid;
     const data = readData();
-    if (!data[uid]) data[uid] = getDefaultBoard(uid);
+    const def = getDefaultBoard(uid);
+    if (!data[uid]) {
+        data[uid] = def;
+    } else {
+        data[uid] = { ...def, ...data[uid] };
+    }
 
     if (req.method === 'GET') {
         return res.json({ success: true, board: data[uid] });
@@ -889,6 +903,7 @@ app.all(['/api/board/:uid/settings', '/api/board/:uid'], (req, res) => {
     };
 
     writeData(data);
+    io.emit('board_settings_update', { uid, board: data[uid] });
     res.json({ success: true, board: data[uid] });
 });
 
@@ -900,6 +915,7 @@ app.put('/api/color/:uid', (req, res) => {
     if (!data[uid]) data[uid] = getDefaultBoard(uid);
     data[uid].color = color;
     writeData(data);
+    io.emit('board_settings_update', { uid, board: data[uid] });
     res.json({ success: true, color });
 });
 

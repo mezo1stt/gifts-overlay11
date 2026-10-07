@@ -249,8 +249,44 @@
                         <!-- Gift Cards Column -->
                         <div class="panel-section gifts-panel">
                             
-                            <!-- Add Gifts Form -->
-                            <div class="panel-card add-gift-card">
+                            <!-- Display Mode Selector (Classic vs MC Royale Cards) -->
+                            <div class="panel-card mode-selector-card">
+                                <div class="card-header-flex">
+                                    <h3 class="card-title"><span>🎮 نمط العرض في أوفرلاي هدايا تيك توك</span></h3>
+                                    <span class="badge-tag" id="currentDisplayModeTag">🎁 كلاسيكي</span>
+                                </div>
+                                <div class="mode-switch-tabs mt-2">
+                                    <button type="button" class="btn-mode-tab active" id="btnModeClassic" onclick="switchGiftDisplayMode('classic')">
+                                        🎁 النمط الكلاسيكي (قائمة الهدايا)
+                                    </button>
+                                    <button type="button" class="btn-mode-tab" id="btnModeMcRoyale" onclick="switchGiftDisplayMode('mcroyale')">
+                                        🃏 وضع بطاقات MC Royale (جنود وبطاقات اللعبة)
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- MC Royale Cards Manager (Shown when mcroyale mode active) -->
+                            <div class="panel-card mcroyale-manager-card" id="mcroyaleCardsCard" style="display:none;">
+                                <div class="card-header-flex">
+                                    <h3 class="card-title"><span>🃏 بطاقات MC Royale والجنود (على طرف الشاشة)</span></h3>
+                                    <span class="badge-tag">إطار ذهبي + نيون مشع ✨</span>
+                                </div>
+                                <p style="font-size:12px; color:#cbd5e1; margin-top:4px;">
+                                    حدد صورة البطاقة لكل خانة، وعدد الجنود (المضاعف مثل X1, X2...)، والهدية المرتبطة بها من المكتبة:
+                                </p>
+                                <div class="mcroyale-cards-grid mt-3" id="mcroyaleCardsGrid"></div>
+                                <div class="mt-3" style="display:flex; gap:10px;">
+                                    <button type="button" class="btn-secondary" onclick="addMcRoyaleCardSlot()" style="flex:1;">
+                                        ➕ إضافة خانة بطاقة جديدة
+                                    </button>
+                                    <button type="button" class="btn-primary" onclick="saveMcRoyaleCardsConfig()" style="flex:1;">
+                                        💾 حفظ البطاقات وتحديث البث
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Add Gifts Form (Classic Mode) -->
+                            <div class="panel-card add-gift-card" id="classicAddGiftCard">
                                 <h3 class="card-title"><span>➕ إضافة هدايا جديدة</span></h3>
                                 <div class="tabs-nav">
                                     <button class="tab-btn active" data-tab="libraryTab">🎁 مكتبة هدايا تيك توك مصر (700+ هدية)</button>
@@ -308,7 +344,7 @@
                             </div>
 
                             <!-- Current Gifts List -->
-                            <div class="panel-card current-gifts-card">
+                            <div class="panel-card current-gifts-card" id="classicCurrentGiftsCard">
                                 <div class="card-header-flex">
                                     <h3 class="card-title"><span>📋 الهدايا الحالية في الـ Overlay</span></h3>
                                     <span class="count-badge" id="giftsCountBadge">0 هدية</span>
@@ -1036,38 +1072,43 @@
                                     </button>
                                 </div>
 
-                                <!-- Scoreboard Triggers & TikFinity Webhook (مطابق لـ scoreboard الأصلي) -->
-                                <div class="sb-triggers-box">
-                                    <h4 style="color:var(--gold); font-size:14.5px; margin-bottom:6px;">⚡ روابط التراجر التلقائي وويب هوك تيك فينيتي (Triggers & Webhook)</h4>
-                                    <p style="font-size:12px; color:#cbd5e1; margin-bottom:12px;">انسخ هذه الروابط لربطها مع TikFinity أو Stream Deck أو برامج البث لتحديث النتيجة فورياً مع كل هدية أو تفاعل:</p>
+                                <!-- Scoreboard Triggers & TikFinity Webhook (Collapsible to fit screen) -->
+                                <details class="sb-triggers-details mt-3">
+                                    <summary class="sb-triggers-summary">
+                                        <span>⚡ روابط التراجر التلقائي وويب هوك تيك فينيتي (TikFinity & Stream Deck)</span>
+                                        <span class="summary-arrow">▼</span>
+                                    </summary>
+                                    <div class="sb-triggers-box mt-2">
+                                        <p style="font-size:12px; color:#cbd5e1; margin-bottom:12px;">انسخ هذه الروابط لربطها مع TikFinity أو Stream Deck أو برامج البث لتحديث النتيجة فورياً مع كل هدية أو تفاعل:</p>
 
-                                    <!-- Trigger Team A (+1) -->
-                                    <div class="sb-trigger-row">
-                                        <div class="sb-trigger-info">
-                                            <h5>⚡ إضافة نقطة للفريق الأحمر:</h5>
-                                            <code id="trigAUrl">/trigger?team=a&action=add&value=1</code>
+                                        <!-- Trigger Team A (+1) -->
+                                        <div class="sb-trigger-row">
+                                            <div class="sb-trigger-info">
+                                                <h5>⚡ إضافة نقطة للفريق الأحمر:</h5>
+                                                <code id="trigAUrl">/trigger?team=a&action=add&value=1</code>
+                                            </div>
+                                            <button class="btn-copy" onclick="copyTriggerLink('a', 1)">📋 نسخ</button>
                                         </div>
-                                        <button class="btn-copy" onclick="copyTriggerLink('a', 1)">📋 نسخ</button>
-                                    </div>
 
-                                    <!-- Trigger Team B (+1) -->
-                                    <div class="sb-trigger-row">
-                                        <div class="sb-trigger-info">
-                                            <h5>⚡ إضافة نقطة للفريق الأخضر:</h5>
-                                            <code id="trigBUrl">/trigger?team=b&action=add&value=1</code>
+                                        <!-- Trigger Team B (+1) -->
+                                        <div class="sb-trigger-row">
+                                            <div class="sb-trigger-info">
+                                                <h5>⚡ إضافة نقطة للفريق الأخضر:</h5>
+                                                <code id="trigBUrl">/trigger?team=b&action=add&value=1</code>
+                                            </div>
+                                            <button class="btn-copy" onclick="copyTriggerLink('b', 1)">📋 نسخ</button>
                                         </div>
-                                        <button class="btn-copy" onclick="copyTriggerLink('b', 1)">📋 نسخ</button>
-                                    </div>
 
-                                    <!-- TikFinity Webhook -->
-                                    <div class="sb-trigger-row">
-                                        <div class="sb-trigger-info">
-                                            <h5>🎁 ويب هوك تيك فينيتي المباشر (TikFinity Webhook):</h5>
-                                            <code id="webhookUrl">/webhook/tikfinity</code>
+                                        <!-- TikFinity Webhook -->
+                                        <div class="sb-trigger-row">
+                                            <div class="sb-trigger-info">
+                                                <h5>🎁 ويب هوك تيك فينيتي المباشر (TikFinity Webhook):</h5>
+                                                <code id="webhookUrl">/webhook/tikfinity</code>
+                                            </div>
+                                            <button class="btn-copy" onclick="copyWebhookLink()">📋 نسخ</button>
                                         </div>
-                                        <button class="btn-copy" onclick="copyWebhookLink()">📋 نسخ</button>
                                     </div>
-                                </div>
+                                </details>
 
                             </div>
 
@@ -1232,11 +1273,11 @@
                                     <a id="racePreviewExternalLink" href="/race-overlay.html" target="_blank" class="preview-external-btn">شاشة كاملة ↗</a>
                                 </div>
 
-                                <div class="race-sim-container" style="height:320px; border-radius:16px; overflow:hidden; position:relative; background:#070a14; border:1px solid rgba(255,215,0,0.25);">
+                                <div class="race-sim-container" style="height:210px; border-radius:14px; overflow:hidden; position:relative; background:#070a14; border:1px solid rgba(255,215,0,0.25);">
                                     <iframe id="raceSimIframe" src="/race-overlay.html" style="width:100%; height:100%; border:none; background:transparent;"></iframe>
                                 </div>
 
-                                <div class="form-actions mt-3">
+                                <div class="form-actions mt-2">
                                     <button class="btn-obs-action" onclick="copyCurrentOverlayUrl('race')">
                                         📺 نسخ رابط صراع الحكام لـ OBS
                                     </button>
@@ -1246,17 +1287,18 @@
                                 </div>
                             </div>
 
-                            <!-- Activity Log Card -->
-                            <div class="panel-card log-card mt-3">
-                                <div class="card-header-flex">
-                                    <h3 class="card-title"><span>📜 سجل انتصارات صراع الحكام</span></h3>
-                                </div>
-                                <div class="log-list mt-2" id="raceLogList">
+                            <!-- Activity Log Card (Compact) -->
+                            <details class="panel-card log-card mt-2">
+                                <summary class="card-header-flex" style="cursor:pointer; list-style:none;">
+                                    <h3 class="card-title"><span>📜 سجل انتصارات صراع الحكام (اضغط للإظهار)</span></h3>
+                                    <span class="summary-arrow" style="font-size:12px; color:var(--gold);">▼</span>
+                                </summary>
+                                <div class="log-list mt-2" id="raceLogList" style="max-height:100px;">
                                     <div class="log-item info">
                                         <span>👋 مرحباً بك في صراع الحكام! اكتب اليوزر واضغط إضافة للبدء.</span>
                                     </div>
                                 </div>
-                            </div>
+                            </details>
 
                         </div>
 

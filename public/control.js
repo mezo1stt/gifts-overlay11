@@ -357,7 +357,197 @@ function switchAuthTab(tab) {
     document.getElementById('registerForm').classList.toggle('active', tab === 'register');
 }
 
-// ================= SECTION 1: GIFTS OVERLAY ================= //
+// ================= SECTION 1: GIFTS OVERLAY & MC ROYALE CARDS ================= //
+const MCROYALE_AVAILABLE_CARDS = [
+    { type: 'skeleton_bandana', name: 'سكلتون بعصابة زرقاء (X1)', img: '/images/mcroyale/skeleton_bandana.png' },
+    { type: 'evoker_mage', name: 'ساحر إيفوكر (X1)', img: '/images/mcroyale/evoker_mage.png' },
+    { type: 'skeleton_cap', name: 'سكلتون بقبعة ونظارة (X2)', img: '/images/mcroyale/skeleton_cap.png' },
+    { type: 'hog_rider', name: 'راكب الخنزير بمطرقة (X1)', img: '/images/mcroyale/hog_rider.png' },
+    { type: 'golem_pumpkin', name: 'وحش الجولم برأس يقطين (X1)', img: '/images/mcroyale/golem_pumpkin.png' }
+];
+
+function onNeonColorChange(color) {
+    if (!color) return;
+    const colorHex = document.getElementById('colorHex');
+    if (colorHex) colorHex.textContent = color;
+    const neonInput = document.getElementById('neonColor');
+    if (neonInput && neonInput.value !== color) neonInput.value = color;
+
+    if (currentBoardData) {
+        currentBoardData.color = color;
+    }
+    saveBoardSettings({ color });
+    renderPreviewSimulator(currentBoardData);
+}
+
+function switchGiftDisplayMode(mode, doSave = true) {
+    const isMcRoyale = mode === 'mcroyale';
+    const btnClassic = document.getElementById('btnModeClassic');
+    const btnMcRoyale = document.getElementById('btnModeMcRoyale');
+    const mcCard = document.getElementById('mcroyaleCardsCard');
+    const classicAdd = document.getElementById('classicAddGiftCard');
+    const classicList = document.getElementById('classicCurrentGiftsCard');
+    const tag = document.getElementById('currentDisplayModeTag');
+
+    if (btnClassic) btnClassic.classList.toggle('active', !isMcRoyale);
+    if (btnMcRoyale) btnMcRoyale.classList.toggle('active', isMcRoyale);
+    if (mcCard) mcCard.style.display = isMcRoyale ? 'block' : 'none';
+    if (classicAdd) classicAdd.style.display = isMcRoyale ? 'none' : 'block';
+    if (classicList) classicList.style.display = isMcRoyale ? 'none' : 'block';
+    if (tag) tag.textContent = isMcRoyale ? '🃏 بطاقات MC Royale' : '🎁 كلاسيكي';
+
+    if (currentBoardData) {
+        currentBoardData.giftDisplayMode = mode;
+    }
+
+    if (isMcRoyale) {
+        renderMcRoyaleCardsEditor();
+    }
+
+    if (doSave) {
+        saveBoardSettings({ giftDisplayMode: mode });
+        showToast(isMcRoyale ? '🃏 تم تفعيل وضع بطاقات MC Royale على البث' : '🎁 تم تفعيل وضع هدايا تيك توك الكلاسيكي', 'success');
+    }
+    renderPreviewSimulator(currentBoardData);
+}
+
+function renderMcRoyaleCardsEditor() {
+    const container = document.getElementById('mcroyaleCardsGrid');
+    if (!container) return;
+
+    if (!currentBoardData.mcroyaleCards || currentBoardData.mcroyaleCards.length === 0) {
+        currentBoardData.mcroyaleCards = [
+            { id: 1, cardType: 'skeleton_bandana', count: 1, giftName: 'وردة', giftImage: '/images/rose.png' },
+            { id: 2, cardType: 'evoker_mage', count: 1, giftName: 'عطر', giftImage: '/images/perfume.png' },
+            { id: 3, cardType: 'skeleton_cap', count: 2, giftName: 'دونات', giftImage: '/images/donut.png' },
+            { id: 4, cardType: 'hog_rider', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' },
+            { id: 5, cardType: 'golem_pumpkin', count: 1, giftName: 'آيس كريم', giftImage: '/images/icecream.png' }
+        ];
+    }
+
+    container.innerHTML = '';
+    currentBoardData.mcroyaleCards.forEach((card, idx) => {
+        const slot = document.createElement('div');
+        slot.className = 'mcroyale-card-slot';
+
+        const cardImg = `/images/mcroyale/${card.cardType || 'skeleton_bandana'}.png`;
+        const giftImg = card.giftImage && card.giftImage.startsWith('http') ? card.giftImage : `/images/${card.giftImage || 'rose.png'}`;
+
+        let cardOptionsHtml = MCROYALE_AVAILABLE_CARDS.map(c => 
+            `<option value="${c.type}" ${c.type === card.cardType ? 'selected' : ''}>${c.name}</option>`
+        ).join('');
+
+        // Prepare gifts catalog options
+        const giftList = allTiktokGifts.length > 0 ? allTiktokGifts : [
+            { name: 'وردة', image: '/images/rose.png' },
+            { name: 'عطر', image: '/images/perfume.png' },
+            { name: 'دونات', image: '/images/donut.png' },
+            { name: 'قلب', image: '/images/heart.png' },
+            { name: 'آيس كريم', image: '/images/icecream.png' },
+            { name: 'جلاكسي', image: '/images/galaxy.png' },
+            { name: 'أسد', image: '/images/lion.png' }
+        ];
+
+        let giftOptionsHtml = giftList.slice(0, 80).map(g => {
+            const isSel = (g.name === card.giftName) || (g.image === card.giftImage);
+            return `<option value="${escapeHtml(g.name)}" data-img="${escapeHtml(g.image)}" ${isSel ? 'selected' : ''}>🎁 ${escapeHtml(g.name)}</option>`;
+        }).join('');
+
+        slot.innerHTML = `
+            <div class="mcroyale-slot-preview">
+                <img class="mcroyale-slot-card-img" id="slotCardImg_${idx}" src="${cardImg}" alt="Card">
+                <img class="mcroyale-slot-gift-tag" id="slotGiftImg_${idx}" src="${giftImg}" alt="Gift">
+            </div>
+            <div class="mcroyale-slot-fields">
+                <div class="mcroyale-field-group">
+                    <label>🃏 نوع البطاقة المصورة:</label>
+                    <select onchange="onMcRoyaleCardTypeChange(${idx}, this.value)">
+                        ${cardOptionsHtml}
+                    </select>
+                </div>
+                <div class="mcroyale-field-group">
+                    <label>⚔️ عدد الجنود (Multiplier):</label>
+                    <input type="number" min="1" max="999" class="mcroyale-count-badge-input" value="${card.count || 1}" onchange="onMcRoyaleCardCountChange(${idx}, this.value)">
+                </div>
+                <div class="mcroyale-field-group">
+                    <label>🎁 الهدية المرتبطة:</label>
+                    <select onchange="onMcRoyaleGiftChange(${idx}, this)">
+                        ${giftOptionsHtml}
+                    </select>
+                </div>
+            </div>
+            <button type="button" class="btn-slot-del" onclick="deleteMcRoyaleCardSlot(${idx})" title="حذف الخانة">✕</button>
+        `;
+        container.appendChild(slot);
+    });
+}
+
+function onMcRoyaleCardTypeChange(idx, val) {
+    if (!currentBoardData.mcroyaleCards || !currentBoardData.mcroyaleCards[idx]) return;
+    currentBoardData.mcroyaleCards[idx].cardType = val;
+    const imgEl = document.getElementById(`slotCardImg_${idx}`);
+    if (imgEl) imgEl.src = `/images/mcroyale/${val}.png`;
+    renderPreviewSimulator(currentBoardData);
+}
+
+function onMcRoyaleCardCountChange(idx, val) {
+    if (!currentBoardData.mcroyaleCards || !currentBoardData.mcroyaleCards[idx]) return;
+    currentBoardData.mcroyaleCards[idx].count = Math.max(1, parseInt(val) || 1);
+    renderPreviewSimulator(currentBoardData);
+}
+
+function onMcRoyaleGiftChange(idx, selectEl) {
+    if (!currentBoardData.mcroyaleCards || !currentBoardData.mcroyaleCards[idx]) return;
+    const opt = selectEl.options[selectEl.selectedIndex];
+    const giftName = opt.value;
+    const giftImg = opt.getAttribute('data-img') || '/images/rose.png';
+
+    currentBoardData.mcroyaleCards[idx].giftName = giftName;
+    currentBoardData.mcroyaleCards[idx].giftImage = giftImg;
+
+    const imgEl = document.getElementById(`slotGiftImg_${idx}`);
+    if (imgEl) imgEl.src = giftImg.startsWith('http') ? giftImg : `/images/${giftImg}`;
+    renderPreviewSimulator(currentBoardData);
+}
+
+function addMcRoyaleCardSlot() {
+    if (!currentBoardData.mcroyaleCards) currentBoardData.mcroyaleCards = [];
+    const newIdx = currentBoardData.mcroyaleCards.length;
+    const defaultTypes = ['skeleton_bandana', 'evoker_mage', 'skeleton_cap', 'hog_rider', 'golem_pumpkin'];
+    const cardType = defaultTypes[newIdx % defaultTypes.length];
+
+    currentBoardData.mcroyaleCards.push({
+        id: Date.now(),
+        cardType: cardType,
+        count: 1,
+        giftName: 'وردة',
+        giftImage: '/images/rose.png'
+    });
+
+    renderMcRoyaleCardsEditor();
+    renderPreviewSimulator(currentBoardData);
+    showToast('✨ تمت إضافة خانة بطاقة جديدة', 'success');
+}
+
+function deleteMcRoyaleCardSlot(idx) {
+    if (!currentBoardData.mcroyaleCards) return;
+    currentBoardData.mcroyaleCards.splice(idx, 1);
+    renderMcRoyaleCardsEditor();
+    renderPreviewSimulator(currentBoardData);
+}
+
+async function saveMcRoyaleCardsConfig() {
+    try {
+        await saveBoardSettings({
+            giftDisplayMode: 'mcroyale',
+            mcroyaleCards: currentBoardData.mcroyaleCards
+        });
+        showToast('💾 تم حفظ بطاقات MC Royale وتحديث شاشة البث فورياً!', 'success');
+    } catch (e) {
+        showToast('فشل حفظ البطاقات', 'error');
+    }
+}
+
 async function loadGiftsData() {
     try {
         const res = await fetch(`/api/board/${currentUid}`);
@@ -368,15 +558,41 @@ async function loadGiftsData() {
             currentGifts = board.gifts || [];
 
             // Update UI elements
-            if (board.color) document.getElementById('neonColor').value = board.color;
-            if (board.scale) document.getElementById('scaleSlider').value = board.scale;
-            if (board.glowIntensity) document.getElementById('glowSlider').value = board.glowIntensity;
-            if (board.offsetY !== undefined) document.getElementById('offsetYSlider').value = board.offsetY;
-            if (board.animationType) document.getElementById('animTypeSelect').value = board.animationType;
+            if (board.color) {
+                const neonColorInput = document.getElementById('neonColor');
+                if (neonColorInput) neonColorInput.value = board.color;
+                const colorHex = document.getElementById('colorHex');
+                if (colorHex) colorHex.textContent = board.color;
+            }
+            if (board.scale) {
+                const scaleSlider = document.getElementById('scaleSlider');
+                if (scaleSlider) scaleSlider.value = board.scale;
+                const scaleBadge = document.getElementById('scaleValue');
+                if (scaleBadge) scaleBadge.textContent = board.scale + '%';
+            }
+            if (board.glowIntensity !== undefined) {
+                const glowSlider = document.getElementById('glowSlider');
+                if (glowSlider) glowSlider.value = board.glowIntensity;
+                const glowBadge = document.getElementById('glowValue');
+                if (glowBadge) glowBadge.textContent = board.glowIntensity + ' px';
+            }
+            if (board.offsetY !== undefined) {
+                const offsetYSlider = document.getElementById('offsetYSlider');
+                if (offsetYSlider) offsetYSlider.value = board.offsetY;
+                const offsetYBadge = document.getElementById('offsetYValue');
+                if (offsetYBadge) offsetYBadge.textContent = board.offsetY + ' px';
+            }
+            if (board.animationType) {
+                const animSelect = document.getElementById('animTypeSelect');
+                if (animSelect) animSelect.value = board.animationType;
+            }
 
             // Sync static text mode
             const staticCheck = document.getElementById('textStaticModeCheck');
             if (staticCheck) staticCheck.checked = Boolean(board.textStaticMode);
+
+            // Sync display mode (Classic vs MC Royale Cards)
+            switchGiftDisplayMode(board.giftDisplayMode || 'classic', false);
 
             renderGiftsList();
             renderPreviewSimulator(board);
@@ -422,23 +638,68 @@ function renderPreviewSimulator(board = {}) {
     if (!content) return;
 
     content.innerHTML = '';
-    const color = board.color || document.getElementById('neonColor').value || '#a855f7';
+    const color = board.color || document.getElementById('neonColor')?.value || '#a855f7';
     const align = board.horizontalAlign || 'right';
     content.style.alignItems = align === 'right' ? 'flex-start' : 'flex-end';
+    content.style.setProperty('--neon-color', color);
 
-    currentGifts.slice(0, 5).forEach(gift => {
-        const item = document.createElement('div');
-        item.className = 'preview-card-item';
-        item.style.borderColor = color;
-        item.style.boxShadow = `0 0 15px ${color}66`;
+    const isMcRoyale = (board.giftDisplayMode === 'mcroyale') || (currentBoardData && currentBoardData.giftDisplayMode === 'mcroyale');
 
-        const imgUrl = gift.image.startsWith('http') ? gift.image : `/images/${gift.image}`;
-        item.innerHTML = `
-            <img src="${imgUrl}" onerror="this.src='/images/rose.png'">
-            <span>${gift.name}</span>
-        `;
-        content.appendChild(item);
-    });
+    if (isMcRoyale) {
+        const cards = (board.mcroyaleCards && board.mcroyaleCards.length > 0)
+            ? board.mcroyaleCards
+            : (currentBoardData && currentBoardData.mcroyaleCards && currentBoardData.mcroyaleCards.length > 0)
+                ? currentBoardData.mcroyaleCards
+                : [
+                    { id: 1, cardType: 'skeleton_bandana', count: 1, giftName: 'وردة', giftImage: '/images/rose.png' },
+                    { id: 2, cardType: 'evoker_mage', count: 1, giftName: 'عطر', giftImage: '/images/perfume.png' },
+                    { id: 3, cardType: 'skeleton_cap', count: 2, giftName: 'دونات', giftImage: '/images/donut.png' },
+                    { id: 4, cardType: 'hog_rider', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' },
+                    { id: 5, cardType: 'golem_pumpkin', count: 1, giftName: 'آيس كريم', giftImage: '/images/icecream.png' }
+                ];
+
+        const col = document.createElement('div');
+        col.style.display = 'flex';
+        col.style.flexDirection = 'column';
+        col.style.gap = '8px';
+        col.style.alignItems = align === 'right' ? 'flex-end' : 'flex-start';
+
+        cards.forEach(card => {
+            const item = document.createElement('div');
+            item.style.position = 'relative';
+            item.style.display = 'flex';
+            item.style.flexDirection = 'column';
+            item.style.alignItems = 'center';
+            item.style.width = '68px';
+
+            const cardSrc = `/images/mcroyale/${card.cardType || 'skeleton_bandana'}.png`;
+            const giftSrc = card.giftImage && card.giftImage.startsWith('http') ? card.giftImage : `/images/${card.giftImage || 'rose.png'}`;
+
+            item.innerHTML = `
+                <div style="position:absolute; top:-4px; right:-4px; width:22px; height:22px; border-radius:50%; background:#0a0814; border:1.5px solid #ffd700; display:flex; align-items:center; justify-content:center; box-shadow:0 0 6px #ffd700; z-index:5;">
+                    <img src="${giftSrc}" style="width:16px; height:16px; object-fit:contain;" onerror="this.src='/images/rose.png'">
+                </div>
+                <img src="${cardSrc}" style="width:64px; height:auto; object-fit:contain; filter:drop-shadow(0 0 8px rgba(255,30,60,0.9));" onerror="this.src='/images/mcroyale/skeleton_bandana.png'">
+                <div style="font-family:'Impact','Arial Black',sans-serif; font-size:18px; font-weight:900; color:#ffe600; -webkit-text-stroke:1px #000; text-shadow:1px 1px 0 #000,-1px -1px 0 #000; margin-top:-6px; z-index:4;">X${card.count || 1}</div>
+            `;
+            col.appendChild(item);
+        });
+        content.appendChild(col);
+    } else {
+        currentGifts.slice(0, 5).forEach(gift => {
+            const item = document.createElement('div');
+            item.className = 'preview-card-item';
+            item.style.borderColor = color;
+            item.style.boxShadow = `0 0 15px ${color}66`;
+
+            const imgUrl = gift.image.startsWith('http') ? gift.image : `/images/${gift.image}`;
+            item.innerHTML = `
+                <img src="${imgUrl}" onerror="this.src='/images/rose.png'">
+                <span>${gift.name}</span>
+            `;
+            content.appendChild(item);
+        });
+    }
 }
 
 async function updateGiftName(id, newName) {
@@ -1769,6 +2030,61 @@ function setupEventListeners() {
         offsetYSlider.addEventListener('input', (e) => {
             document.getElementById('offsetYValue').textContent = e.target.value + ' px';
             setPosition(document.querySelector('.pos-preset-buttons .btn-pos.active')?.dataset.valign || 'center', e.target.value);
+        });
+    }
+
+    // Neon Color Picker & Preset Swatches
+    const neonColorInput = document.getElementById('neonColor');
+    if (neonColorInput) {
+        neonColorInput.addEventListener('input', (e) => {
+            onNeonColorChange(e.target.value);
+        });
+        neonColorInput.addEventListener('change', (e) => {
+            onNeonColorChange(e.target.value);
+        });
+    }
+
+    document.querySelectorAll('.color-presets .preset-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const color = btn.getAttribute('data-color') || btn.style.getPropertyValue('--c');
+            if (color) {
+                onNeonColorChange(color.trim());
+            }
+        });
+    });
+
+    // Scale slider (حجم الهدايا والخط)
+    const scaleSlider = document.getElementById('scaleSlider');
+    if (scaleSlider) {
+        scaleSlider.addEventListener('input', (e) => {
+            const badge = document.getElementById('scaleValue');
+            if (badge) badge.textContent = e.target.value + '%';
+            if (currentBoardData) currentBoardData.scale = e.target.value;
+            saveBoardSettings({ scale: e.target.value });
+            renderPreviewSimulator(currentBoardData);
+        });
+    }
+
+    // Glow intensity slider (قوة توهج النيون)
+    const glowSlider = document.getElementById('glowSlider');
+    if (glowSlider) {
+        glowSlider.addEventListener('input', (e) => {
+            const badge = document.getElementById('glowValue');
+            if (badge) badge.textContent = e.target.value + ' px';
+            if (currentBoardData) currentBoardData.glowIntensity = e.target.value;
+            saveBoardSettings({ glowIntensity: e.target.value });
+            renderPreviewSimulator(currentBoardData);
+        });
+    }
+
+    // Animation type select
+    const animTypeSelect = document.getElementById('animTypeSelect');
+    if (animTypeSelect) {
+        animTypeSelect.addEventListener('change', (e) => {
+            if (currentBoardData) currentBoardData.animationType = e.target.value;
+            saveBoardSettings({ animationType: e.target.value });
+            renderPreviewSimulator(currentBoardData);
         });
     }
 

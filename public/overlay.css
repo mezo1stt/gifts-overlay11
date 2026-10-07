@@ -153,3 +153,107 @@ body.static-text.anim-pulse .gift-item img {
 body.static-text.anim-none .gift-item img {
     animation: none !important;
 }
+
+/* ================= MC ROYALE CARDS MODE (وضع بطاقات وجنود اللعبة) ================= */
+.mcroyale-column {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    align-items: flex-end;
+    transition: gap 0.3s ease;
+}
+
+body.align-left .mcroyale-column {
+    align-items: flex-start;
+}
+
+.mcroyale-card-item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: var(--gift-size);
+    transition: transform 0.25s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    will-change: transform, filter;
+    animation: mcCardIdle 4s ease-in-out infinite alternate;
+}
+
+.mcroyale-card-item:nth-child(2) { animation-delay: 0.8s; }
+.mcroyale-card-item:nth-child(3) { animation-delay: 1.6s; }
+.mcroyale-card-item:nth-child(4) { animation-delay: 2.4s; }
+.mcroyale-card-item:nth-child(5) { animation-delay: 3.2s; }
+
+.mcroyale-card-img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 0 10px rgba(255, 30, 60, 0.9)) drop-shadow(0 0 20px rgba(255, 0, 50, 0.55));
+    transition: filter 0.3s ease, transform 0.3s ease;
+    display: block;
+}
+
+.mcroyale-gift-corner-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: calc(var(--gift-size) * 0.36);
+    height: calc(var(--gift-size) * 0.36);
+    background: rgba(12, 10, 24, 0.92);
+    border: 2px solid #ffd700;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.7), 0 4px 8px rgba(0, 0, 0, 0.8);
+    z-index: 12;
+    overflow: hidden;
+    padding: 2px;
+}
+
+body.align-left .mcroyale-gift-corner-badge {
+    right: auto;
+    left: -6px;
+}
+
+.mcroyale-gift-corner-badge img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.mcroyale-troop-count {
+    font-family: 'Impact', 'Arial Black', 'Changa', 'Cairo', sans-serif;
+    font-size: calc(var(--gift-size) * 0.3);
+    font-weight: 900;
+    color: #ffe600;
+    -webkit-text-stroke: 2px #000;
+    text-shadow: 
+        2px 2px 0 #000, -2px -2px 0 #000,
+        2px -2px 0 #000, -2px 2px 0 #000,
+        0 3px 0 #000, 0 -3px 0 #000,
+        3px 0 0 #000, -3px 0 0 #000,
+        0 4px 8px rgba(0,0,0,0.95);
+    text-align: center;
+    margin-top: -8px;
+    z-index: 10;
+    letter-spacing: 0.5px;
+    line-height: 1;
+    user-select: none;
+    transform: scaleY(1.05);
+}
+
+@keyframes mcCardIdle {
+    0% { transform: translateY(0) scale(1); }
+    100% { transform: translateY(-3px) scale(1.02); }
+}
+
+@keyframes mcCardPulse {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.18); filter: drop-shadow(0 0 20px rgba(255, 215, 0, 1)) drop-shadow(0 0 30px rgba(255, 30, 60, 1)); }
+    100% { transform: scale(1); }
+}
+
+.mcroyale-card-item.gift-trigger-active {
+    animation: mcCardPulse 1.2s ease-out;
+}
