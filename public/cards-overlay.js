@@ -128,25 +128,28 @@ function renderCardsToColumn(columnEl, cards, giftPos, teamColor) {
     if (!columnEl) return;
 
     const currentKey = Array.from(columnEl.children).map(c => c.getAttribute('data-card-key')).join('|');
-    const newKey = cards.map(c => `${c.id}_${c.cardType}_${c.customImage || ''}_${c.count}_${c.giftImage}_${giftPos}_${teamColor}`).join('|');
+    const newKey = cards.map(c => `${c.id}_${c.cardType}_${c.customImage || ''}_${c.customText || ''}_${c.count}_${c.giftImage}_${c.giftName || ''}_${giftPos}_${teamColor}`).join('|');
 
     if (currentKey !== newKey) {
         columnEl.innerHTML = '';
         cards.forEach(card => {
             const item = document.createElement('div');
             item.className = 'card-unit-item';
-            item.setAttribute('data-card-key', `${card.id}_${card.cardType}_${card.customImage || ''}_${card.count}_${card.giftImage}_${giftPos}_${teamColor}`);
+            item.setAttribute('data-card-key', `${card.id}_${card.cardType}_${card.customImage || ''}_${card.customText || ''}_${card.count}_${card.giftImage}_${card.giftName || ''}_${giftPos}_${teamColor}`);
             item.setAttribute('data-card-id', card.id);
 
             const cardSrc = getCardMediaSrc(card);
             const giftSrc = getImageSrc(card.giftImage);
+            const displayText = (card.customText !== undefined && card.customText !== null)
+                ? card.customText
+                : (card.count ? `X${card.count}` : '');
 
             item.innerHTML = `
                 <div class="card-gift-badge pos-${giftPos}" title="${escapeHtml(card.giftName || 'هدية')}">
                     <img src="${giftSrc}" alt="${escapeHtml(card.giftName || '')}" onerror="this.src='/images/rose.png'">
                 </div>
                 <img class="card-character-img" src="${cardSrc}" alt="Card Item" onerror="this.src='/images/cards_gif/meteor.gif'">
-                <div class="troop-count-badge">X${card.count || 1}</div>
+                ${displayText ? `<div class="troop-count-badge card-bottom-text">${escapeHtml(displayText)}</div>` : ''}
             `;
             columnEl.appendChild(item);
         });

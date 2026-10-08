@@ -2996,10 +2996,14 @@ function renderTeamCardsDeck(teamKey, listContainerId, countDisplayId) {
                     </button>
                 </div>
 
-                <!-- Troop Count -->
+                <!-- Card Bottom Text (بدل عدد الجنود حط نص تحت البطاقه وانا اكتبه) -->
                 <div class="card-slot-field">
-                    <label>عدد الجنود (X):</label>
-                    <input type="number" min="1" max="999" value="${card.count || 1}" class="mcroyale-count-badge-input" onchange="onCardCountChange('${teamKey}', ${idx}, this.value)">
+                    <label>✍️ النص أسفل البطاقة:</label>
+                    <input type="text" 
+                           class="form-input card-bottom-text-input" 
+                           placeholder="اكتب النص هنا (مثلاً: X1 أو تيربو أو نيزك...)" 
+                           value="${escapeHtml(card.customText !== undefined && card.customText !== null ? card.customText : (card.count ? 'X' + card.count : ''))}" 
+                           oninput="onCardTextChange('${teamKey}', ${idx}, this.value)">
                 </div>
 
                 <!-- Visual Gift Trigger -->
@@ -3035,9 +3039,22 @@ function moveCardSlot(teamKey, idx, direction) {
     showToast('تمت إعادة ترتيب البطاقات بنجاح! 🔄', 'info');
 }
 
+function onCardTextChange(teamKey, idx, val) {
+    if (!cardsBoardConfig[teamKey] || !cardsBoardConfig[teamKey].cards[idx]) return;
+    cardsBoardConfig[teamKey].cards[idx].customText = val;
+    const numMatch = (val || '').match(/\d+/);
+    if (numMatch) {
+        cardsBoardConfig[teamKey].cards[idx].count = parseInt(numMatch[0]) || 1;
+    }
+    saveCardsBoardConfig(true);
+}
+
 function onCardCountChange(teamKey, idx, val) {
     if (!cardsBoardConfig[teamKey] || !cardsBoardConfig[teamKey].cards[idx]) return;
     cardsBoardConfig[teamKey].cards[idx].count = Math.max(1, parseInt(val) || 1);
+    if (!cardsBoardConfig[teamKey].cards[idx].customText) {
+        cardsBoardConfig[teamKey].cards[idx].customText = `X${cardsBoardConfig[teamKey].cards[idx].count}`;
+    }
     saveCardsBoardConfig(true);
 }
 
@@ -3050,6 +3067,7 @@ function addNewCardSlot(teamKey = 'teamRed') {
     teamCards.push({
         id: nextId,
         cardType: itemChoice.id,
+        customText: 'X1',
         count: 1,
         giftName: 'وردة',
         giftImage: '/images/rose.png'
