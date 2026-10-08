@@ -214,7 +214,7 @@
       "neonEnabled": true,
       "glowIntensity": 18,
       "fontFamily": "cairo",
-      "giftPosition": "top-right",
+      "giftPosition": "top-left",
       "disappearMode": "gift_only",
       "offsetY": 0,
       "scale": 100,
@@ -227,40 +227,41 @@
             "cardType": "skeleton_bandana",
             "customText": "X1",
             "count": 1,
+            "giftName": "تكبيس (❤️ X100)",
+            "giftImage": "/images/tiktok_likes.png",
+            "likesCount": 100
+          },
+          {
+            "id": 2,
+            "cardType": "evoker_mage",
+            "customText": "X1",
+            "count": 1,
             "giftName": "وردة",
             "giftImage": "/images/rose.png"
           },
           {
-            "id": 2,
+            "id": 3,
             "cardType": "skeleton_cap",
             "customText": "X2",
             "count": 2,
-            "giftName": "دونات",
-            "giftImage": "/images/donut.png"
-          },
-          {
-            "id": 3,
-            "cardType": "golem_pumpkin",
-            "customText": "X1",
-            "count": 1,
-            "giftName": "نيزك",
-            "giftImage": "/images/1791197748042-81cb495abfe066981b9c135cfff21c7a.png~tplv-obj.webp"
+            "giftName": "قلب",
+            "giftImage": "/images/heart.png"
           },
           {
             "id": 4,
             "cardType": "hog_rider",
-            "customText": "X3",
-            "count": 3,
-            "giftName": "صاروخ",
-            "giftImage": "/images/perfume.png"
+            "customText": "X1",
+            "count": 1,
+            "giftName": "دونات",
+            "giftImage": "/images/donut.png"
           },
           {
             "id": 5,
-            "cardType": "evoker_mage",
+            "cardType": "golem_pumpkin",
             "customText": "X1",
             "count": 1,
-            "giftName": "قلب",
-            "giftImage": "/images/heart.png"
+            "giftName": "مكوك فضائي",
+            "giftImage": "/images/1791197817001-eb77ead5c3abb6da6034d3cf6cfeb438~tplv-obj.webp"
           }
         ]
       },
@@ -270,43 +271,44 @@
         "cards": [
           {
             "id": 101,
-            "cardType": "evoker_mage",
+            "cardType": "skeleton_bandana",
             "customText": "X1",
             "count": 1,
-            "giftName": "صاروخ",
-            "giftImage": "/images/perfume.png"
+            "giftName": "تكبيس (❤️ X100)",
+            "giftImage": "/images/tiktok_likes.png",
+            "likesCount": 100
           },
           {
             "id": 102,
-            "cardType": "hog_rider",
+            "cardType": "evoker_mage",
             "customText": "X1",
             "count": 1,
+            "giftName": "وردة",
+            "giftImage": "/images/rose.png"
+          },
+          {
+            "id": 103,
+            "cardType": "skeleton_cap",
+            "customText": "X2",
+            "count": 2,
             "giftName": "قلب",
             "giftImage": "/images/heart.png"
           },
           {
-            "id": 103,
-            "cardType": "skeleton_bandana",
-            "customText": "X2",
-            "count": 2,
-            "giftName": "مكوك فضائي",
-            "giftImage": "/images/1791197817001-eb77ead5c3abb6da6034d3cf6cfeb438~tplv-obj.webp"
-          },
-          {
             "id": 104,
-            "cardType": "golem_pumpkin",
+            "cardType": "hog_rider",
             "customText": "X1",
             "count": 1,
-            "giftName": "حمايه",
-            "giftImage": "/images/1791197852391-e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp"
+            "giftName": "دونات",
+            "giftImage": "/images/donut.png"
           },
           {
             "id": 105,
-            "cardType": "skeleton_cap",
-            "customText": "X3",
-            "count": 3,
-            "giftName": "دونات",
-            "giftImage": "/images/donut.png"
+            "cardType": "golem_pumpkin",
+            "customText": "X1",
+            "count": 1,
+            "giftName": "مكوك فضائي",
+            "giftImage": "/images/1791197817001-eb77ead5c3abb6da6034d3cf6cfeb438~tplv-obj.webp"
           }
         ]
       }
@@ -331,6 +333,109 @@
       "vAlign": "center",
       "hAlign": "center",
       "subtitle": ""
+    },
+    "cards4Board": {
+      "neonEnabled": true,
+      "glowIntensity": 18,
+      "fontFamily": "cairo",
+      "giftPosition": "top-left",
+      "disappearMode": "gift_only",
+      "offsetY": 0,
+      "scale": 100,
+      "teamRed": {
+        "title": "الفريق الأحمر",
+        "color": "#ff2a4a",
+        "cards": [
+          {
+            "id": 1,
+            "cardType": "skeleton_bandana",
+            "customText": "X1",
+            "count": 1,
+            "giftName": "تكبيس (❤️ X100)",
+            "giftImage": "/images/tiktok_likes.png",
+            "likesCount": 100
+          },
+          {
+            "id": 2,
+            "cardType": "evoker_mage",
+            "customText": "X1",
+            "count": 1,
+            "giftName": "وردة",
+            "giftImage": "/images/rose.png"
+          },
+          {
+            "id": 3,
+            "cardType": "skeleton_cap",
+            "customText": "X2",
+            "count": 2,
+            "giftName": "قلب",
+            "giftImage": "/images/heart.png"
+          },
+          {
+            "id": 4,
+            "cardType": "hog_rider",
+            "customText": "X1",
+            "count": 1,
+            "giftName": "دونات",
+            "giftImage": "/images/donut.png"
+          },
+          {
+            "id": 5,
+            "cardType": "golem_pumpkin",
+            "customText": "X1",
+            "count": 1,
+            "giftName": "مكوك فضائي",
+            "giftImage": "/images/1791197817001-eb77ead5c3abb6da6034d3cf6cfeb438~tplv-obj.webp"
+          }
+        ]
+      },
+      "teamBlue": {
+        "title": "الفريق الأزرق",
+        "color": "#00b4d8",
+        "cards": [
+          {
+            "id": 101,
+            "cardType": "skeleton_bandana",
+            "customText": "X1",
+            "count": 1,
+            "giftName": "تكبيس (❤️ X100)",
+            "giftImage": "/images/tiktok_likes.png",
+            "likesCount": 100
+          },
+          {
+            "id": 102,
+            "cardType": "evoker_mage",
+            "customText": "X1",
+            "count": 1,
+            "giftName": "وردة",
+            "giftImage": "/images/rose.png"
+          },
+          {
+            "id": 103,
+            "cardType": "skeleton_cap",
+            "customText": "X2",
+            "count": 2,
+            "giftName": "قلب",
+            "giftImage": "/images/heart.png"
+          },
+          {
+            "id": 104,
+            "cardType": "hog_rider",
+            "customText": "X1",
+            "count": 1,
+            "giftName": "دونات",
+            "giftImage": "/images/donut.png"
+          },
+          {
+            "id": 105,
+            "cardType": "golem_pumpkin",
+            "customText": "X1",
+            "count": 1,
+            "giftName": "مكوك فضائي",
+            "giftImage": "/images/1791197817001-eb77ead5c3abb6da6034d3cf6cfeb438~tplv-obj.webp"
+          }
+        ]
+      }
     }
   },
   "test_board": {
@@ -369,6 +474,109 @@
       "position_h": "center",
       "offset_y": 0,
       "scale": 100
+    },
+    "cards4Board": {
+      "neonEnabled": true,
+      "glowIntensity": 18,
+      "fontFamily": "cairo",
+      "giftPosition": "top-left",
+      "disappearMode": "gift_only",
+      "offsetY": 0,
+      "scale": 100,
+      "teamRed": {
+        "title": "الفريق الأحمر",
+        "color": "#ff2a4a",
+        "cards": [
+          {
+            "id": 1,
+            "cardType": "skeleton_bandana",
+            "customText": "X1",
+            "count": 1,
+            "giftName": "تكبيس (❤️ X100)",
+            "giftImage": "/images/tiktok_likes.png",
+            "likesCount": 100
+          },
+          {
+            "id": 2,
+            "cardType": "evoker_mage",
+            "customText": "X1",
+            "count": 1,
+            "giftName": "وردة",
+            "giftImage": "/images/rose.png"
+          },
+          {
+            "id": 3,
+            "cardType": "skeleton_cap",
+            "customText": "X2",
+            "count": 2,
+            "giftName": "قلب",
+            "giftImage": "/images/heart.png"
+          },
+          {
+            "id": 4,
+            "cardType": "hog_rider",
+            "customText": "X1",
+            "count": 1,
+            "giftName": "دونات",
+            "giftImage": "/images/donut.png"
+          },
+          {
+            "id": 5,
+            "cardType": "golem_pumpkin",
+            "customText": "X1",
+            "count": 1,
+            "giftName": "مكوك فضائي",
+            "giftImage": "/images/1791197817001-eb77ead5c3abb6da6034d3cf6cfeb438~tplv-obj.webp"
+          }
+        ]
+      },
+      "teamBlue": {
+        "title": "الفريق الأزرق",
+        "color": "#00b4d8",
+        "cards": [
+          {
+            "id": 101,
+            "cardType": "skeleton_bandana",
+            "customText": "X1",
+            "count": 1,
+            "giftName": "تكبيس (❤️ X100)",
+            "giftImage": "/images/tiktok_likes.png",
+            "likesCount": 100
+          },
+          {
+            "id": 102,
+            "cardType": "evoker_mage",
+            "customText": "X1",
+            "count": 1,
+            "giftName": "وردة",
+            "giftImage": "/images/rose.png"
+          },
+          {
+            "id": 103,
+            "cardType": "skeleton_cap",
+            "customText": "X2",
+            "count": 2,
+            "giftName": "قلب",
+            "giftImage": "/images/heart.png"
+          },
+          {
+            "id": 104,
+            "cardType": "hog_rider",
+            "customText": "X1",
+            "count": 1,
+            "giftName": "دونات",
+            "giftImage": "/images/donut.png"
+          },
+          {
+            "id": 105,
+            "cardType": "golem_pumpkin",
+            "customText": "X1",
+            "count": 1,
+            "giftName": "مكوك فضائي",
+            "giftImage": "/images/1791197817001-eb77ead5c3abb6da6034d3cf6cfeb438~tplv-obj.webp"
+          }
+        ]
+      }
     }
   },
   "default": {
@@ -627,7 +835,7 @@
       "neonEnabled": true,
       "glowIntensity": 18,
       "fontFamily": "cairo",
-      "giftPosition": "top-right",
+      "giftPosition": "top-left",
       "disappearMode": "gift_only",
       "offsetY": 0,
       "scale": 100,
@@ -640,40 +848,41 @@
             "cardType": "skeleton_bandana",
             "customText": "X1",
             "count": 1,
+            "giftName": "تكبيس (❤️ X100)",
+            "giftImage": "/images/tiktok_likes.png",
+            "likesCount": 100
+          },
+          {
+            "id": 2,
+            "cardType": "evoker_mage",
+            "customText": "X1",
+            "count": 1,
             "giftName": "وردة",
             "giftImage": "/images/rose.png"
           },
           {
-            "id": 2,
+            "id": 3,
             "cardType": "skeleton_cap",
             "customText": "X2",
             "count": 2,
-            "giftName": "دونات",
-            "giftImage": "/images/donut.png"
-          },
-          {
-            "id": 3,
-            "cardType": "golem_pumpkin",
-            "customText": "X1",
-            "count": 1,
-            "giftName": "نيزك",
-            "giftImage": "/images/1791197748042-81cb495abfe066981b9c135cfff21c7a.png~tplv-obj.webp"
+            "giftName": "قلب",
+            "giftImage": "/images/heart.png"
           },
           {
             "id": 4,
             "cardType": "hog_rider",
-            "customText": "X3",
-            "count": 3,
-            "giftName": "صاروخ",
-            "giftImage": "/images/perfume.png"
+            "customText": "X1",
+            "count": 1,
+            "giftName": "دونات",
+            "giftImage": "/images/donut.png"
           },
           {
             "id": 5,
-            "cardType": "evoker_mage",
+            "cardType": "golem_pumpkin",
             "customText": "X1",
             "count": 1,
-            "giftName": "قلب",
-            "giftImage": "/images/heart.png"
+            "giftName": "مكوك فضائي",
+            "giftImage": "/images/1791197817001-eb77ead5c3abb6da6034d3cf6cfeb438~tplv-obj.webp"
           }
         ]
       },
@@ -683,43 +892,44 @@
         "cards": [
           {
             "id": 101,
-            "cardType": "evoker_mage",
+            "cardType": "skeleton_bandana",
             "customText": "X1",
             "count": 1,
-            "giftName": "صاروخ",
-            "giftImage": "/images/perfume.png"
+            "giftName": "تكبيس (❤️ X100)",
+            "giftImage": "/images/tiktok_likes.png",
+            "likesCount": 100
           },
           {
             "id": 102,
-            "cardType": "hog_rider",
+            "cardType": "evoker_mage",
             "customText": "X1",
             "count": 1,
+            "giftName": "وردة",
+            "giftImage": "/images/rose.png"
+          },
+          {
+            "id": 103,
+            "cardType": "skeleton_cap",
+            "customText": "X2",
+            "count": 2,
             "giftName": "قلب",
             "giftImage": "/images/heart.png"
           },
           {
-            "id": 103,
-            "cardType": "skeleton_bandana",
-            "customText": "X2",
-            "count": 2,
-            "giftName": "مكوك فضائي",
-            "giftImage": "/images/1791197817001-eb77ead5c3abb6da6034d3cf6cfeb438~tplv-obj.webp"
-          },
-          {
             "id": 104,
-            "cardType": "golem_pumpkin",
+            "cardType": "hog_rider",
             "customText": "X1",
             "count": 1,
-            "giftName": "حمايه",
-            "giftImage": "/images/1791197852391-e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp"
+            "giftName": "دونات",
+            "giftImage": "/images/donut.png"
           },
           {
             "id": 105,
-            "cardType": "skeleton_cap",
-            "customText": "X3",
-            "count": 3,
-            "giftName": "دونات",
-            "giftImage": "/images/donut.png"
+            "cardType": "golem_pumpkin",
+            "customText": "X1",
+            "count": 1,
+            "giftName": "مكوك فضائي",
+            "giftImage": "/images/1791197817001-eb77ead5c3abb6da6034d3cf6cfeb438~tplv-obj.webp"
           }
         ]
       }
@@ -818,6 +1028,109 @@
             "id": 201,
             "name": "صاروخ",
             "image": "perfume.png"
+          }
+        ]
+      }
+    },
+    "cards4Board": {
+      "neonEnabled": true,
+      "glowIntensity": 18,
+      "fontFamily": "cairo",
+      "giftPosition": "top-left",
+      "disappearMode": "gift_only",
+      "offsetY": 0,
+      "scale": 100,
+      "teamRed": {
+        "title": "الفريق الأحمر",
+        "color": "#ff2a4a",
+        "cards": [
+          {
+            "id": 1,
+            "cardType": "skeleton_bandana",
+            "customText": "X1",
+            "count": 1,
+            "giftName": "تكبيس (❤️ X100)",
+            "giftImage": "/images/tiktok_likes.png",
+            "likesCount": 100
+          },
+          {
+            "id": 2,
+            "cardType": "evoker_mage",
+            "customText": "X1",
+            "count": 1,
+            "giftName": "وردة",
+            "giftImage": "/images/rose.png"
+          },
+          {
+            "id": 3,
+            "cardType": "skeleton_cap",
+            "customText": "X2",
+            "count": 2,
+            "giftName": "قلب",
+            "giftImage": "/images/heart.png"
+          },
+          {
+            "id": 4,
+            "cardType": "hog_rider",
+            "customText": "X1",
+            "count": 1,
+            "giftName": "دونات",
+            "giftImage": "/images/donut.png"
+          },
+          {
+            "id": 5,
+            "cardType": "golem_pumpkin",
+            "customText": "X1",
+            "count": 1,
+            "giftName": "مكوك فضائي",
+            "giftImage": "/images/1791197817001-eb77ead5c3abb6da6034d3cf6cfeb438~tplv-obj.webp"
+          }
+        ]
+      },
+      "teamBlue": {
+        "title": "الفريق الأزرق",
+        "color": "#00b4d8",
+        "cards": [
+          {
+            "id": 101,
+            "cardType": "skeleton_bandana",
+            "customText": "X1",
+            "count": 1,
+            "giftName": "تكبيس (❤️ X100)",
+            "giftImage": "/images/tiktok_likes.png",
+            "likesCount": 100
+          },
+          {
+            "id": 102,
+            "cardType": "evoker_mage",
+            "customText": "X1",
+            "count": 1,
+            "giftName": "وردة",
+            "giftImage": "/images/rose.png"
+          },
+          {
+            "id": 103,
+            "cardType": "skeleton_cap",
+            "customText": "X2",
+            "count": 2,
+            "giftName": "قلب",
+            "giftImage": "/images/heart.png"
+          },
+          {
+            "id": 104,
+            "cardType": "hog_rider",
+            "customText": "X1",
+            "count": 1,
+            "giftName": "دونات",
+            "giftImage": "/images/donut.png"
+          },
+          {
+            "id": 105,
+            "cardType": "golem_pumpkin",
+            "customText": "X1",
+            "count": 1,
+            "giftName": "مكوك فضائي",
+            "giftImage": "/images/1791197817001-eb77ead5c3abb6da6034d3cf6cfeb438~tplv-obj.webp"
           }
         ]
       }

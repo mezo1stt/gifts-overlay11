@@ -2157,8 +2157,26 @@
                     <span class="badge-tag" style="background:#ff2a4a; font-size:11px;">اضغط على صورة الهدية لاختيارها فوراً ✨</span>
                 </h3>
                 <p style="color:#94a3b8; font-size:12.5px; margin-top:4px;">
-                    اختر صورة الهدية التي تريد ربطها بهذه البطاقة من مكتبة هدايا تيك توك:
+                    اختر صورة الهدية أو تفعيل وضع التكبيس والفولو السريع لهذه البطاقة:
                 </p>
+            </div>
+
+            <!-- Special Modes: Likes (التكبيس) & Follow (الفولو) -->
+            <div class="special-modes-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; padding:10px 12px; background:linear-gradient(135deg, rgba(255,42,74,0.12), rgba(0,180,216,0.12)); border:1.5px solid rgba(255,215,0,0.3); border-radius:12px;">
+                <button type="button" class="btn-special-trigger" onclick="selectSpecialTrigger('likes')" style="display:flex; align-items:center; gap:10px; padding:8px 12px; background:linear-gradient(135deg, #ff2a4a, #d90429); color:#fff; border:none; border-radius:10px; cursor:pointer; font-weight:900; font-family:'Cairo',sans-serif; text-align:right; box-shadow:0 3px 10px rgba(255,42,74,0.35); transition:transform 0.15s ease;">
+                    <span style="font-size:24px;">❤️</span>
+                    <div style="flex:1;">
+                        <div style="font-size:13.5px;">وضع التكبيس (حدد عدد التكبيسات)</div>
+                        <div style="font-size:11px; opacity:0.85; font-weight:normal;">يسألك كم تكبيسة ويحفظ فوراً (مثال: 100)</div>
+                    </div>
+                </button>
+                <button type="button" class="btn-special-trigger" onclick="selectSpecialTrigger('follow')" style="display:flex; align-items:center; gap:10px; padding:8px 12px; background:linear-gradient(135deg, #00b4d8, #0077b6); color:#fff; border:none; border-radius:10px; cursor:pointer; font-weight:900; font-family:'Cairo',sans-serif; text-align:right; box-shadow:0 3px 10px rgba(0,180,216,0.35); transition:transform 0.15s ease;">
+                    <span style="font-size:24px;">👤+</span>
+                    <div style="flex:1;">
+                        <div style="font-size:13.5px;">وضع الفولو (متابعة البث)</div>
+                        <div style="font-size:11px; opacity:0.85; font-weight:normal;">نقرة واحدة وحفظ فوري للبطاقة ✨</div>
+                    </div>
+                </button>
             </div>
 
             <!-- Search & Filter Controls -->

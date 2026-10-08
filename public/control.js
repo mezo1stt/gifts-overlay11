@@ -1521,7 +1521,7 @@ async function loadScoreboardData() {
             document.getElementById('sbScoreBDisplay').textContent = scB >= 1000 ? scB.toLocaleString() : scB;
         }
 
-        // Update trigger URLs on screen
+        // Update trigger URLs and simulator on screen
         const origin = window.location.origin;
         const trigA = document.getElementById('trigAUrl');
         const trigB = document.getElementById('trigBUrl');
@@ -1529,6 +1529,13 @@ async function loadScoreboardData() {
         if (trigA) trigA.textContent = `${origin}/trigger?team=a&action=add&value=1&id=${currentUid}`;
         if (trigB) trigB.textContent = `${origin}/trigger?team=b&action=add&value=1&id=${currentUid}`;
         if (webh) webh.textContent = `${origin}/webhook/tikfinity?id=${currentUid}`;
+
+        const sbSim = document.getElementById('sbSimIframe');
+        if (sbSim && (!sbSim.src || !sbSim.src.includes(`id=${currentUid}`))) {
+            sbSim.src = `/scoreboard-overlay.html?id=${currentUid}`;
+        }
+        const sbExt = document.getElementById('sbPreviewExternalLink');
+        if (sbExt) sbExt.href = `/scoreboard-overlay.html?id=${currentUid}`;
     } catch (e) {}
 }
 
@@ -1539,6 +1546,29 @@ let sbHotkeyTargetTeam = 'a'; // 'a' or 'b'
 
 function playScoreChime(type = 'up') {
     if (!sbSoundEnabled) return;
+
+    // Try HTML5 Audio file playback first (crisp authentic sound)
+    try {
+        const soundSrc = type === 'up' ? '/sounds/score_up.wav' : '/sounds/score_down.wav';
+        const snd = new Audio(soundSrc);
+        snd.volume = 0.85;
+        const playPromise = snd.play();
+        if (playPromise !== undefined) {
+            playPromise.then(() => {
+                return;
+            }).catch(() => {
+                playSynthChime(type);
+            });
+            return;
+        }
+    } catch (e) {
+        // Fallback to synthesizer
+    }
+
+    playSynthChime(type);
+}
+
+function playSynthChime(type = 'up') {
     try {
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         if (!AudioContext) return;
@@ -2464,6 +2494,8 @@ function setupEventListeners() {
     // Global Keyboard Hotkeys for Scoreboard (Alt 1 / Alt 2 / Alt + / Alt -)
     window.addEventListener('keydown', (e) => {
         if (!e.altKey) return;
+        // In desktop app, Electron globalShortcut handles hotkeys natively to prevent double-counting!
+        if (window.electronAPI) return;
 
         const isEditing = ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName);
 
@@ -3551,21 +3583,46 @@ function renderVisualGiftsGallery() {
     }
 }
 
-function selectVisualGift(giftName, giftImage) {
+function selectSpecialTrigger(type) {
+    if (activeCardSlotIndex === null) {
+        showToast('يرجى النقر على زر اختيار الهدية في البطاقة أولاً!', 'warning');
+        return;
+    }
+
+    if (type === 'likes') {
+        const input = prompt('❤️ أدخل عدد التكبيسات المطلوبة لتفعيل البطاقة (مثال: 100 أو 50 أو 500):', '100');
+        if (input === null) return; // User cancelled
+        const count = parseInt(input.trim()) || 100;
+        const giftName = `تكبيس (❤️ X${count})`;
+        const giftImage = '/images/tiktok_likes.png';
+        applyGiftToCardSlot(giftName, giftImage, count);
+    } else if (type === 'follow') {
+        const giftName = 'متابعة (فولو 👤+)';
+        const giftImage = '/images/tiktok_follow.png';
+        applyGiftToCardSlot(giftName, giftImage, null);
+    }
+}
+
+function applyGiftToCardSlot(giftName, giftImage, likesCount = null) {
     if (activeCardSlotIndex === null) return;
-    
+
     if (activeVisualGiftContext === 'cards4') {
         const team = cards4BoardConfig[cardsActiveTargetTeam];
         if (!team || !team.cards[activeCardSlotIndex]) return;
 
         team.cards[activeCardSlotIndex].giftName = giftName;
         team.cards[activeCardSlotIndex].giftImage = giftImage;
+        if (likesCount) {
+            team.cards[activeCardSlotIndex].likesCount = likesCount;
+        } else {
+            delete team.cards[activeCardSlotIndex].likesCount;
+        }
 
         closeVisualGiftPicker();
         renderCards4DeckList();
         saveCards4BoardConfig(true);
         const teamLabel = cardsActiveTargetTeam === 'teamRed' ? 'الفريق الأحمر' : 'الفريق الأزرق';
-        showToast(`تم اختيار هدية (${giftName}) لـ ${teamLabel} للبطاقة رقم ${activeCardSlotIndex + 1}! ✨`, 'success');
+        showToast(`✅ تم حفظ ${giftName} لـ ${teamLabel} للبطاقة ${activeCardSlotIndex + 1}! ✨`, 'success');
     } else {
         const team = cardsBoardConfig[cardsActiveTargetTeam];
         if (!team || !team.cards[activeCardSlotIndex]) return;
@@ -3577,12 +3634,51 @@ function selectVisualGift(giftName, giftImage) {
         renderCardsDeckList();
         saveCardsBoardConfig(true);
         const teamLabel = cardsActiveTargetTeam === 'teamRed' ? 'الفريق الأحمر' : 'الفريق الأزرق';
-        showToast(`تم اختيار هدية (${giftName}) لـ ${teamLabel} للبطاقة رقم ${activeCardSlotIndex + 1}! ✨`, 'success');
+        showToast(`✅ تم حفظ ${giftName} لـ ${teamLabel} للبطاقة ${activeCardSlotIndex + 1}! ✨`, 'success');
     }
+}
+
+function selectVisualGift(giftName, giftImage) {
+    applyGiftToCardSlot(giftName, giftImage, null);
 }
 
 // ================= SECTION: TIKTOK GIFTS 4 (بطاقات كلاسيك رويال MC Royale) ================= //
 const CARD4_MC_ITEMS = [
+    {
+        id: 'skeleton_bandana',
+        name: 'الهيكل ذو العصابة (Skeleton Bandana)',
+        badge: '💀 هيكل بسيف',
+        desc: 'الهيكل العظمي ذو العصابة الزرقاء والسيف',
+        image: '/images/mcroyale/skeleton_bandana.png'
+    },
+    {
+        id: 'evoker_mage',
+        name: 'الساحر إيفوكر (Evoker Mage)',
+        badge: '🧙 ساحر ذهبي',
+        desc: 'الساحر إيفوكر برداء أزرق وعيون ذهبية',
+        image: '/images/mcroyale/evoker_mage.png'
+    },
+    {
+        id: 'skeleton_cap',
+        name: 'الهيكل ذو القبعة (Skeleton Cap)',
+        badge: '🧢 هيكل بقبعة',
+        desc: 'الهيكل العظمي بقبعة خضراء وعيون وردية',
+        image: '/images/mcroyale/skeleton_cap.png'
+    },
+    {
+        id: 'hog_rider',
+        name: 'راكب الخنزير (Hog Rider)',
+        badge: '🐗 راكب المطرقة',
+        desc: 'راكب الخنزير السريع بمطرقة الحرب',
+        image: '/images/mcroyale/hog_rider.png'
+    },
+    {
+        id: 'golem_pumpkin',
+        name: 'الغول برأس اليقطين (Pumpkin Golem)',
+        badge: '🎃 غول اليقطين',
+        desc: 'الغول الحديدي برأس وقبعة اليقطين',
+        image: '/images/mcroyale/golem_pumpkin.png'
+    },
     {
         id: 'knight',
         name: 'الفارس المدرع (Caballero)',
@@ -3656,52 +3752,35 @@ const CARD4_MC_ITEMS = [
 ];
 
 function getCard4McItem(cardType) {
-    // Check direct id
     let found = CARD4_MC_ITEMS.find(c => c.id === cardType);
     if (found) return found;
-
-    // Check alias mappings for backward compatibility
-    const aliasMap = {
-        skeleton_bandana: 'skeleton',
-        skeleton_cap: 'knight',
-        evoker_mage: 'archer',
-        hog_rider: 'hog',
-        golem_pumpkin: 'giant'
-    };
-    if (aliasMap[cardType]) {
-        return CARD4_MC_ITEMS.find(c => c.id === aliasMap[cardType]) || CARD4_MC_ITEMS[0];
-    }
 
     return CARD4_MC_ITEMS[0];
 }
 
+const DEFAULT_DECK_CARDS4 = [
+    { id: 1, cardType: 'skeleton_bandana', customText: 'X1', count: 1, giftName: 'تكبيس (❤️ X100)', giftImage: '/images/tiktok_likes.png', likesCount: 100 },
+    { id: 2, cardType: 'evoker_mage', customText: 'X1', count: 1, giftName: 'وردة', giftImage: '/images/rose.png' },
+    { id: 3, cardType: 'skeleton_cap', customText: 'X2', count: 2, giftName: 'قلب', giftImage: '/images/heart.png' },
+    { id: 4, cardType: 'hog_rider', customText: 'X1', count: 1, giftName: 'دونات', giftImage: '/images/donut.png' },
+    { id: 5, cardType: 'golem_pumpkin', customText: 'X1', count: 1, giftName: 'مكوك فضائي', giftImage: '/images/1791197817001-eb77ead5c3abb6da6034d3cf6cfeb438~tplv-obj.webp' }
+];
+
 let cards4BoardConfig = {
     neonEnabled: true,
     fontFamily: 'cairo',
-    giftPosition: 'top-right',
+    giftPosition: 'top-left',
     disappearMode: 'gift_only',
     offsetY: 0,
     teamRed: {
         color: '#ff2a4a',
         title: 'الفريق الأحمر',
-        cards: [
-            { id: 1, cardType: 'skeleton_bandana', customText: 'X1', count: 1, giftName: 'وردة', giftImage: '/images/rose.png' },
-            { id: 2, cardType: 'skeleton_cap', customText: 'X2', count: 2, giftName: 'دونات', giftImage: '/images/donut.png' },
-            { id: 3, cardType: 'golem_pumpkin', customText: 'X1', count: 1, giftName: 'نيزك', giftImage: '/images/1791197748042-81cb495abfe066981b9c135cfff21c7a.png~tplv-obj.webp' },
-            { id: 4, cardType: 'hog_rider', customText: 'X3', count: 3, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
-            { id: 5, cardType: 'evoker_mage', customText: 'X1', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' }
-        ]
+        cards: JSON.parse(JSON.stringify(DEFAULT_DECK_CARDS4))
     },
     teamBlue: {
         color: '#00b4d8',
         title: 'الفريق الأزرق',
-        cards: [
-            { id: 101, cardType: 'evoker_mage', customText: 'X1', count: 1, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
-            { id: 102, cardType: 'hog_rider', customText: 'X1', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' },
-            { id: 103, cardType: 'skeleton_bandana', customText: 'X2', count: 2, giftName: 'مكوك فضائي', giftImage: '/images/1791197817001-eb77ead5c3abb6da6034d3cf6cfeb438~tplv-obj.webp' },
-            { id: 104, cardType: 'golem_pumpkin', customText: 'X1', count: 1, giftName: 'حمايه', giftImage: '/images/1791197852391-e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp' },
-            { id: 105, cardType: 'skeleton_cap', customText: 'X3', count: 3, giftName: 'دونات', giftImage: '/images/donut.png' }
-        ]
+        cards: DEFAULT_DECK_CARDS4.map((c, i) => ({ ...c, id: 101 + i }))
     }
 };
 

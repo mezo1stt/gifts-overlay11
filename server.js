@@ -323,35 +323,31 @@ function getDefaultCardsBoard(uid = 'default') {
 }
 
 function getDefaultCards4Board(uid = 'default') {
+    const defaultDeck = [
+        { id: 1, cardType: 'skeleton_bandana', customText: 'X1', count: 1, giftName: 'تكبيس (❤️ X100)', giftImage: '/images/tiktok_likes.png', likesCount: 100 },
+        { id: 2, cardType: 'evoker_mage', customText: 'X1', count: 1, giftName: 'وردة', giftImage: '/images/rose.png' },
+        { id: 3, cardType: 'skeleton_cap', customText: 'X2', count: 2, giftName: 'قلب', giftImage: '/images/heart.png' },
+        { id: 4, cardType: 'hog_rider', customText: 'X1', count: 1, giftName: 'دونات', giftImage: '/images/donut.png' },
+        { id: 5, cardType: 'golem_pumpkin', customText: 'X1', count: 1, giftName: 'مكوك فضائي', giftImage: '/images/1791197817001-eb77ead5c3abb6da6034d3cf6cfeb438~tplv-obj.webp' }
+    ];
+
     return {
         neonEnabled: true,
         glowIntensity: 18,
-        fontFamily: 'cairo', // 'cairo', 'changa', 'rubik', 'tajawal', 'pixel', 'impact'
-        giftPosition: 'top-right',
+        fontFamily: 'cairo',
+        giftPosition: 'top-left',
         disappearMode: 'gift_only',
         offsetY: 0,
         scale: 100,
         teamRed: {
             title: 'الفريق الأحمر',
             color: '#ff2a4a',
-            cards: [
-                { id: 1, cardType: 'skeleton_bandana', customText: 'X1', count: 1, giftName: 'وردة', giftImage: '/images/rose.png' },
-                { id: 2, cardType: 'skeleton_cap', customText: 'X2', count: 2, giftName: 'دونات', giftImage: '/images/donut.png' },
-                { id: 3, cardType: 'golem_pumpkin', customText: 'X1', count: 1, giftName: 'نيزك', giftImage: '/images/1791197748042-81cb495abfe066981b9c135cfff21c7a.png~tplv-obj.webp' },
-                { id: 4, cardType: 'hog_rider', customText: 'X3', count: 3, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
-                { id: 5, cardType: 'evoker_mage', customText: 'X1', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' }
-            ]
+            cards: JSON.parse(JSON.stringify(defaultDeck))
         },
         teamBlue: {
             title: 'الفريق الأزرق',
             color: '#00b4d8',
-            cards: [
-                { id: 101, cardType: 'evoker_mage', customText: 'X1', count: 1, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
-                { id: 102, cardType: 'hog_rider', customText: 'X1', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' },
-                { id: 103, cardType: 'skeleton_bandana', customText: 'X2', count: 2, giftName: 'مكوك فضائي', giftImage: '/images/1791197817001-eb77ead5c3abb6da6034d3cf6cfeb438~tplv-obj.webp' },
-                { id: 104, cardType: 'golem_pumpkin', customText: 'X1', count: 1, giftName: 'حمايه', giftImage: '/images/1791197852391-e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp' },
-                { id: 105, cardType: 'skeleton_cap', customText: 'X3', count: 3, giftName: 'دونات', giftImage: '/images/donut.png' }
-            ]
+            cards: defaultDeck.map((c, i) => ({ ...c, id: 101 + i }))
         }
     };
 }
@@ -486,20 +482,41 @@ app.get('/api/scoreboard/:id', (req, res) => {
 
 app.post('/api/scoreboard/:id/update', (req, res) => {
     const board = db.updateScoreboard(req.params.id, req.body);
+    const mirrorId = req.params.id === 'default' ? 'board_XXXX' : (req.params.id === 'board_XXXX' ? 'default' : null);
+    if (mirrorId) {
+        db.updateScoreboard(mirrorId, req.body);
+    }
     io.emit('scoreboard_update', board);
+    if (mirrorId) {
+        io.emit('scoreboard_update', { ...board, board_id: mirrorId });
+    }
     res.json({ success: true, board });
 });
 
 app.post('/api/scoreboard/:id/score', (req, res) => {
     const { team, delta, score } = req.body;
     const board = db.adjustScore(req.params.id, team, delta, score);
+    const mirrorId = req.params.id === 'default' ? 'board_XXXX' : (req.params.id === 'board_XXXX' ? 'default' : null);
+    if (mirrorId) {
+        db.adjustScore(mirrorId, team, null, team === 'a' ? board.team_a_score : board.team_b_score);
+    }
     io.emit('scoreboard_update', board);
+    if (mirrorId) {
+        io.emit('scoreboard_update', { ...board, board_id: mirrorId });
+    }
     res.json({ success: true, board });
 });
 
 app.post('/api/scoreboard/:id/reset', (req, res) => {
     const board = db.resetScoreboard(req.params.id);
+    const mirrorId = req.params.id === 'default' ? 'board_XXXX' : (req.params.id === 'board_XXXX' ? 'default' : null);
+    if (mirrorId) {
+        db.resetScoreboard(mirrorId);
+    }
     io.emit('scoreboard_update', board);
+    if (mirrorId) {
+        io.emit('scoreboard_update', { ...board, board_id: mirrorId });
+    }
     res.json({ success: true, board });
 });
 

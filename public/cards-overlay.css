@@ -189,17 +189,33 @@ body.neon-off .card-character-img {
 /* Likes / Taps Badge (التكبيس) */
 .card-gift-badge.badge-likes {
     border-color: #ff2a4a;
-    box-shadow: 0 0 14px rgba(255, 42, 74, 0.85), 0 4px 8px rgba(0, 0, 0, 0.9);
-    background: linear-gradient(135deg, rgba(38, 10, 22, 0.96), rgba(18, 6, 12, 0.96));
-    width: auto;
-    min-width: calc(var(--card-size) * 0.44);
-    border-radius: 20px;
+    box-shadow: 0 0 14px rgba(255, 42, 74, 0.9), 0 4px 8px rgba(0, 0, 0, 0.9);
+    background: linear-gradient(135deg, rgba(42, 10, 24, 0.96), rgba(18, 6, 12, 0.96));
+    width: auto !important;
+    min-width: 58px;
+    height: 28px !important;
+    border-radius: 14px;
     padding: 2px 7px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
 }
 
-.card-gift-badge.badge-likes img {
-    max-height: 24px;
-    width: auto;
+.card-gift-badge.badge-likes .likes-heart-icon {
+    font-size: 15px;
+    line-height: 1;
+    filter: drop-shadow(0 0 4px #ff2a4a);
+}
+
+.card-gift-badge.badge-likes .likes-badge-text {
+    font-family: 'Cairo', 'Changa', 'Impact', sans-serif;
+    font-size: 13.5px;
+    font-weight: 900;
+    color: #ffcc00;
+    -webkit-text-stroke: 1px #000;
+    text-shadow: 0 1px 3px #000;
+    line-height: 1;
 }
 
 /* Follow Badge (الفولو) */
@@ -207,6 +223,8 @@ body.neon-off .card-character-img {
     border-color: #00b4d8;
     box-shadow: 0 0 14px rgba(0, 180, 216, 0.85), 0 4px 8px rgba(0, 0, 0, 0.9);
     background: linear-gradient(135deg, rgba(8, 22, 38, 0.96), rgba(4, 12, 22, 0.96));
+    width: 32px !important;
+    height: 32px !important;
 }
 
 /* Disappearance Mode: Gift Only Loop */
@@ -262,35 +280,32 @@ body.mode-gift-only .card-gift-badge {
     display: none !important;
 }
 
-/* Troop Count & Custom Card Bottom Text (نص تحت البطاقة - مظهر إسبورتس نيون فخم) */
+/* Troop Count & Custom Card Bottom Text (نص تحت البطاقة مطابق للصورة بخط ذهبي عريض وبدون خلفية غامقة) */
 .troop-count-badge,
 .card-bottom-text {
-    font-size: var(--count-font-size, 22px);
+    font-size: var(--count-font-size, 26px);
     font-weight: 900;
-    color: #ffffff;
+    color: #ffcc00 !important;
     text-align: center;
-    margin-top: 5px;
+    margin-top: 4px;
     z-index: 10;
     letter-spacing: 0.5px;
-    line-height: 1.2;
+    line-height: 1.1;
     user-select: none;
-    padding: 3px 12px;
-    background: linear-gradient(135deg, rgba(16, 10, 26, 0.94), rgba(8, 6, 18, 0.94));
-    border: 2px solid var(--team-color, #ffd700);
-    border-radius: 12px;
-    box-shadow: 
-        0 4px 15px rgba(0, 0, 0, 0.9),
-        0 0 16px var(--team-color, rgba(255, 42, 74, 0.45)),
-        inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    -webkit-text-stroke: 1.5px #000;
     text-shadow: 
-        0 2px 4px rgba(0, 0, 0, 0.95),
-        0 0 8px rgba(255, 255, 255, 0.8);
+        0 3px 6px #000,
+        0 1px 2px #000,
+        0 0 10px rgba(0, 0, 0, 0.9);
     max-width: 150px;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    direction: auto;
-    font-family: 'Cairo', 'Tajawal', sans-serif;
+    overflow: visible;
+    direction: ltr;
+    font-family: 'Cairo', 'Changa', 'Impact', sans-serif;
     transition: all 0.25s ease;
 }
 
