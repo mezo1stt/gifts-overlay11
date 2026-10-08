@@ -202,10 +202,12 @@ body.neon-off .card-character-img {
     gap: 4px;
 }
 
-.card-gift-badge.badge-likes .likes-heart-icon {
-    font-size: 15px;
-    line-height: 1;
-    filter: drop-shadow(0 0 4px #ff2a4a);
+.card-gift-badge.badge-likes .likes-badge-icon {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 4px rgba(255, 42, 74, 0.8));
+    flex-shrink: 0;
 }
 
 .card-gift-badge.badge-likes .likes-badge-text {
@@ -223,8 +225,17 @@ body.neon-off .card-character-img {
     border-color: #00b4d8;
     box-shadow: 0 0 14px rgba(0, 180, 216, 0.85), 0 4px 8px rgba(0, 0, 0, 0.9);
     background: linear-gradient(135deg, rgba(8, 22, 38, 0.96), rgba(4, 12, 22, 0.96));
-    width: 32px !important;
-    height: 32px !important;
+    width: calc(var(--card-size) * 0.40) !important;
+    height: calc(var(--card-size) * 0.40) !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    overflow: hidden;
+}
+
+.card-gift-badge.badge-follow img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
 
 /* Disappearance Mode: Gift Only Loop */

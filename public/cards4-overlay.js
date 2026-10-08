@@ -151,7 +151,7 @@ function renderCardsToColumn(columnEl, cards, giftPos, teamColor) {
             let badgeInnerHtml = '';
             if (isLikes) {
                 const likesCount = card.likesCount || ((card.giftName || '').match(/\d+/) ? (card.giftName.match(/\d+/)[0]) : 100);
-                badgeInnerHtml = `<span class="likes-heart-icon">❤️</span><span class="likes-badge-text">X${likesCount}</span>`;
+                badgeInnerHtml = `<img src="/images/tiktok_likes.png" alt="تكبيس" class="likes-badge-icon"><span class="likes-badge-text">X${likesCount}</span>`;
             } else if (isFollow) {
                 badgeInnerHtml = `<img src="/images/tiktok_follow.png" alt="فولو" onerror="this.src='/images/rose.png'">`;
             } else {

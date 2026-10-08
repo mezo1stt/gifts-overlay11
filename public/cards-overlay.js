@@ -146,11 +146,19 @@ function renderCardsToColumn(columnEl, cards, giftPos, teamColor) {
 
             const isLikes = (card.giftName && card.giftName.includes('تكبيس')) || (card.giftImage && card.giftImage.includes('tiktok_likes'));
             const isFollow = (card.giftName && card.giftName.includes('فولو')) || (card.giftImage && card.giftImage.includes('tiktok_follow'));
-            const badgeTypeClass = isLikes ? 'badge-likes' : (isFollow ? 'badge-follow' : '');
+            let badgeInnerHtml = '';
+            if (isLikes) {
+                const likesCount = card.likesCount || ((card.giftName || '').match(/\d+/) ? (card.giftName.match(/\d+/)[0]) : 100);
+                badgeInnerHtml = `<img src="/images/tiktok_likes.png" alt="تكبيس" class="likes-badge-icon"><span class="likes-badge-text">X${likesCount}</span>`;
+            } else if (isFollow) {
+                badgeInnerHtml = `<img src="/images/tiktok_follow.png" alt="فولو" onerror="this.src='/images/rose.png'">`;
+            } else {
+                badgeInnerHtml = `<img src="${giftSrc}" alt="${escapeHtml(card.giftName || '')}" onerror="this.src='/images/rose.png'">`;
+            }
 
             item.innerHTML = `
                 <div class="card-gift-badge pos-${giftPos} ${badgeTypeClass}" title="${escapeHtml(card.giftName || 'هدية')}">
-                    <img src="${giftSrc}" alt="${escapeHtml(card.giftName || '')}" onerror="this.src='/images/rose.png'">
+                    ${badgeInnerHtml}
                 </div>
                 <img class="card-character-img" src="${cardSrc}" alt="Card Item" onerror="this.src='/images/cards_gif/meteor.gif'">
                 ${displayText ? `<div class="troop-count-badge card-bottom-text">${escapeHtml(displayText)}</div>` : ''}
