@@ -61,8 +61,8 @@ async function loadCards4Data() {
         document.documentElement.style.setProperty('--count-font-size', `${Math.round(countFontSize)}px`);
 
         // 3. Fonts
-        const font = board.fontFamily || 'impact';
-        document.body.classList.remove('font-impact', 'font-pixel', 'font-cyber', 'font-cairo', 'font-tajawal');
+        const font = board.fontFamily || 'cairo';
+        document.body.classList.remove('font-impact', 'font-pixel', 'font-cyber', 'font-changa', 'font-cairo', 'font-rubik', 'font-tajawal');
         document.body.classList.add(`font-${font}`);
 
         // 4. Disappearance Mode

@@ -222,65 +222,84 @@ body.mode-gift-only .card-gift-badge {
     display: none !important;
 }
 
-/* Troop Count & Custom Card Bottom Text (نص تحت البطاقة) */
+/* Troop Count & Custom Card Bottom Text (نص تحت البطاقة - مظهر إسبورتس نيون فخم) */
 .troop-count-badge,
 .card-bottom-text {
     font-size: var(--count-font-size, 22px);
     font-weight: 900;
-    color: #ffe600;
+    color: #ffffff;
     text-align: center;
-    margin-top: 3px;
+    margin-top: 5px;
     z-index: 10;
     letter-spacing: 0.5px;
-    line-height: 1.15;
+    line-height: 1.2;
     user-select: none;
-    -webkit-text-stroke: 2px #000;
+    padding: 3px 12px;
+    background: linear-gradient(135deg, rgba(16, 10, 26, 0.94), rgba(8, 6, 18, 0.94));
+    border: 2px solid var(--team-color, #ffd700);
+    border-radius: 12px;
+    box-shadow: 
+        0 4px 15px rgba(0, 0, 0, 0.9),
+        0 0 16px var(--team-color, rgba(255, 42, 74, 0.45)),
+        inset 0 1px 0 rgba(255, 255, 255, 0.35);
     text-shadow: 
-        2px 2px 0 #000, -2px -2px 0 #000,
-        2px -2px 0 #000, -2px 2px 0 #000,
-        0 3px 0 #000, 0 -3px 0 #000,
-        3px 0 0 #000, -3px 0 0 #000,
-        0 4px 8px rgba(0, 0, 0, 0.95);
-    max-width: 140px;
+        0 2px 4px rgba(0, 0, 0, 0.95),
+        0 0 8px rgba(255, 255, 255, 0.8);
+    max-width: 150px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     direction: auto;
+    font-family: 'Cairo', 'Tajawal', sans-serif;
+    transition: all 0.25s ease;
 }
 
-/* Fonts */
+/* Luxury Arabic & Esports Fonts */
+body.font-cairo .troop-count-badge,
+body.font-cairo .card-bottom-text,
+body.font-cairo .cards-team-badge {
+    font-family: 'Cairo', sans-serif;
+    font-weight: 900;
+}
+
+body.font-cyber .troop-count-badge,
+body.font-cyber .card-bottom-text,
+body.font-cyber .cards-team-badge,
+body.font-changa .troop-count-badge,
+body.font-changa .card-bottom-text {
+    font-family: 'Changa', sans-serif;
+    font-weight: 900;
+    color: #ffd700;
+}
+
+body.font-rubik .troop-count-badge,
+body.font-rubik .card-bottom-text,
+body.font-rubik .cards-team-badge {
+    font-family: 'Rubik', 'Cairo', sans-serif;
+    font-weight: 900;
+    color: #ffffff;
+}
+
+body.font-tajawal .troop-count-badge,
+body.font-tajawal .card-bottom-text,
+body.font-tajawal .cards-team-badge {
+    font-family: 'Tajawal', sans-serif;
+    font-weight: 900;
+}
+
 body.font-impact .troop-count-badge,
 body.font-impact .card-bottom-text {
-    font-family: 'Impact', 'Arial Black', sans-serif;
-    transform: scaleY(1.05);
+    font-family: 'Impact', 'Cairo', sans-serif;
+    font-weight: 900;
 }
 
 body.font-pixel .troop-count-badge,
 body.font-pixel .card-bottom-text {
     font-family: 'Press Start 2P', monospace;
     font-size: calc(var(--count-font-size, 20px) * 0.65);
-    -webkit-text-stroke: 1px #000;
-    margin-top: 3px;
-}
-
-body.font-cyber .troop-count-badge,
-body.font-cyber .card-bottom-text {
-    font-family: 'Changa', sans-serif;
-    font-weight: 900;
-    font-style: italic;
-    color: #ffd700;
-}
-
-body.font-cairo .troop-count-badge,
-body.font-cairo .card-bottom-text {
-    font-family: 'Cairo', sans-serif;
-    font-weight: 900;
-}
-
-body.font-tajawal .troop-count-badge,
-body.font-tajawal .card-bottom-text {
-    font-family: 'Tajawal', sans-serif;
-    font-weight: 900;
+    padding: 3px 8px;
+    border-radius: 6px;
+    color: #ffe600;
 }
 
 /* Trigger pulse on gift receive */

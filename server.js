@@ -292,31 +292,31 @@ function getDefaultCardsBoard(uid = 'default') {
     return {
         neonEnabled: true,
         glowIntensity: 18,
-        fontFamily: 'impact', // 'impact', 'pixel', 'cyber', 'cairo', 'tajawal'
-        giftPosition: 'top-right', // 'top-right', 'top-left', 'center', 'bottom-right', 'bottom-left', 'beside', 'none'
-        disappearMode: 'gift_only', // 'gift_only' or 'card_and_gift'
+        fontFamily: 'cairo', // 'cairo', 'changa', 'rubik', 'tajawal', 'pixel', 'impact'
+        giftPosition: 'top-right',
+        disappearMode: 'gift_only',
         offsetY: 0,
         scale: 100,
         teamRed: {
             title: 'الفريق الأحمر',
             color: '#ff2a4a',
             cards: [
-                { id: 1, cardType: 'skeleton_bandana', count: 1, giftName: 'تيربو', giftImage: '/images/rose.png' },
-                { id: 2, cardType: 'skeleton_cap', count: 2, giftName: 'بوابه', giftImage: '/images/donut.png' },
-                { id: 3, cardType: 'golem_pumpkin', count: 1, giftName: 'نيزك', giftImage: '/images/1791197748042-81cb495abfe066981b9c135cfff21c7a.png~tplv-obj.webp' },
-                { id: 4, cardType: 'hog_rider', count: 3, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
-                { id: 5, cardType: 'evoker_mage', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' }
+                { id: 1, cardType: 'meteor', customText: 'X1', count: 1, giftName: 'وردة', giftImage: '/images/rose.png' },
+                { id: 2, cardType: 'nitro', customText: 'X2', count: 2, giftName: 'دونات', giftImage: '/images/donut.png' },
+                { id: 3, cardType: 'barrels', customText: 'X1', count: 1, giftName: 'نيزك', giftImage: '/images/1791197748042-81cb495abfe066981b9c135cfff21c7a.png~tplv-obj.webp' },
+                { id: 4, cardType: 'fuel', customText: 'X3', count: 3, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
+                { id: 5, cardType: 'wind', customText: 'X1', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' }
             ]
         },
         teamBlue: {
             title: 'الفريق الأزرق',
             color: '#00b4d8',
             cards: [
-                { id: 101, cardType: 'evoker_mage', count: 1, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
-                { id: 102, cardType: 'hog_rider', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' },
-                { id: 103, cardType: 'skeleton_bandana', count: 2, giftName: 'مكوك فضائي', giftImage: '/images/1791197817001-eb77ead5c3abb6da6034d3cf6cfeb438~tplv-obj.webp' },
-                { id: 104, cardType: 'golem_pumpkin', count: 1, giftName: 'حمايه', giftImage: '/images/1791197852391-e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp' },
-                { id: 105, cardType: 'skeleton_cap', count: 3, giftName: 'بوابه', giftImage: '/images/donut.png' }
+                { id: 101, cardType: 'leak', customText: 'X1', count: 1, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
+                { id: 102, cardType: 'rain', customText: 'X1', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' },
+                { id: 103, cardType: 'seagull', customText: 'X2', count: 2, giftName: 'مكوك فضائي', giftImage: '/images/1791197817001-eb77ead5c3abb6da6034d3cf6cfeb438~tplv-obj.webp' },
+                { id: 104, cardType: 'toolbox', customText: 'X1', count: 1, giftName: 'حمايه', giftImage: '/images/1791197852391-e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp' },
+                { id: 105, cardType: 'nitro', customText: 'X3', count: 3, giftName: 'دونات', giftImage: '/images/donut.png' }
             ]
         }
     };
@@ -326,9 +326,9 @@ function getDefaultCards4Board(uid = 'default') {
     return {
         neonEnabled: true,
         glowIntensity: 18,
-        fontFamily: 'impact', // 'impact', 'pixel', 'cyber', 'cairo', 'tajawal'
-        giftPosition: 'top-right', // 'top-right', 'top-left', 'center', 'bottom-right', 'bottom-left', 'beside', 'none'
-        disappearMode: 'gift_only', // 'gift_only' or 'card_and_gift'
+        fontFamily: 'cairo', // 'cairo', 'changa', 'rubik', 'tajawal', 'pixel', 'impact'
+        giftPosition: 'top-right',
+        disappearMode: 'gift_only',
         offsetY: 0,
         scale: 100,
         teamRed: {
@@ -337,7 +337,7 @@ function getDefaultCards4Board(uid = 'default') {
             cards: [
                 { id: 1, cardType: 'skeleton_bandana', customText: 'X1', count: 1, giftName: 'وردة', giftImage: '/images/rose.png' },
                 { id: 2, cardType: 'skeleton_cap', customText: 'X2', count: 2, giftName: 'دونات', giftImage: '/images/donut.png' },
-                { id: 3, cardType: 'golem_pumpkin', customText: 'X1', count: 1, giftName: 'حوت', giftImage: '/images/whale.png' },
+                { id: 3, cardType: 'golem_pumpkin', customText: 'X1', count: 1, giftName: 'نيزك', giftImage: '/images/1791197748042-81cb495abfe066981b9c135cfff21c7a.png~tplv-obj.webp' },
                 { id: 4, cardType: 'hog_rider', customText: 'X3', count: 3, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
                 { id: 5, cardType: 'evoker_mage', customText: 'X1', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' }
             ]
@@ -348,9 +348,9 @@ function getDefaultCards4Board(uid = 'default') {
             cards: [
                 { id: 101, cardType: 'evoker_mage', customText: 'X1', count: 1, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
                 { id: 102, cardType: 'hog_rider', customText: 'X1', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' },
-                { id: 103, cardType: 'skeleton_bandana', customText: 'X2', count: 2, giftName: 'دونات', giftImage: '/images/donut.png' },
+                { id: 103, cardType: 'skeleton_bandana', customText: 'X2', count: 2, giftName: 'مكوك فضائي', giftImage: '/images/1791197817001-eb77ead5c3abb6da6034d3cf6cfeb438~tplv-obj.webp' },
                 { id: 104, cardType: 'golem_pumpkin', customText: 'X1', count: 1, giftName: 'حمايه', giftImage: '/images/1791197852391-e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp' },
-                { id: 105, cardType: 'skeleton_cap', customText: 'X3', count: 3, giftName: 'وردة', giftImage: '/images/rose.png' }
+                { id: 105, cardType: 'skeleton_cap', customText: 'X3', count: 3, giftName: 'دونات', giftImage: '/images/donut.png' }
             ]
         }
     };

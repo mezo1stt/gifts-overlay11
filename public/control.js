@@ -2459,43 +2459,73 @@ function setupEventListeners() {
         });
     });
 
-    // Global Keyboard Hotkeys for Scoreboard (Alt + / Alt - / Alt 1 / Alt 2)
+    // Global Keyboard Hotkeys for Scoreboard (Alt 1 / Alt 2 / Alt + / Alt -)
     window.addEventListener('keydown', (e) => {
         if (!e.altKey) return;
 
         const isEditing = ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName);
 
-        // Alt + Plus / Alt + Equals / Numpad Plus
-        if (e.key === '+' || e.key === '=' || e.code === 'NumpadAdd' || (e.shiftKey && e.code === 'Equal')) {
-            e.preventDefault();
-            adjustSbScore(sbHotkeyTargetTeam, 1);
-            const teamName = sbHotkeyTargetTeam === 'a' 
-                ? (document.getElementById('sbTeamAName')?.value || 'الفريق الأول') 
-                : (document.getElementById('sbTeamBName')?.value || 'الفريق الثاني');
-            showToast(`➕ +1 نقطة لـ (${teamName}) [اختصار Alt +]`, 'success');
-        }
-        // Alt + Minus / Numpad Subtract
-        else if (e.key === '-' || e.key === '_' || e.code === 'NumpadSubtract' || e.code === 'Minus') {
-            e.preventDefault();
-            adjustSbScore(sbHotkeyTargetTeam, -1);
-            const teamName = sbHotkeyTargetTeam === 'a' 
-                ? (document.getElementById('sbTeamAName')?.value || 'الفريق الأول') 
-                : (document.getElementById('sbTeamBName')?.value || 'الفريق الثاني');
-            showToast(`➖ -1 نقطة لـ (${teamName}) [اختصار Alt -]`, 'info');
-        }
-        // Alt + 1: Switch hotkey to Team A
-        else if (e.key === '1' || e.code === 'Digit1' || e.code === 'Numpad1') {
+        // Alt + 1: Direct Increase (+1) to Team 1 (Red)
+        if (e.key === '1' || e.code === 'Digit1' || e.code === 'Numpad1') {
             if (!isEditing) {
                 e.preventDefault();
-                setSbHotkeyTargetTeam('a');
+                sbHotkeyTargetTeam = 'a';
+                adjustSbScore('a', 1);
+                playScoreChime('up');
+                const teamName = document.getElementById('sbTeamAName')?.value || 'الفريق الأول (الأحمر)';
+                showToast(`🔴 +1 نقطة لـ (${teamName}) [Alt 1]`, 'success');
             }
         }
-        // Alt + 2: Switch hotkey to Team B
+        // Alt + 2: Direct Increase (+1) to Team 2
         else if (e.key === '2' || e.code === 'Digit2' || e.code === 'Numpad2') {
             if (!isEditing) {
                 e.preventDefault();
-                setSbHotkeyTargetTeam('b');
+                sbHotkeyTargetTeam = 'b';
+                adjustSbScore('b', 1);
+                playScoreChime('up');
+                const teamName = document.getElementById('sbTeamBName')?.value || 'الفريق الثاني';
+                showToast(`🟢 +1 نقطة لـ (${teamName}) [Alt 2]`, 'success');
             }
+        }
+        // Alt + 3: Direct Decrease (-1) to Team 1 (Red)
+        else if (e.key === '3' || e.code === 'Digit3' || e.code === 'Numpad3') {
+            if (!isEditing) {
+                e.preventDefault();
+                adjustSbScore('a', -1);
+                playScoreChime('down');
+                const teamName = document.getElementById('sbTeamAName')?.value || 'الفريق الأول (الأحمر)';
+                showToast(`🔴 -1 نقطة لـ (${teamName}) [Alt 3]`, 'info');
+            }
+        }
+        // Alt + 4: Direct Decrease (-1) to Team 2
+        else if (e.key === '4' || e.code === 'Digit4' || e.code === 'Numpad4') {
+            if (!isEditing) {
+                e.preventDefault();
+                adjustSbScore('b', -1);
+                playScoreChime('down');
+                const teamName = document.getElementById('sbTeamBName')?.value || 'الفريق الثاني';
+                showToast(`🟢 -1 نقطة لـ (${teamName}) [Alt 4]`, 'info');
+            }
+        }
+        // Alt + Plus / Alt + Equals / Numpad Plus: Increase Active Team
+        else if (e.key === '+' || e.key === '=' || e.code === 'NumpadAdd' || (e.shiftKey && e.code === 'Equal')) {
+            e.preventDefault();
+            adjustSbScore(sbHotkeyTargetTeam, 1);
+            playScoreChime('up');
+            const teamName = sbHotkeyTargetTeam === 'a' 
+                ? (document.getElementById('sbTeamAName')?.value || 'الفريق الأول') 
+                : (document.getElementById('sbTeamBName')?.value || 'الفريق الثاني');
+            showToast(`➕ +1 نقطة لـ (${teamName}) [Alt +]`, 'success');
+        }
+        // Alt + Minus / Numpad Subtract: Decrease Active Team
+        else if (e.key === '-' || e.key === '_' || e.code === 'NumpadSubtract' || e.code === 'Minus') {
+            e.preventDefault();
+            adjustSbScore(sbHotkeyTargetTeam, -1);
+            playScoreChime('down');
+            const teamName = sbHotkeyTargetTeam === 'a' 
+                ? (document.getElementById('sbTeamAName')?.value || 'الفريق الأول') 
+                : (document.getElementById('sbTeamBName')?.value || 'الفريق الثاني');
+            showToast(`➖ -1 نقطة لـ (${teamName}) [Alt -]`, 'info');
         }
     });
 }
@@ -2885,7 +2915,7 @@ function loadRaceState() {
 let cardsBoardConfig = {
     neonEnabled: true,
     glowIntensity: 18,
-    fontFamily: 'impact',
+    fontFamily: 'cairo',
     giftPosition: 'top-right',
     disappearMode: 'gift_only',
     offsetY: 0,
@@ -2894,22 +2924,22 @@ let cardsBoardConfig = {
         title: 'الفريق الأحمر',
         color: '#ff2a4a',
         cards: [
-            { id: 1, cardType: 'meteor', count: 1, giftName: 'وردة', giftImage: '/images/rose.png' },
-            { id: 2, cardType: 'nitro', count: 2, giftName: 'دونات', giftImage: '/images/donut.png' },
-            { id: 3, cardType: 'barrels', count: 1, giftName: 'حوت', giftImage: '/images/whale.png' },
-            { id: 4, cardType: 'fuel', count: 3, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
-            { id: 5, cardType: 'wind', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' }
+            { id: 1, cardType: 'meteor', customText: 'X1', count: 1, giftName: 'وردة', giftImage: '/images/rose.png' },
+            { id: 2, cardType: 'nitro', customText: 'X2', count: 2, giftName: 'دونات', giftImage: '/images/donut.png' },
+            { id: 3, cardType: 'barrels', customText: 'X1', count: 1, giftName: 'نيزك', giftImage: '/images/1791197748042-81cb495abfe066981b9c135cfff21c7a.png~tplv-obj.webp' },
+            { id: 4, cardType: 'fuel', customText: 'X3', count: 3, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
+            { id: 5, cardType: 'wind', customText: 'X1', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' }
         ]
     },
     teamBlue: {
         title: 'الفريق الأزرق',
         color: '#00b4d8',
         cards: [
-            { id: 101, cardType: 'leak', count: 1, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
-            { id: 102, cardType: 'rain', count: 2, giftName: 'قلب', giftImage: '/images/heart.png' },
-            { id: 103, cardType: 'seagull', count: 1, giftName: 'دونات', giftImage: '/images/donut.png' },
-            { id: 104, cardType: 'toolbox', count: 1, giftName: 'حمايه', giftImage: '/images/1791197852391-e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp' },
-            { id: 105, cardType: 'nitro', count: 3, giftName: 'وردة', giftImage: '/images/rose.png' }
+            { id: 101, cardType: 'leak', customText: 'X1', count: 1, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
+            { id: 102, cardType: 'rain', customText: 'X1', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' },
+            { id: 103, cardType: 'seagull', customText: 'X2', count: 2, giftName: 'مكوك فضائي', giftImage: '/images/1791197817001-eb77ead5c3abb6da6034d3cf6cfeb438~tplv-obj.webp' },
+            { id: 104, cardType: 'toolbox', customText: 'X1', count: 1, giftName: 'حمايه', giftImage: '/images/1791197852391-e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp' },
+            { id: 105, cardType: 'nitro', customText: 'X3', count: 3, giftName: 'دونات', giftImage: '/images/donut.png' }
         ]
     }
 };
@@ -2972,21 +3002,21 @@ async function loadCardsData() {
 
                 if (!Array.isArray(cardsBoardConfig.teamRed.cards) || cardsBoardConfig.teamRed.cards.length === 0) {
                     cardsBoardConfig.teamRed.cards = [
-                        { id: 1, cardType: 'meteor', count: 1, giftName: 'وردة', giftImage: '/images/rose.png' },
-                        { id: 2, cardType: 'nitro', count: 2, giftName: 'دونات', giftImage: '/images/donut.png' },
-                        { id: 3, cardType: 'barrels', count: 1, giftName: 'حوت', giftImage: '/images/whale.png' },
-                        { id: 4, cardType: 'fuel', count: 3, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
-                        { id: 5, cardType: 'wind', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' }
+                        { id: 1, cardType: 'meteor', customText: 'X1', count: 1, giftName: 'وردة', giftImage: '/images/rose.png' },
+                        { id: 2, cardType: 'nitro', customText: 'X2', count: 2, giftName: 'دونات', giftImage: '/images/donut.png' },
+                        { id: 3, cardType: 'barrels', customText: 'X1', count: 1, giftName: 'نيزك', giftImage: '/images/1791197748042-81cb495abfe066981b9c135cfff21c7a.png~tplv-obj.webp' },
+                        { id: 4, cardType: 'fuel', customText: 'X3', count: 3, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
+                        { id: 5, cardType: 'wind', customText: 'X1', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' }
                     ];
                 }
 
                 if (!Array.isArray(cardsBoardConfig.teamBlue.cards) || cardsBoardConfig.teamBlue.cards.length === 0) {
                     cardsBoardConfig.teamBlue.cards = [
-                        { id: 101, cardType: 'leak', count: 1, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
-                        { id: 102, cardType: 'rain', count: 2, giftName: 'قلب', giftImage: '/images/heart.png' },
-                        { id: 103, cardType: 'seagull', count: 1, giftName: 'دونات', giftImage: '/images/donut.png' },
-                        { id: 104, cardType: 'toolbox', count: 1, giftName: 'حمايه', giftImage: '/images/1791197852391-e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp' },
-                        { id: 105, cardType: 'nitro', count: 3, giftName: 'وردة', giftImage: '/images/rose.png' }
+                        { id: 101, cardType: 'leak', customText: 'X1', count: 1, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
+                        { id: 102, cardType: 'rain', customText: 'X1', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' },
+                        { id: 103, cardType: 'seagull', customText: 'X2', count: 2, giftName: 'مكوك فضائي', giftImage: '/images/1791197817001-eb77ead5c3abb6da6034d3cf6cfeb438~tplv-obj.webp' },
+                        { id: 104, cardType: 'toolbox', customText: 'X1', count: 1, giftName: 'حمايه', giftImage: '/images/1791197852391-e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp' },
+                        { id: 105, cardType: 'nitro', customText: 'X3', count: 3, giftName: 'دونات', giftImage: '/images/donut.png' }
                     ];
                 }
             }
@@ -3594,7 +3624,7 @@ function getCard4McItem(cardType) {
 
 let cards4BoardConfig = {
     neonEnabled: true,
-    fontFamily: 'impact',
+    fontFamily: 'cairo',
     giftPosition: 'top-right',
     disappearMode: 'gift_only',
     offsetY: 0,
@@ -3603,21 +3633,21 @@ let cards4BoardConfig = {
         title: 'الفريق الأحمر',
         cards: [
             { id: 1, cardType: 'skeleton_bandana', customText: 'X1', count: 1, giftName: 'وردة', giftImage: '/images/rose.png' },
-            { id: 2, cardType: 'evoker_mage', customText: 'X2', count: 2, giftName: 'دونات', giftImage: '/images/donut.png' },
-            { id: 3, cardType: 'skeleton_cap', customText: 'X3', count: 3, giftName: 'حوت', giftImage: '/images/whale.png' },
-            { id: 4, cardType: 'hog_rider', customText: 'X4', count: 4, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
-            { id: 5, cardType: 'golem_pumpkin', customText: 'X5', count: 5, giftName: 'قلب', giftImage: '/images/heart.png' }
+            { id: 2, cardType: 'skeleton_cap', customText: 'X2', count: 2, giftName: 'دونات', giftImage: '/images/donut.png' },
+            { id: 3, cardType: 'golem_pumpkin', customText: 'X1', count: 1, giftName: 'نيزك', giftImage: '/images/1791197748042-81cb495abfe066981b9c135cfff21c7a.png~tplv-obj.webp' },
+            { id: 4, cardType: 'hog_rider', customText: 'X3', count: 3, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
+            { id: 5, cardType: 'evoker_mage', customText: 'X1', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' }
         ]
     },
     teamBlue: {
         color: '#00b4d8',
         title: 'الفريق الأزرق',
         cards: [
-            { id: 101, cardType: 'hog_rider', customText: 'X1', count: 1, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
-            { id: 102, cardType: 'skeleton_bandana', customText: 'X2', count: 2, giftName: 'قلب', giftImage: '/images/heart.png' },
-            { id: 103, cardType: 'golem_pumpkin', customText: 'X3', count: 3, giftName: 'دونات', giftImage: '/images/donut.png' },
-            { id: 104, cardType: 'evoker_mage', customText: 'X4', count: 4, giftName: 'حمايه', giftImage: '/images/1791197852391-e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp' },
-            { id: 105, cardType: 'skeleton_cap', customText: 'X5', count: 5, giftName: 'وردة', giftImage: '/images/rose.png' }
+            { id: 101, cardType: 'evoker_mage', customText: 'X1', count: 1, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
+            { id: 102, cardType: 'hog_rider', customText: 'X1', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' },
+            { id: 103, cardType: 'skeleton_bandana', customText: 'X2', count: 2, giftName: 'مكوك فضائي', giftImage: '/images/1791197817001-eb77ead5c3abb6da6034d3cf6cfeb438~tplv-obj.webp' },
+            { id: 104, cardType: 'golem_pumpkin', customText: 'X1', count: 1, giftName: 'حمايه', giftImage: '/images/1791197852391-e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp' },
+            { id: 105, cardType: 'skeleton_cap', customText: 'X3', count: 3, giftName: 'دونات', giftImage: '/images/donut.png' }
         ]
     }
 };
@@ -3649,20 +3679,20 @@ async function loadCards4Data() {
                 if (!Array.isArray(cards4BoardConfig.teamRed.cards) || cards4BoardConfig.teamRed.cards.length === 0) {
                     cards4BoardConfig.teamRed.cards = [
                         { id: 1, cardType: 'skeleton_bandana', customText: 'X1', count: 1, giftName: 'وردة', giftImage: '/images/rose.png' },
-                        { id: 2, cardType: 'evoker_mage', customText: 'X2', count: 2, giftName: 'دونات', giftImage: '/images/donut.png' },
-                        { id: 3, cardType: 'skeleton_cap', customText: 'X3', count: 3, giftName: 'حوت', giftImage: '/images/whale.png' },
-                        { id: 4, cardType: 'hog_rider', customText: 'X4', count: 4, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
-                        { id: 5, cardType: 'golem_pumpkin', customText: 'X5', count: 5, giftName: 'قلب', giftImage: '/images/heart.png' }
+                        { id: 2, cardType: 'skeleton_cap', customText: 'X2', count: 2, giftName: 'دونات', giftImage: '/images/donut.png' },
+                        { id: 3, cardType: 'golem_pumpkin', customText: 'X1', count: 1, giftName: 'نيزك', giftImage: '/images/1791197748042-81cb495abfe066981b9c135cfff21c7a.png~tplv-obj.webp' },
+                        { id: 4, cardType: 'hog_rider', customText: 'X3', count: 3, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
+                        { id: 5, cardType: 'evoker_mage', customText: 'X1', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' }
                     ];
                 }
 
                 if (!Array.isArray(cards4BoardConfig.teamBlue.cards) || cards4BoardConfig.teamBlue.cards.length === 0) {
                     cards4BoardConfig.teamBlue.cards = [
-                        { id: 101, cardType: 'hog_rider', customText: 'X1', count: 1, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
-                        { id: 102, cardType: 'skeleton_bandana', customText: 'X2', count: 2, giftName: 'قلب', giftImage: '/images/heart.png' },
-                        { id: 103, cardType: 'golem_pumpkin', customText: 'X3', count: 3, giftName: 'دونات', giftImage: '/images/donut.png' },
-                        { id: 104, cardType: 'evoker_mage', customText: 'X4', count: 4, giftName: 'حمايه', giftImage: '/images/1791197852391-e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp' },
-                        { id: 105, cardType: 'skeleton_cap', customText: 'X5', count: 5, giftName: 'وردة', giftImage: '/images/rose.png' }
+                        { id: 101, cardType: 'evoker_mage', customText: 'X1', count: 1, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
+                        { id: 102, cardType: 'hog_rider', customText: 'X1', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' },
+                        { id: 103, cardType: 'skeleton_bandana', customText: 'X2', count: 2, giftName: 'مكوك فضائي', giftImage: '/images/1791197817001-eb77ead5c3abb6da6034d3cf6cfeb438~tplv-obj.webp' },
+                        { id: 104, cardType: 'golem_pumpkin', customText: 'X1', count: 1, giftName: 'حمايه', giftImage: '/images/1791197852391-e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp' },
+                        { id: 105, cardType: 'skeleton_cap', customText: 'X3', count: 3, giftName: 'دونات', giftImage: '/images/donut.png' }
                     ];
                 }
             }

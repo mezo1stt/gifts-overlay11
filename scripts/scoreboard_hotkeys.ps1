@@ -19,42 +19,49 @@ public class HotKeyHelper {
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host "   🎮 اختصارات الاسكوربورد الشاملة (MEZO TIK) - شغال في الخلفية   " -ForegroundColor Yellow
 Write-Host "==========================================================" -ForegroundColor Cyan
-Write-Host " [Alt] + [+]     : زيادة النتيجة (+1) 🔔" -ForegroundColor Green
-Write-Host " [Alt] + [-]     : إنقاص النتيجة (-1) 🔔" -ForegroundColor Red
-Write-Host " [Alt] + [1]     : تحديد التحكم لـ (الفريق 1) 🔴" -ForegroundColor Magenta
-Write-Host " [Alt] + [2]     : تحديد التحكم لـ (الفريق 2) 🟢" -ForegroundColor Magenta
+Write-Host " [Alt] + [1]     : زيادة نقطة (+1) للفريق الأحمر 🔴" -ForegroundColor Green
+Write-Host " [Alt] + [2]     : زيادة نقطة (+1) للفريق الثاني 🟢" -ForegroundColor Green
+Write-Host " [Alt] + [+]     : زيادة نقطة (+1) للفريق النشط 🔔" -ForegroundColor Yellow
+Write-Host " [Alt] + [-]     : إنقاص نقطة (-1) للفريق النشط 🔔" -ForegroundColor Red
+Write-Host " [Alt] + [3]     : إنقاص نقطة (-1) للفريق الأحمر 🔴" -ForegroundColor DarkRed
+Write-Host " [Alt] + [4]     : إنقاص نقطة (-1) للفريق الثاني 🟢" -ForegroundColor DarkRed
 Write-Host "----------------------------------------------------------"
-Write-Host "جاهز ويعمل الآن في خلفية الويندوز! يمكنك تصغير هذه الشاشة والاستمتاع باللعب." -ForegroundColor White
+Write-Host "جاهز ويعمل الآن في خلفية الويندوز بالكامل!" -ForegroundColor White
+Write-Host "يمكنك تصغير هذه الشاشة والاستمتاع باللعب أو البث الآن." -ForegroundColor Gray
 
-$serverUrl = "https://gifts-overlay11.onrender.com"
-$localUrl = "http://localhost:3001"
-$currentTeam = "a"
+$global:currentTeam = "a"
 
 function Send-ScoreUpdate($team, $delta) {
     try {
-        [System.Console]::Beep($(if ($delta -gt 0) { 1200 } else { 650 }), 120)
+        if ($delta -gt 0) {
+            [System.Console]::Beep(1200, 90)
+        } else {
+            [System.Console]::Beep(650, 110)
+        }
     } catch {}
 
-    $body = @{ team = $team; delta = $delta } | ConvertTo-Json
-    $teamName = if ($team -eq "a") { "الفريق 1" } else { "الفريق 2" }
+    $body = @{ team = $team; delta = $delta } | ConvertTo-Json -Compress
+    $teamName = if ($team -eq "a") { "الفريق الأحمر 🔴" } else { "الفريق الثاني 🟢" }
     $sign = if ($delta -gt 0) { "+$delta" } else { "$delta" }
 
-    Write-Host "[$(Get-Date -Format 'HH:mm:ss')] تم إرسال: $sign لـ ($teamName) 🚀" -ForegroundColor Yellow
+    Write-Host "[$(Get-Date -Format 'HH:mm:ss')] تم إرسال: $sign لـ ($teamName)" -ForegroundColor $(if ($delta -gt 0) { "Green" } else { "Red" })
 
-    # Try local first, then remote (updates both board_XXXX and default)
-    Start-Job -ScriptBlock {
-        param($body, $localUrl, $serverUrl)
-        $targets = @("board_XXXX", "default")
-        foreach ($t in $targets) {
+    # Ultra-fast non-blocking background web request
+    [System.Threading.ThreadPool]::QueueUserWorkItem({
+        param($bodyJson)
+        $endpoints = @(
+            "https://gifts-overlay11.onrender.com/api/scoreboard/board_XXXX/score",
+            "https://gifts-overlay11.onrender.com/api/scoreboard/default/score",
+            "http://127.0.0.1:3001/api/scoreboard/board_XXXX/score"
+        )
+        foreach ($u in $endpoints) {
             try {
-                Invoke-RestMethod -Uri "$localUrl/api/scoreboard/$t/score" -Method Post -Body $body -ContentType "application/json" -TimeoutSec 1 -ErrorAction SilentlyContinue | Out-Null
-            } catch {
-                try {
-                    Invoke-RestMethod -Uri "$serverUrl/api/scoreboard/$t/score" -Method Post -Body $body -ContentType "application/json" -TimeoutSec 3 -ErrorAction SilentlyContinue | Out-Null
-                } catch {}
-            }
+                $wc = New-Object System.Net.WebClient
+                $wc.Headers.Add("Content-Type", "application/json")
+                $wc.UploadString($u, "POST", $bodyJson) | Out-Null
+            } catch {}
         }
-    } -ArgumentList $body, $localUrl, $serverUrl | Out-Null
+    }, $body) | Out-Null
 }
 
 class HiddenForm : System.Windows.Forms.Form {
@@ -66,17 +73,33 @@ class HiddenForm : System.Windows.Forms.Form {
     [void]WndProc([ref][System.Windows.Forms.Message]$m) {
         if ($m.Value.Msg -eq 0x0312) { # WM_HOTKEY
             $id = $m.Value.WParam.ToInt32()
-            if ($id -eq 1) { Send-ScoreUpdate $global:currentTeam 1 }
-            elseif ($id -eq 2) { Send-ScoreUpdate $global:currentTeam -1 }
-            elseif ($id -eq 3) {
+            if ($id -eq 1) { 
+                # Alt + 1 -> Direct increase Team A (Red)
                 $global:currentTeam = "a"
-                [System.Console]::Beep(900, 100)
-                Write-Host "🎯 تم التبديل للتحكم في (الفريق 1) 🔴" -ForegroundColor Cyan
+                Send-ScoreUpdate "a" 1 
             }
-            elseif ($id -eq 4) {
+            elseif ($id -eq 2) { 
+                # Alt + 2 -> Direct increase Team B
                 $global:currentTeam = "b"
-                [System.Console]::Beep(1100, 100)
-                Write-Host "🎯 تم التبديل للتحكم في (الفريق 2) 🟢" -ForegroundColor Green
+                Send-ScoreUpdate "b" 1 
+            }
+            elseif ($id -eq 3) { 
+                # Alt + Plus -> Increase active team
+                Send-ScoreUpdate $global:currentTeam 1 
+            }
+            elseif ($id -eq 4) { 
+                # Alt + Minus -> Decrease active team
+                Send-ScoreUpdate $global:currentTeam -1 
+            }
+            elseif ($id -eq 5) {
+                # Alt + 3 -> Decrease Red
+                $global:currentTeam = "a"
+                Send-ScoreUpdate "a" -1
+            }
+            elseif ($id -eq 6) {
+                # Alt + 4 -> Decrease Blue
+                $global:currentTeam = "b"
+                Send-ScoreUpdate "b" -1
             }
         }
         ([System.Windows.Forms.Form]$this).WndProc($m)
@@ -87,23 +110,31 @@ $form = [HiddenForm]::new()
 $MOD_ALT = 0x0001
 
 # Hotkeys:
-# 1: Alt + Plus (=/+)
-[HotKeyHelper]::RegisterHotKey($form.Handle, 1, $MOD_ALT, 0xBB) # VK_OEM_PLUS
-[HotKeyHelper]::RegisterHotKey($form.Handle, 1, $MOD_ALT, 0x6B) # VK_ADD (Numpad)
+# 1: Alt + 1 (Direct +1 Red)
+[HotKeyHelper]::RegisterHotKey($form.Handle, 1, $MOD_ALT, 0x31) # '1'
+[HotKeyHelper]::RegisterHotKey($form.Handle, 1, $MOD_ALT, 0x61) # Numpad 1
 
-# 2: Alt + Minus (-)
-[HotKeyHelper]::RegisterHotKey($form.Handle, 2, $MOD_ALT, 0xBD) # VK_OEM_MINUS
-[HotKeyHelper]::RegisterHotKey($form.Handle, 2, $MOD_ALT, 0x6D) # VK_SUBTRACT (Numpad)
+# 2: Alt + 2 (Direct +1 Blue)
+[HotKeyHelper]::RegisterHotKey($form.Handle, 2, $MOD_ALT, 0x32) # '2'
+[HotKeyHelper]::RegisterHotKey($form.Handle, 2, $MOD_ALT, 0x62) # Numpad 2
 
-# 3: Alt + 1
-[HotKeyHelper]::RegisterHotKey($form.Handle, 3, $MOD_ALT, 0x31) # '1'
-# 4: Alt + 2
-[HotKeyHelper]::RegisterHotKey($form.Handle, 4, $MOD_ALT, 0x32) # '2'
+# 3: Alt + Plus (=/+)
+[HotKeyHelper]::RegisterHotKey($form.Handle, 3, $MOD_ALT, 0xBB) # VK_OEM_PLUS
+[HotKeyHelper]::RegisterHotKey($form.Handle, 3, $MOD_ALT, 0x6B) # VK_ADD (Numpad)
+
+# 4: Alt + Minus (-)
+[HotKeyHelper]::RegisterHotKey($form.Handle, 4, $MOD_ALT, 0xBD) # VK_OEM_MINUS
+[HotKeyHelper]::RegisterHotKey($form.Handle, 4, $MOD_ALT, 0x6D) # VK_SUBTRACT (Numpad)
+
+# 5: Alt + 3 (Direct -1 Red)
+[HotKeyHelper]::RegisterHotKey($form.Handle, 5, $MOD_ALT, 0x33) # '3'
+
+# 6: Alt + 4 (Direct -1 Blue)
+[HotKeyHelper]::RegisterHotKey($form.Handle, 6, $MOD_ALT, 0x34) # '4'
 
 [System.Windows.Forms.Application]::Run($form)
 
 # Cleanup on exit
-[HotKeyHelper]::UnregisterHotKey($form.Handle, 1)
-[HotKeyHelper]::UnregisterHotKey($form.Handle, 2)
-[HotKeyHelper]::UnregisterHotKey($form.Handle, 3)
-[HotKeyHelper]::UnregisterHotKey($form.Handle, 4)
+for ($i = 1; $i -le 6; $i++) {
+    [HotKeyHelper]::UnregisterHotKey($form.Handle, $i)
+}
