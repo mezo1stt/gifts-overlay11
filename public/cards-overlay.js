@@ -99,6 +99,31 @@ async function loadCardsData() {
     }
 }
 
+const CARD_GIF_MAP = {
+    meteor: '/images/cards_gif/meteor.gif',
+    nitro: '/images/cards_gif/nitro.gif',
+    barrels: '/images/cards_gif/barrels.gif',
+    fuel: '/images/cards_gif/fuel.gif',
+    leak: '/images/cards_gif/leak.gif',
+    rain: '/images/cards_gif/rain.gif',
+    seagull: '/images/cards_gif/seagull.gif',
+    toolbox: '/images/cards_gif/toolbox.gif',
+    wind: '/images/cards_gif/wind.gif',
+    // Fallbacks for legacy character types
+    skeleton_bandana: '/images/cards_gif/barrels.gif',
+    evoker_mage: '/images/cards_gif/meteor.gif',
+    skeleton_cap: '/images/cards_gif/nitro.gif',
+    hog_rider: '/images/cards_gif/fuel.gif',
+    golem_pumpkin: '/images/cards_gif/toolbox.gif'
+};
+
+function getCardMediaSrc(card) {
+    if (!card) return '/images/cards_gif/meteor.gif';
+    if (card.customImage) return getImageSrc(card.customImage);
+    const key = card.cardType || 'meteor';
+    return CARD_GIF_MAP[key] || `/images/cards_gif/${key}.gif`;
+}
+
 function renderCardsToColumn(columnEl, cards, giftPos, teamColor) {
     if (!columnEl) return;
 
@@ -110,17 +135,17 @@ function renderCardsToColumn(columnEl, cards, giftPos, teamColor) {
         cards.forEach(card => {
             const item = document.createElement('div');
             item.className = 'card-unit-item';
-            item.setAttribute('data-card-key', `${card.id}_${card.cardType}_${c = card.customImage || ''}_${card.count}_${card.giftImage}_${giftPos}_${teamColor}`);
+            item.setAttribute('data-card-key', `${card.id}_${card.cardType}_${card.customImage || ''}_${card.count}_${card.giftImage}_${giftPos}_${teamColor}`);
             item.setAttribute('data-card-id', card.id);
 
-            const cardSrc = card.customImage ? getImageSrc(card.customImage) : `/images/mcroyale/${card.cardType || 'skeleton_bandana'}.png`;
+            const cardSrc = getCardMediaSrc(card);
             const giftSrc = getImageSrc(card.giftImage);
 
             item.innerHTML = `
                 <div class="card-gift-badge pos-${giftPos}" title="${escapeHtml(card.giftName || 'هدية')}">
                     <img src="${giftSrc}" alt="${escapeHtml(card.giftName || '')}" onerror="this.src='/images/rose.png'">
                 </div>
-                <img class="card-character-img" src="${cardSrc}" alt="Card" onerror="this.src='/images/mcroyale/skeleton_bandana.png'">
+                <img class="card-character-img" src="${cardSrc}" alt="Card Item" onerror="this.src='/images/cards_gif/meteor.gif'">
                 <div class="troop-count-badge">X${card.count || 1}</div>
             `;
             columnEl.appendChild(item);

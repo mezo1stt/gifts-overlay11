@@ -623,11 +623,7 @@
                                         <div class="slider-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
                                             <label>🃏 بطاقات وجنود الأحمر (<span id="cardsRedCount">5</span>):</label>
                                             <div style="display:flex; gap:6px; align-items:center;">
-                                                <button type="button" onclick="addNewCardSlot('teamRed')" class="btn-mini" style="background:rgba(255,42,74,0.25); border:1px solid #ff2a4a; color:#fff;" title="إضافة بطاقة افتراضية">➕ إضافة بطاقة</button>
-                                                <label class="btn-mini" style="background:rgba(56,189,248,0.25); border:1px solid #38bdf8; color:#38bdf8; cursor:pointer;" title="إضافة بطاقة بصورة خاصة من جهازك مباشرة">
-                                                    <span>📷 بطاقة بصورتي</span>
-                                                    <input type="file" accept="image/*" style="display:none;" onchange="addNewCardWithCustomImage('teamRed', this.files[0])">
-                                                </label>
+                                                <button type="button" onclick="addNewCardSlot('teamRed')" class="btn-mini" style="background:rgba(255,42,74,0.25); border:1px solid #ff2a4a; color:#fff;" title="إضافة بطاقة جديدة">➕ إضافة بطاقة</button>
                                                 <button type="button" onclick="clearTeamCards('teamRed')" class="btn-mini del" title="حذف جميع بطاقات هذا الفريق">🗑️ تفريغ</button>
                                             </div>
                                         </div>
@@ -662,11 +658,7 @@
                                         <div class="slider-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
                                             <label>🃏 بطاقات وجنود الأزرق (<span id="cardsBlueCount">5</span>):</label>
                                             <div style="display:flex; gap:6px; align-items:center;">
-                                                <button type="button" onclick="addNewCardSlot('teamBlue')" class="btn-mini" style="background:rgba(0,180,216,0.25); border:1px solid #00b4d8; color:#fff;" title="إضافة بطاقة افتراضية">➕ إضافة بطاقة</button>
-                                                <label class="btn-mini" style="background:rgba(56,189,248,0.25); border:1px solid #38bdf8; color:#38bdf8; cursor:pointer;" title="إضافة بطاقة بصورة خاصة من جهازك مباشرة">
-                                                    <span>📷 بطاقة بصورتي</span>
-                                                    <input type="file" accept="image/*" style="display:none;" onchange="addNewCardWithCustomImage('teamBlue', this.files[0])">
-                                                </label>
+                                                <button type="button" onclick="addNewCardSlot('teamBlue')" class="btn-mini" style="background:rgba(0,180,216,0.25); border:1px solid #00b4d8; color:#fff;" title="إضافة بطاقة جديدة">➕ إضافة بطاقة</button>
                                                 <button type="button" onclick="clearTeamCards('teamBlue')" class="btn-mini del" title="حذف جميع بطاقات هذا الفريق">🗑️ تفريغ</button>
                                             </div>
                                         </div>
@@ -1853,6 +1845,33 @@
 
             <div class="modal-footer">
                 <button class="btn-secondary" onclick="closeAllObsModal()">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: VISUAL CHARACTER / ITEM PICKER (معرض اختيار عنصر البطاقة - GIF متحرك) ================= -->
+    <div class="modal-backdrop" id="visualCharacterPickerModal">
+        <div class="modal-box modal-wide" style="max-width:740px; max-height:85vh; display:flex; flex-direction:column;">
+            <button class="modal-close" onclick="closeVisualCharacterPicker()">✕</button>
+            
+            <div class="modal-header-simple" style="margin-bottom:14px;">
+                <h3 style="color:#fff; font-size:18px; font-weight:900; display:flex; align-items:center; gap:8px;">
+                    <span>✨ اختيار عنصر / شخصية البطاقة (GIF متحرك)</span>
+                    <span class="badge-tag" style="background:linear-gradient(135deg, #00b4d8, #7928ca); font-size:11px;">اضغط على العنصر لاختياره فوراً 🎯</span>
+                </h3>
+                <p style="color:#94a3b8; font-size:12.5px; margin-top:4px;">
+                    اختر العنصر المتحرك الذي تريده في هذه البطاقة من مكتبة العناصر:
+                </p>
+            </div>
+
+            <!-- Visual Characters Grid (Large cards with animated GIFs) -->
+            <div id="visualCharactersGalleryGrid" class="visual-characters-gallery-grid" style="flex:1; overflow-y:auto; max-height:450px; display:grid; grid-template-columns:repeat(auto-fill, minmax(190px, 1fr)); gap:14px; padding:12px; background:rgba(0,0,0,0.35); border-radius:14px; border:1px solid rgba(255,255,255,0.08);">
+                <!-- Dynamically populated with large animated GIF preview cards -->
+            </div>
+
+            <div class="modal-footer" style="margin-top:14px; display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:12px; color:#94a3b8;">9 عناصر متحركة مميزة (GIF شفاف) 🌟</span>
+                <button class="btn-secondary" onclick="closeVisualCharacterPicker()">إغلاق</button>
             </div>
         </div>
     </div>

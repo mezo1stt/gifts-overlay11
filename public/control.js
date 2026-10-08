@@ -2759,34 +2759,51 @@ let cardsBoardConfig = {
         title: 'الفريق الأحمر',
         color: '#ff2a4a',
         cards: [
-            { id: 1, cardType: 'skeleton_bandana', count: 1, giftName: 'وردة', giftImage: '/images/rose.png' },
-            { id: 2, cardType: 'skeleton_cap', count: 2, giftName: 'دونات', giftImage: '/images/donut.png' },
-            { id: 3, cardType: 'golem_pumpkin', count: 1, giftName: 'نيزك', giftImage: '/images/1791197748042-81cb495abfe066981b9c135cfff21c7a.png~tplv-obj.webp' },
-            { id: 4, cardType: 'hog_rider', count: 3, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
-            { id: 5, cardType: 'evoker_mage', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' }
+            { id: 1, cardType: 'meteor', count: 1, giftName: 'وردة', giftImage: '/images/rose.png' },
+            { id: 2, cardType: 'nitro', count: 2, giftName: 'دونات', giftImage: '/images/donut.png' },
+            { id: 3, cardType: 'barrels', count: 1, giftName: 'حوت', giftImage: '/images/whale.png' },
+            { id: 4, cardType: 'fuel', count: 3, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
+            { id: 5, cardType: 'wind', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' }
         ]
     },
     teamBlue: {
         title: 'الفريق الأزرق',
         color: '#00b4d8',
         cards: [
-            { id: 101, cardType: 'evoker_mage', count: 1, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
-            { id: 102, cardType: 'hog_rider', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' },
-            { id: 103, cardType: 'skeleton_bandana', count: 2, giftName: 'مكوك فضائي', giftImage: '/images/1791197817001-eb77ead5c3abb6da6034d3cf6cfeb438~tplv-obj.webp' },
-            { id: 104, cardType: 'golem_pumpkin', count: 1, giftName: 'حمايه', giftImage: '/images/1791197852391-e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp' },
-            { id: 105, cardType: 'skeleton_cap', count: 3, giftName: 'دونات', giftImage: '/images/donut.png' }
+            { id: 101, cardType: 'leak', count: 1, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
+            { id: 102, cardType: 'rain', count: 2, giftName: 'قلب', giftImage: '/images/heart.png' },
+            { id: 103, cardType: 'seagull', count: 1, giftName: 'دونات', giftImage: '/images/donut.png' },
+            { id: 104, cardType: 'toolbox', count: 1, giftName: 'حمايه', giftImage: '/images/1791197852391-e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp' },
+            { id: 105, cardType: 'nitro', count: 3, giftName: 'وردة', giftImage: '/images/rose.png' }
         ]
     }
 };
 
-const MCROYALE_CHARACTERS = [
-    { id: 'skeleton_bandana', name: '💀 هيكل عظمي (Bandana)', img: '/images/mcroyale/skeleton_bandana.png' },
-    { id: 'evoker_mage', name: '🧙‍♂️ الساحر إيفوكر (Evoker Mage)', img: '/images/mcroyale/evoker_mage.png' },
-    { id: 'skeleton_cap', name: '⚔️ محارب القبعة (Skeleton Cap)', img: '/images/mcroyale/skeleton_cap.png' },
-    { id: 'hog_rider', name: '🐗 فارس الخنزير (Hog Rider)', img: '/images/mcroyale/hog_rider.png' },
-    { id: 'golem_pumpkin', name: '🎃 وحش اليقطين (Golem Pumpkin)', img: '/images/mcroyale/golem_pumpkin.png' }
+const CARD_GIF_ITEMS = [
+    { id: 'meteor', name: 'نيزك مشتعل (Meteor)', img: '/images/cards_gif/meteor.gif', icon: '☄️' },
+    { id: 'nitro', name: 'نيترو سرعة (Nitro)', img: '/images/cards_gif/nitro.gif', icon: '🚀' },
+    { id: 'barrels', name: 'براميل متفجرة (Barrels)', img: '/images/cards_gif/barrels.gif', icon: '🛢️' },
+    { id: 'fuel', name: 'وقود وبوش (Fuel)', img: '/images/cards_gif/fuel.gif', icon: '⛽' },
+    { id: 'leak', name: 'تسريب مياه (Leak)', img: '/images/cards_gif/leak.gif', icon: '💧' },
+    { id: 'rain', name: 'عاصفة مطر (Rain)', img: '/images/cards_gif/rain.gif', icon: '🌧️' },
+    { id: 'seagull', name: 'طائر نورس (Seagull)', img: '/images/cards_gif/seagull.gif', icon: '🕊️' },
+    { id: 'toolbox', name: 'صندوق أدوات (Toolbox)', img: '/images/cards_gif/toolbox.gif', icon: '🧰' },
+    { id: 'wind', name: 'رياح وإعصار (Wind)', img: '/images/cards_gif/wind.gif', icon: '🌪️' }
 ];
 
+function getCardGifItem(cardType) {
+    const found = CARD_GIF_ITEMS.find(c => c.id === cardType);
+    if (found) return found;
+    if (cardType === 'skeleton_bandana') return CARD_GIF_ITEMS.find(c => c.id === 'barrels') || CARD_GIF_ITEMS[0];
+    if (cardType === 'evoker_mage') return CARD_GIF_ITEMS.find(c => c.id === 'meteor') || CARD_GIF_ITEMS[0];
+    if (cardType === 'skeleton_cap') return CARD_GIF_ITEMS.find(c => c.id === 'nitro') || CARD_GIF_ITEMS[0];
+    if (cardType === 'hog_rider') return CARD_GIF_ITEMS.find(c => c.id === 'fuel') || CARD_GIF_ITEMS[0];
+    if (cardType === 'golem_pumpkin') return CARD_GIF_ITEMS.find(c => c.id === 'toolbox') || CARD_GIF_ITEMS[0];
+    return CARD_GIF_ITEMS[0];
+}
+
+let activeVisualCharTeam = 'teamRed';
+let activeVisualCharSlotIdx = null;
 let cardsActiveTargetTeam = 'teamRed'; // 'teamRed' or 'teamBlue'
 let activeCardSlotIndex = null;
 let visualGiftPriceFilter = 'all';
@@ -2820,21 +2837,21 @@ async function loadCardsData() {
 
                 if (!Array.isArray(cardsBoardConfig.teamRed.cards) || cardsBoardConfig.teamRed.cards.length === 0) {
                     cardsBoardConfig.teamRed.cards = [
-                        { id: 1, cardType: 'skeleton_bandana', count: 1, giftName: 'وردة', giftImage: '/images/rose.png' },
-                        { id: 2, cardType: 'skeleton_cap', count: 2, giftName: 'دونات', giftImage: '/images/donut.png' },
-                        { id: 3, cardType: 'golem_pumpkin', count: 1, giftName: 'نيزك', giftImage: '/images/1791197748042-81cb495abfe066981b9c135cfff21c7a.png~tplv-obj.webp' },
-                        { id: 4, cardType: 'hog_rider', count: 3, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
-                        { id: 5, cardType: 'evoker_mage', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' }
+                        { id: 1, cardType: 'meteor', count: 1, giftName: 'وردة', giftImage: '/images/rose.png' },
+                        { id: 2, cardType: 'nitro', count: 2, giftName: 'دونات', giftImage: '/images/donut.png' },
+                        { id: 3, cardType: 'barrels', count: 1, giftName: 'حوت', giftImage: '/images/whale.png' },
+                        { id: 4, cardType: 'fuel', count: 3, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
+                        { id: 5, cardType: 'wind', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' }
                     ];
                 }
 
                 if (!Array.isArray(cardsBoardConfig.teamBlue.cards) || cardsBoardConfig.teamBlue.cards.length === 0) {
                     cardsBoardConfig.teamBlue.cards = [
-                        { id: 101, cardType: 'evoker_mage', count: 1, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
-                        { id: 102, cardType: 'hog_rider', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' },
-                        { id: 103, cardType: 'skeleton_bandana', count: 2, giftName: 'مكوك فضائي', giftImage: '/images/1791197817001-eb77ead5c3abb6da6034d3cf6cfeb438~tplv-obj.webp' },
-                        { id: 104, cardType: 'golem_pumpkin', count: 1, giftName: 'حمايه', giftImage: '/images/1791197852391-e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp' },
-                        { id: 105, cardType: 'skeleton_cap', count: 3, giftName: 'دونات', giftImage: '/images/donut.png' }
+                        { id: 101, cardType: 'leak', count: 1, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
+                        { id: 102, cardType: 'rain', count: 2, giftName: 'قلب', giftImage: '/images/heart.png' },
+                        { id: 103, cardType: 'seagull', count: 1, giftName: 'دونات', giftImage: '/images/donut.png' },
+                        { id: 104, cardType: 'toolbox', count: 1, giftName: 'حمايه', giftImage: '/images/1791197852391-e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp' },
+                        { id: 105, cardType: 'nitro', count: 3, giftName: 'وردة', giftImage: '/images/rose.png' }
                     ];
                 }
             }
@@ -2937,8 +2954,8 @@ function renderTeamCardsDeck(teamKey, listContainerId, countDisplayId) {
         listContainer.innerHTML = `
             <div style="text-align:center; padding:25px 12px; color:#94a3b8; background:rgba(0,0,0,0.35); border:1.5px dashed rgba(255,255,255,0.14); border-radius:12px; margin:8px 0;">
                 <div style="font-size:22px; margin-bottom:4px;">📭</div>
-                <div style="font-weight:800; font-size:12.5px; color:#fff;">لا توجد بطاقات في هذا الفريق حالياً</div>
-                <div style="font-size:11px; color:#cbd5e1; margin-top:3px;">اضغط <strong>➕ إضافة بطاقة</strong> أو <strong>📷 بطاقة بصورتي</strong> للبدء بصورك الخاصة!</div>
+                <div style="font-weight:800; font-size:12.5px; color:#fff;">لا توجد عناصر في هذا الفريق حالياً</div>
+                <div style="font-size:11px; color:#cbd5e1; margin-top:3px;">اضغط <strong>➕ إضافة بطاقة</strong> لاختيار العناصر المتحركة والبدء!</div>
             </div>
         `;
         return;
@@ -2950,7 +2967,8 @@ function renderTeamCardsDeck(teamKey, listContainerId, countDisplayId) {
         item.setAttribute('data-slot-index', idx);
         item.setAttribute('data-team', teamKey);
 
-        const cardSrc = card.customImage ? normalizeImgPath(card.customImage) : `/images/mcroyale/${card.cardType || 'skeleton_bandana'}.png`;
+        const charItem = getCardGifItem(card.cardType);
+        const cardSrc = charItem.img;
         const giftSrc = normalizeImgPath(card.giftImage || '/images/rose.png');
 
         item.innerHTML = `
@@ -2963,31 +2981,19 @@ function renderTeamCardsDeck(teamKey, listContainerId, countDisplayId) {
             <span class="card-slot-idx">#${idx + 1}</span>
 
             <div class="card-slot-avatar-wrap">
-                <img class="card-slot-avatar-img" src="${cardSrc}" alt="Character" id="${teamKey}_slotAvatar_${idx}" onerror="this.src='/images/mcroyale/skeleton_bandana.png'">
+                <img class="card-slot-avatar-img" src="${cardSrc}" alt="${escapeHtml(charItem.name)}" id="${teamKey}_slotAvatar_${idx}" onerror="this.src='/images/cards_gif/meteor.gif'">
                 <img class="card-slot-badge-preview" src="${giftSrc}" alt="Gift" id="${teamKey}_slotBadge_${idx}" onerror="this.src='/images/rose.png'">
             </div>
 
             <div class="card-slot-controls-wrap">
-                <!-- Character & Custom Image Select -->
+                <!-- Character & Item Visual Selector (اختيار العنصر بنافذة عرض كبيرة ومجسمة) -->
                 <div class="card-slot-field">
-                    <label>شخصية أو صورة البطاقة:</label>
-                    <div style="display:flex; gap:6px; align-items:center;">
-                        <select style="flex:1;" onchange="onCardTypeChange('${teamKey}', ${idx}, this.value)">
-                            ${MCROYALE_CHARACTERS.map(c => `
-                                <option value="${c.id}" ${(!card.customImage && c.id === (card.cardType || 'skeleton_bandana')) ? 'selected' : ''}>
-                                    ${c.name}
-                                </option>
-                            `).join('')}
-                            ${card.customImage ? `<option value="custom" selected>🖼️ صورة مخصصة (مرفوعة)</option>` : ''}
-                        </select>
-                        <label class="btn-card-custom-img" title="رفع صورة مخصصة لهذه البطاقة من جهازك">
-                            <span>📷 رفع</span>
-                            <input type="file" accept="image/*" style="display:none;" onchange="uploadCardCustomImage('${teamKey}', ${idx}, this.files[0])">
-                        </label>
-                        ${card.customImage ? `
-                            <button type="button" class="btn-card-reset-img" onclick="resetCardCustomImage('${teamKey}', ${idx})" title="استعادة الشخصية الافتراضية">↺</button>
-                        ` : ''}
-                    </div>
+                    <label>عنصر البطاقة (GIF متحرك شفاف):</label>
+                    <button type="button" class="btn-visual-char-trigger" onclick="openVisualCharacterPicker('${teamKey}', ${idx})" title="انقر لفتح معرض العناصر واختيار عنصر من المعرض الكبير">
+                        <img class="char-thumb-img" src="${cardSrc}" alt="${escapeHtml(charItem.name)}" onerror="this.src='/images/cards_gif/meteor.gif'">
+                        <span class="char-name-label">${escapeHtml(charItem.name)}</span>
+                        <span class="char-click-hint">تغيير العنصر 🖼️</span>
+                    </button>
                 </div>
 
                 <!-- Troop Count -->
@@ -3002,7 +3008,7 @@ function renderTeamCardsDeck(teamKey, listContainerId, countDisplayId) {
                     <button type="button" class="btn-visual-gift-trigger" onclick="openVisualGiftPicker('${teamKey}', ${idx})" title="انقر لاختيار أي هدية بالصورة">
                         <img src="${giftSrc}" alt="${escapeHtml(card.giftName || 'هدية')}" onerror="this.src='/images/rose.png'">
                         <span class="gift-name-label">${escapeHtml(card.giftName || 'اختر هدية')}</span>
-                        <span class="gift-click-hint">تغيير 🖼️</span>
+                        <span class="gift-click-hint">تغيير الهدية 🎁</span>
                     </button>
                 </div>
             </div>
@@ -3029,56 +3035,6 @@ function moveCardSlot(teamKey, idx, direction) {
     showToast('تمت إعادة ترتيب البطاقات بنجاح! 🔄', 'info');
 }
 
-async function uploadCardCustomImage(teamKey, idx, file) {
-    if (!file) return;
-    const team = cardsBoardConfig[teamKey];
-    if (!team || !team.cards[idx]) return;
-
-    showToast('جاري رفع صورة البطاقة... ⏳', 'info');
-    const formData = new FormData();
-    formData.append('cardImage', file);
-
-    try {
-        const res = await fetch('/api/upload-card-image', {
-            method: 'POST',
-            body: formData
-        });
-        const data = await res.json();
-        if (data.success && data.url) {
-            team.cards[idx].customImage = data.url;
-            renderCardsDeckList();
-            saveCardsBoardConfig(true);
-            showToast('تم حفظ صورة البطاقة بنجاح! 🖼️✨', 'success');
-        } else {
-            showToast('فشل رفع الصورة: ' + (data.error || 'خطأ غير معروف'), 'error');
-        }
-    } catch (e) {
-        console.error('Upload failed:', e);
-        showToast('حدث خطأ في الاتصال أثناء رفع الصورة', 'error');
-    }
-}
-
-function resetCardCustomImage(teamKey, idx) {
-    const team = cardsBoardConfig[teamKey];
-    if (!team || !team.cards[idx]) return;
-    delete team.cards[idx].customImage;
-    renderCardsDeckList();
-    saveCardsBoardConfig(true);
-    showToast('تمت استعادة صورة الشخصية الافتراضية.', 'info');
-}
-
-function onCardTypeChange(teamKey, idx, val) {
-    if (!cardsBoardConfig[teamKey] || !cardsBoardConfig[teamKey].cards[idx]) return;
-    if (val !== 'custom') {
-        delete cardsBoardConfig[teamKey].cards[idx].customImage;
-        cardsBoardConfig[teamKey].cards[idx].cardType = val;
-    }
-    const avatar = document.getElementById(`${teamKey}_slotAvatar_${idx}`);
-    if (avatar) avatar.src = `/images/mcroyale/${val}.png`;
-    renderCardsDeckList();
-    saveCardsBoardConfig(true);
-}
-
 function onCardCountChange(teamKey, idx, val) {
     if (!cardsBoardConfig[teamKey] || !cardsBoardConfig[teamKey].cards[idx]) return;
     cardsBoardConfig[teamKey].cards[idx].count = Math.max(1, parseInt(val) || 1);
@@ -3089,12 +3045,11 @@ function addNewCardSlot(teamKey = 'teamRed') {
     if (!cardsBoardConfig[teamKey]) return;
     const teamCards = cardsBoardConfig[teamKey].cards;
     const nextId = (teamCards.length ? Math.max(...teamCards.map(c => c.id || 0)) : 0) + 1;
-    const chars = ['skeleton_bandana', 'evoker_mage', 'skeleton_cap', 'hog_rider', 'golem_pumpkin'];
-    const charChoice = chars[teamCards.length % chars.length];
+    const itemChoice = CARD_GIF_ITEMS[teamCards.length % CARD_GIF_ITEMS.length];
     
     teamCards.push({
         id: nextId,
-        cardType: charChoice,
+        cardType: itemChoice.id,
         count: 1,
         giftName: 'وردة',
         giftImage: '/images/rose.png'
@@ -3102,7 +3057,7 @@ function addNewCardSlot(teamKey = 'teamRed') {
 
     renderCardsDeckList();
     saveCardsBoardConfig(true);
-    showToast(`تمت إضافة خانة بطاقة جديدة لـ ${teamKey === 'teamRed' ? 'الفريق الأحمر' : 'الفريق الأزرق'} بنجاح! ➕`, 'success');
+    showToast(`تمت إضافة عنصر بطاقة جديد (${itemChoice.name}) بنجاح! ➕`, 'success');
 }
 
 function deleteCardSlot(teamKey, idx) {
@@ -3113,48 +3068,14 @@ function deleteCardSlot(teamKey, idx) {
     showToast('تم حذف خانة البطاقة.', 'info');
 }
 
-async function addNewCardWithCustomImage(teamKey, file) {
-    if (!file) return;
-    if (!cardsBoardConfig[teamKey]) return;
-    try {
-        const formData = new FormData();
-        formData.append('cardImage', file);
-        showToast('⏳ جاري رفع صورتك الخاصة للبطاقة...', 'info');
-        const res = await fetch('/api/upload-card-image', {
-            method: 'POST',
-            body: formData
-        });
-        const data = await res.json();
-        if (data.success && data.url) {
-            const teamCards = cardsBoardConfig[teamKey].cards;
-            const nextId = (teamCards.length ? Math.max(...teamCards.map(c => c.id || 0)) : 0) + 1;
-            teamCards.push({
-                id: nextId,
-                cardType: 'custom',
-                customImage: data.url,
-                count: 1,
-                giftName: 'وردة',
-                giftImage: '/images/rose.png'
-            });
-            renderCardsDeckList();
-            saveCardsBoardConfig(true);
-            showToast('✅ تمت إضافة بطاقتك بصورتك الخاصة بنجاح!', 'success');
-        } else {
-            showToast('فشل رفع الصورة: ' + (data.error || 'خطأ'), 'error');
-        }
-    } catch (e) {
-        showToast('خطأ أثناء رفع صورة البطاقة', 'error');
-    }
-}
-
 function clearTeamCards(teamKey) {
     if (!cardsBoardConfig[teamKey]) return;
     const teamTitle = cardsBoardConfig[teamKey].title || (teamKey === 'teamRed' ? 'الفريق الأحمر' : 'الفريق الأزرق');
-    if (confirm(`هل أنت متأكد من مسح جميع بطاقات ${teamTitle}؟ ستتمكن بعدها من إضافة صورك الخاصة.`)) {
+    if (confirm(`هل أنت متأكد من مسح جميع عناصر ${teamTitle}؟`)) {
         cardsBoardConfig[teamKey].cards = [];
         renderCardsDeckList();
         saveCardsBoardConfig(true);
-        showToast(`🗑️ تم مسح جميع بطاقات ${teamTitle}. يمكنك الآن إضافة صورك الخاصة!`, 'info');
+        showToast(`🗑️ تم مسح جميع بطاقات ${teamTitle}.`, 'info');
     }
 }
 
@@ -3244,6 +3165,62 @@ async function saveCardsBoardConfig(silent = false) {
         console.error('Save cards failed:', e);
         if (!silent) showToast('فشل الاتصال بالخادم لحفظ البطاقات', 'error');
     }
+}
+
+// ================= VISUAL CHARACTER / ITEM PICKER MODAL (اختيار عنصر البطاقة كـ GIF متحرك كبير) ================= //
+function openVisualCharacterPicker(teamKey, slotIdx) {
+    activeVisualCharTeam = teamKey || 'teamRed';
+    activeVisualCharSlotIdx = slotIdx;
+    const modal = document.getElementById('visualCharacterPickerModal');
+    if (!modal) return;
+    modal.classList.add('open');
+    renderVisualCharactersGallery();
+}
+
+function closeVisualCharacterPicker() {
+    const modal = document.getElementById('visualCharacterPickerModal');
+    if (modal) modal.classList.remove('open');
+    activeVisualCharSlotIdx = null;
+}
+
+function renderVisualCharactersGallery() {
+    const grid = document.getElementById('visualCharactersGalleryGrid');
+    if (!grid) return;
+
+    grid.innerHTML = '';
+    const currentCard = (activeVisualCharSlotIdx !== null && cardsBoardConfig[activeVisualCharTeam]?.cards[activeVisualCharSlotIdx])
+        ? cardsBoardConfig[activeVisualCharTeam].cards[activeVisualCharSlotIdx]
+        : null;
+    const currentType = currentCard ? (currentCard.cardType || 'meteor') : '';
+
+    CARD_GIF_ITEMS.forEach(item => {
+        const isSelected = currentType === item.id;
+        const card = document.createElement('div');
+        card.className = `visual-character-card ${isSelected ? 'selected' : ''}`;
+        card.onclick = () => selectVisualCharacter(item.id, item.name, item.img);
+
+        card.innerHTML = `
+            <img src="${item.img}" alt="${escapeHtml(item.name)}" loading="lazy">
+            <span class="v-char-name">${escapeHtml(item.name)}</span>
+            <span class="v-char-badge">${isSelected ? '✅ العنصر المحدد حالياً' : 'اختر هذا العنصر 🎯'}</span>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+function selectVisualCharacter(itemId, itemName, itemImg) {
+    if (activeVisualCharSlotIdx === null) return;
+    const team = cardsBoardConfig[activeVisualCharTeam];
+    if (!team || !team.cards[activeVisualCharSlotIdx]) return;
+
+    delete team.cards[activeVisualCharSlotIdx].customImage;
+    team.cards[activeVisualCharSlotIdx].cardType = itemId;
+
+    closeVisualCharacterPicker();
+    renderCardsDeckList();
+    saveCardsBoardConfig(true);
+    const teamLabel = activeVisualCharTeam === 'teamRed' ? 'الفريق الأحمر' : 'الفريق الأزرق';
+    showToast(`تم اختيار (${itemName}) لـ ${teamLabel} للبطاقة رقم ${activeVisualCharSlotIdx + 1}! ✨`, 'success');
 }
 
 // ================= VISUAL GIFT PICKER MODAL (اختيار الهدية كصورة) ================= //
