@@ -9,11 +9,22 @@ const badgeBlue = document.getElementById('cardsTeamBlueBadge');
 const badgeRed = document.getElementById('cardsTeamRedBadge');
 
 const CARD4_IMG_MAP = {
-    skeleton_bandana: '/images/mcroyale/skeleton_bandana.png',
-    evoker_mage: '/images/mcroyale/evoker_mage.png',
-    skeleton_cap: '/images/mcroyale/skeleton_cap.png',
-    hog_rider: '/images/mcroyale/hog_rider.png',
-    golem_pumpkin: '/images/mcroyale/golem_pumpkin.png'
+    knight: '/images/mcroyale/knight.gif',
+    skeleton: '/images/mcroyale/skeleton.gif',
+    archer: '/images/mcroyale/archer.gif',
+    giant: '/images/mcroyale/giant.gif',
+    hog: '/images/mcroyale/hog.gif',
+    crown_win: '/images/mcroyale/crown_win.gif',
+    dragon: '/images/mcroyale/dragon.gif',
+    wither: '/images/mcroyale/wither.gif',
+    tnt: '/images/mcroyale/tnt.gif',
+    zombie: '/images/mcroyale/zombie.gif',
+    // Aliases & backward compatibility
+    skeleton_bandana: '/images/mcroyale/skeleton.gif',
+    skeleton_cap: '/images/mcroyale/knight.gif',
+    evoker_mage: '/images/mcroyale/archer.gif',
+    hog_rider: '/images/mcroyale/hog.gif',
+    golem_pumpkin: '/images/mcroyale/giant.gif'
 };
 
 function getImageSrc(image) {
@@ -25,10 +36,10 @@ function getImageSrc(image) {
 }
 
 function getCard4MediaSrc(card) {
-    if (!card) return '/images/mcroyale/skeleton_bandana.png';
+    if (!card) return '/images/mcroyale/skeleton.gif';
     if (card.customImage) return getImageSrc(card.customImage);
-    const key = card.cardType || 'skeleton_bandana';
-    return CARD4_IMG_MAP[key] || `/images/mcroyale/${key}.png`;
+    const key = card.cardType || 'skeleton';
+    return CARD4_IMG_MAP[key] || `/images/mcroyale/${key}.gif`;
 }
 
 function escapeHtml(str) {
@@ -134,11 +145,15 @@ function renderCardsToColumn(columnEl, cards, giftPos, teamColor) {
                 ? card.customText
                 : (card.count ? `X${card.count}` : '');
 
+            const isLikes = (card.giftName && card.giftName.includes('تكبيس')) || (card.giftImage && card.giftImage.includes('tiktok_likes'));
+            const isFollow = (card.giftName && card.giftName.includes('فولو')) || (card.giftImage && card.giftImage.includes('tiktok_follow'));
+            const badgeTypeClass = isLikes ? 'badge-likes' : (isFollow ? 'badge-follow' : '');
+
             item.innerHTML = `
-                <div class="card-gift-badge pos-${giftPos}" title="${escapeHtml(card.giftName || 'هدية')}">
+                <div class="card-gift-badge pos-${giftPos} ${badgeTypeClass}" title="${escapeHtml(card.giftName || 'هدية')}">
                     <img src="${giftSrc}" alt="${escapeHtml(card.giftName || '')}" onerror="this.src='/images/rose.png'">
                 </div>
-                <img class="card-character-img" src="${cardSrc}" alt="Card Item" onerror="this.src='/images/mcroyale/skeleton_bandana.png'">
+                <img class="card-character-img" src="${cardSrc}" alt="Card Item" onerror="this.src='/images/mcroyale/skeleton.gif'">
                 ${displayText ? `<div class="troop-count-badge card-bottom-text">${escapeHtml(displayText)}</div>` : ''}
             `;
             columnEl.appendChild(item);

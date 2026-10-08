@@ -50,8 +50,10 @@ function escapeHtml(str) {
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-// 11 Permanent TikTok Gifts from New folder (6) with their exact names
+// 13 Permanent TikTok Gifts & Triggers (شاملة التكبيس والفولو)
 const POPULAR_GIFTS = [
+    { name: 'تكبيس', image: '/images/tiktok_likes.png', type: 'likes' },
+    { name: 'فولو', image: '/images/tiktok_follow.png', type: 'follow' },
     { name: 'تيربو', image: '/images/rose.png' },
     { name: 'مكوك فضائي', image: '/images/1791197817001-eb77ead5c3abb6da6034d3cf6cfeb438~tplv-obj.webp' },
     { name: 'حمايه', image: '/images/1791197852391-e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp' },
@@ -3582,44 +3584,95 @@ function selectVisualGift(giftName, giftImage) {
 // ================= SECTION: TIKTOK GIFTS 4 (بطاقات كلاسيك رويال MC Royale) ================= //
 const CARD4_MC_ITEMS = [
     {
-        id: 'skeleton_bandana',
-        name: 'هيكل عظمي باندانا',
-        badge: '💀 كلاسيك',
-        desc: 'مقاتل الرماية الأسطوري بباندانا الهيكل',
-        image: '/images/mcroyale/skeleton_bandana.png'
+        id: 'knight',
+        name: 'الفارس المدرع (Caballero)',
+        badge: '⚔️ فارس متحرك',
+        desc: 'فارس كلاسيك رويال المتحرك بالسيف والدرع',
+        image: '/images/mcroyale/knight.gif'
     },
     {
-        id: 'evoker_mage',
-        name: 'الساحر إيفوكر',
-        badge: '🧙‍♂️ ساحر',
-        desc: 'ساحر الاستدعاء القوي بتميمة الخلود',
-        image: '/images/mcroyale/evoker_mage.png'
+        id: 'skeleton',
+        name: 'الهيكل العظمي (Esqueletos)',
+        badge: '💀 هيكل متحرك',
+        desc: 'جيش الهياكل العظمية السريعة المتحركة',
+        image: '/images/mcroyale/skeleton.gif'
     },
     {
-        id: 'skeleton_cap',
-        name: 'محارب القبعة',
-        badge: '⚔️ مقاتل',
-        desc: 'هيكل مدرع بقبعة الحرب وسيف الفولاذ',
-        image: '/images/mcroyale/skeleton_cap.png'
+        id: 'archer',
+        name: 'رامية السهام (Arqueras)',
+        badge: '🏹 رماة متحرك',
+        desc: 'رامية السهام الملكية الأسطورية المتحركة',
+        image: '/images/mcroyale/archer.gif'
     },
     {
-        id: 'hog_rider',
-        name: 'راكب الخنزير',
-        badge: '🐗 اقتحام',
-        desc: 'فارس المطرقة والمغامرة الخاطفة السريعة',
-        image: '/images/mcroyale/hog_rider.png'
+        id: 'giant',
+        name: 'العملاق الضخم (Gigante)',
+        badge: '🛡️ عملاق متحرك',
+        desc: 'العملاق الجبار الدبابة ذو اللكمات القوية',
+        image: '/images/mcroyale/giant.gif'
     },
     {
-        id: 'golem_pumpkin',
-        name: 'وحش اليقطين (غولم)',
-        badge: '🎃 دبابة',
-        desc: 'وحش الحراسة الصامد برأس اليقطين المضيء',
-        image: '/images/mcroyale/golem_pumpkin.png'
+        id: 'hog',
+        name: 'راكب الخنزير (Montapuercos)',
+        badge: '🐗 هوغ متحرك',
+        desc: 'راكب الخنزير السريع بمطرقة الحرب',
+        image: '/images/mcroyale/hog.gif'
+    },
+    {
+        id: 'crown_win',
+        name: 'تاج الفوز الملكي (Crown Win)',
+        badge: '👑 فوز متحرك',
+        desc: 'تاج الفوز الذهبي المتحرك ذو الإشعاع المضيء',
+        image: '/images/mcroyale/crown_win.gif'
+    },
+    {
+        id: 'dragon',
+        name: 'التنين المجنح (Dragon Boss)',
+        badge: '🐉 تنين متحرك',
+        desc: 'تنين المعارك الطائر العملاق',
+        image: '/images/mcroyale/dragon.gif'
+    },
+    {
+        id: 'wither',
+        name: 'وحش الويذر (Wither Boss)',
+        badge: '⚡ ويذر متحرك',
+        desc: 'زعيم الويذر ذو الرؤوس الثلاثة النارية',
+        image: '/images/mcroyale/wither.gif'
+    },
+    {
+        id: 'tnt',
+        name: 'صندوق التي إن تي (TNT Blast)',
+        badge: '💣 متفجرات متحركة',
+        desc: 'صندوق المتفجرات الكلاسيكي المضيء',
+        image: '/images/mcroyale/tnt.gif'
+    },
+    {
+        id: 'zombie',
+        name: 'الزومبي الزاحف (Zombie Rush)',
+        badge: '🧟 زومبي متحرك',
+        desc: 'وحش الزومبي الكلاسيكي السريع',
+        image: '/images/mcroyale/zombie.gif'
     }
 ];
 
 function getCard4McItem(cardType) {
-    return CARD4_MC_ITEMS.find(c => c.id === cardType) || CARD4_MC_ITEMS[0];
+    // Check direct id
+    let found = CARD4_MC_ITEMS.find(c => c.id === cardType);
+    if (found) return found;
+
+    // Check alias mappings for backward compatibility
+    const aliasMap = {
+        skeleton_bandana: 'skeleton',
+        skeleton_cap: 'knight',
+        evoker_mage: 'archer',
+        hog_rider: 'hog',
+        golem_pumpkin: 'giant'
+    };
+    if (aliasMap[cardType]) {
+        return CARD4_MC_ITEMS.find(c => c.id === aliasMap[cardType]) || CARD4_MC_ITEMS[0];
+    }
+
+    return CARD4_MC_ITEMS[0];
 }
 
 let cards4BoardConfig = {
@@ -4051,7 +4104,7 @@ function renderVisualCard4Gallery() {
 
         cardEl.innerHTML = `
             <div style="width:100%; height:110px; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle, rgba(121,40,202,0.2), transparent); border-radius:10px; margin-bottom:8px;">
-                <img src="${item.image}" alt="${escapeHtml(item.name)}" style="max-height:95px; max-width:95px; object-fit:contain; filter:drop-shadow(0 4px 10px rgba(0,0,0,0.6));" onerror="this.src='/images/mcroyale/skeleton_bandana.png'">
+                <img src="${item.image}" alt="${escapeHtml(item.name)}" style="max-height:95px; max-width:95px; object-fit:contain; filter:drop-shadow(0 4px 10px rgba(0,0,0,0.6));" onerror="this.src='/images/mcroyale/skeleton.gif'">
             </div>
             <div style="width:100%;">
                 <span style="background:rgba(121,40,202,0.35); color:#e2bbf7; border:1px solid #7928ca; font-size:10.5px; font-weight:800; padding:2px 8px; border-radius:10px; display:inline-block; margin-bottom:4px;">${escapeHtml(item.badge)}</span>

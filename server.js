@@ -1785,3 +1785,5 @@ server.listen(PORT, () => {
     console.log(`📡 Storage Mode: ${isCloudinaryConfigured() ? 'Cloudinary (Cloud)' : (process.env.IMGBB_API_KEY ? 'ImgBB (Cloud)' : 'Local Disk')}`);
     startKeepAlive();
 });
+
+module.exports = { app, server, io };

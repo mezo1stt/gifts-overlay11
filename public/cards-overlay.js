@@ -144,8 +144,12 @@ function renderCardsToColumn(columnEl, cards, giftPos, teamColor) {
                 ? card.customText
                 : (card.count ? `X${card.count}` : '');
 
+            const isLikes = (card.giftName && card.giftName.includes('تكبيس')) || (card.giftImage && card.giftImage.includes('tiktok_likes'));
+            const isFollow = (card.giftName && card.giftName.includes('فولو')) || (card.giftImage && card.giftImage.includes('tiktok_follow'));
+            const badgeTypeClass = isLikes ? 'badge-likes' : (isFollow ? 'badge-follow' : '');
+
             item.innerHTML = `
-                <div class="card-gift-badge pos-${giftPos}" title="${escapeHtml(card.giftName || 'هدية')}">
+                <div class="card-gift-badge pos-${giftPos} ${badgeTypeClass}" title="${escapeHtml(card.giftName || 'هدية')}">
                     <img src="${giftSrc}" alt="${escapeHtml(card.giftName || '')}" onerror="this.src='/images/rose.png'">
                 </div>
                 <img class="card-character-img" src="${cardSrc}" alt="Card Item" onerror="this.src='/images/cards_gif/meteor.gif'">
