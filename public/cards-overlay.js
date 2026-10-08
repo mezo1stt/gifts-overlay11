@@ -146,6 +146,7 @@ function renderCardsToColumn(columnEl, cards, giftPos, teamColor) {
 
             const isLikes = (card.giftName && card.giftName.includes('تكبيس')) || (card.giftImage && card.giftImage.includes('tiktok_likes'));
             const isFollow = (card.giftName && card.giftName.includes('فولو')) || (card.giftImage && card.giftImage.includes('tiktok_follow'));
+            const badgeTypeClass = isLikes ? 'badge-likes' : (isFollow ? 'badge-follow' : '');
             let badgeInnerHtml = '';
             if (isLikes) {
                 const likesCount = card.likesCount || ((card.giftName || '').match(/\d+/) ? (card.giftName.match(/\d+/)[0]) : 100);

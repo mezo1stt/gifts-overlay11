@@ -667,8 +667,15 @@ app.get('/api/team-gifts/:uid', (req, res) => {
     const uid = req.params.uid;
     const data = readData();
     const board = data[uid] || getDefaultBoard(uid);
-    const teamGifts = board.teamGifts || getDefaultTeamGifts();
-    res.json({ success: true, teamGifts });
+    let tg = board.teamGifts || getDefaultTeamGifts();
+    if (tg.teamGifts && !tg.team1) {
+        tg = tg.teamGifts;
+    }
+    const cleanTeamGifts = {
+        team1: tg.team1 || getDefaultTeamGifts().team1,
+        team2: tg.team2 || getDefaultTeamGifts().team2
+    };
+    res.json({ success: true, teamGifts: cleanTeamGifts });
 });
 
 app.post('/api/team-gifts/:uid', (req, res) => {
@@ -676,10 +683,26 @@ app.post('/api/team-gifts/:uid', (req, res) => {
     const data = readData();
     if (!data[uid]) data[uid] = getDefaultBoard(uid);
 
-    const payload = (req.body && req.body.teamGifts) ? req.body.teamGifts : req.body;
+    const body = req.body || {};
+    const defaultTG = getDefaultTeamGifts();
+    const t1 = body.team1 || (body.teamGifts && body.teamGifts.team1) || data[uid].teamGifts?.team1 || defaultTG.team1;
+    const t2 = body.team2 || (body.teamGifts && body.teamGifts.team2) || data[uid].teamGifts?.team2 || defaultTG.team2;
+
     data[uid].teamGifts = {
-        ...(data[uid].teamGifts || getDefaultTeamGifts()),
-        ...payload
+        team1: {
+            title: (t1 && t1.title) ? t1.title : 'المساعدين',
+            color: (t1 && t1.color) ? t1.color : '#22ff88',
+            icon: (t1 && t1.icon) ? t1.icon : '💚',
+            imageOnlyAnimation: t1 && t1.imageOnlyAnimation !== false,
+            gifts: Array.isArray(t1 && t1.gifts) ? t1.gifts : []
+        },
+        team2: {
+            title: (t2 && t2.title) ? t2.title : 'المخربين',
+            color: (t2 && t2.color) ? t2.color : '#ff2a4a',
+            icon: (t2 && t2.icon) ? t2.icon : '🔥',
+            imageOnlyAnimation: t2 && t2.imageOnlyAnimation !== false,
+            gifts: Array.isArray(t2 && t2.gifts) ? t2.gifts : []
+        }
     };
 
     writeData(data);

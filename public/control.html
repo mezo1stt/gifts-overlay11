@@ -398,6 +398,9 @@
                                             <div class="team-gifts-assigned-list" id="team1AssignedList">
                                                 <!-- Dynamic items -->
                                             </div>
+                                            <button type="button" class="btn-primary mt-2" onclick="openAddGiftModalForTeam('team1')" style="width:100%; font-size:13px; padding:9px 12px; background:linear-gradient(135deg, rgba(34,255,136,0.2), rgba(34,255,136,0.35)); border:1.5px solid #22ff88; color:#fff; font-weight:900; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+                                                <span>➕</span> إضافة هدية للفريق 1 (المساعدين)
+                                            </button>
                                         </div>
 
                                         <div class="team-actions-row mt-2">
@@ -441,6 +444,9 @@
                                             <div class="team-gifts-assigned-list" id="team2AssignedList">
                                                 <!-- Dynamic items -->
                                             </div>
+                                            <button type="button" class="btn-primary mt-2" onclick="openAddGiftModalForTeam('team2')" style="width:100%; font-size:13px; padding:9px 12px; background:linear-gradient(135deg, rgba(255,42,74,0.2), rgba(255,42,74,0.35)); border:1.5px solid #ff2a4a; color:#fff; font-weight:900; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+                                                <span>➕</span> إضافة هدية للفريق 2 (المخربين)
+                                            </button>
                                         </div>
 
                                         <div class="team-actions-row mt-2">
@@ -2163,11 +2169,11 @@
 
             <!-- Special Modes: Likes (التكبيس) & Follow (الفولو) -->
             <div class="special-modes-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; padding:10px 12px; background:linear-gradient(135deg, rgba(255,42,74,0.12), rgba(0,180,216,0.12)); border:1.5px solid rgba(255,215,0,0.3); border-radius:12px;">
-                <button type="button" class="btn-special-trigger" onclick="selectSpecialTrigger('likes')" style="display:flex; align-items:center; gap:12px; padding:8px 12px; background:linear-gradient(135deg, #ff2a4a, #d90429); color:#fff; border:none; border-radius:10px; cursor:pointer; font-weight:900; font-family:'Cairo',sans-serif; text-align:right; box-shadow:0 3px 10px rgba(255,42,74,0.35); transition:transform 0.15s ease;">
+                <button type="button" class="btn-special-trigger" id="btnTriggerLikes" onclick="toggleLikesConfigBox()" style="display:flex; align-items:center; gap:12px; padding:8px 12px; background:linear-gradient(135deg, #ff2a4a, #d90429); color:#fff; border:none; border-radius:10px; cursor:pointer; font-weight:900; font-family:'Cairo',sans-serif; text-align:right; box-shadow:0 3px 10px rgba(255,42,74,0.35); transition:transform 0.15s ease;">
                     <img src="/images/tiktok_likes.png" alt="تكبيس" style="width:36px; height:36px; object-fit:contain; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.4)); flex-shrink:0;">
                     <div style="flex:1;">
                         <div style="font-size:13.5px;">وضع التكبيس (تحديد عدد التكبيسات)</div>
-                        <div style="font-size:11px; opacity:0.9; font-weight:normal;">يسألك كم تكبيسة ويحفظ فوراً (مثال: 100)</div>
+                        <div style="font-size:11px; opacity:0.9; font-weight:normal;">تحديد العدد وتطبيقه فوراً للبطاقة 👇</div>
                     </div>
                 </button>
                 <button type="button" class="btn-special-trigger" onclick="selectSpecialTrigger('follow')" style="display:flex; align-items:center; gap:12px; padding:8px 12px; background:linear-gradient(135deg, #00b4d8, #0077b6); color:#fff; border:none; border-radius:10px; cursor:pointer; font-weight:900; font-family:'Cairo',sans-serif; text-align:right; box-shadow:0 3px 10px rgba(0,180,216,0.35); transition:transform 0.15s ease;">
@@ -2177,6 +2183,27 @@
                         <div style="font-size:11px; opacity:0.9; font-weight:normal;">نقرة واحدة وحفظ فوري للبطاقة ✨</div>
                     </div>
                 </button>
+            </div>
+
+            <!-- Inline Likes Count Selector Box (No window.prompt, 100% works in Electron) -->
+            <div id="likesConfigInlineBox" style="display:none; margin-bottom:14px; padding:12px 14px; background:rgba(255,42,74,0.16); border:2px solid #ff2a4a; border-radius:12px; box-shadow:0 6px 20px rgba(255,42,74,0.3); animation:fadeIn 0.2s ease;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <span style="font-size:13.5px; font-weight:900; color:#fff;">❤️ كم عدد التكبيسات (اللايكات) المطلوبة لتفعيل البطاقة؟</span>
+                    <button type="button" onclick="toggleLikesConfigBox(false)" style="background:none; border:none; color:#cbd5e1; cursor:pointer; font-size:16px; font-weight:bold;">✕</button>
+                </div>
+                <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;">
+                    <button type="button" class="chip likes-preset-chip" onclick="setLikesCountValue(50, this)">50 ❤️</button>
+                    <button type="button" class="chip active likes-preset-chip" onclick="setLikesCountValue(100, this)">100 ❤️</button>
+                    <button type="button" class="chip likes-preset-chip" onclick="setLikesCountValue(200, this)">200 ❤️</button>
+                    <button type="button" class="chip likes-preset-chip" onclick="setLikesCountValue(500, this)">500 ❤️</button>
+                    <button type="button" class="chip likes-preset-chip" onclick="setLikesCountValue(1000, this)">1,000 🚀</button>
+                </div>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <input type="number" id="likesCountCustomInput" class="form-input" value="100" min="1" max="999999" style="width:130px; font-size:16px; font-weight:900; text-align:center; padding:8px 10px; border-color:#ff2a4a;" placeholder="أدخل العدد" onkeydown="if(event.key==='Enter') confirmLikesTrigger()">
+                    <button type="button" class="btn-primary" onclick="confirmLikesTrigger()" style="flex:1; background:linear-gradient(135deg, #ff2a4a, #d90429); font-weight:900; font-size:14px; padding:9px 16px; box-shadow:0 4px 15px rgba(255,42,74,0.4);">
+                        ✓ تأكيد وتطبيق التكبيس على البطاقة ❤️
+                    </button>
+                </div>
             </div>
 
             <!-- Search & Filter Controls -->

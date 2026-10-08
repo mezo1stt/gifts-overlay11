@@ -312,6 +312,64 @@
           }
         ]
       }
+    },
+    "teamGifts": {
+      "team1": {
+        "title": "المساعدين",
+        "color": "#22ff88",
+        "icon": "💚",
+        "imageOnlyAnimation": true,
+        "gifts": [
+          {
+            "id": 101,
+            "name": "تيربو",
+            "image": "rose.png"
+          },
+          {
+            "id": 102,
+            "name": "حمايه",
+            "image": "1791197852391-e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp"
+          },
+          {
+            "id": 103,
+            "name": "بوابه",
+            "image": "donut.png"
+          },
+          {
+            "id": 104,
+            "name": "اسرع لاعب",
+            "image": "1791198042522-9f8bd92363c400c284179f6719b6ba9c~tplv-obj.webp"
+          }
+        ]
+      },
+      "team2": {
+        "title": "المخربين",
+        "color": "#ff2a4a",
+        "icon": "🔥",
+        "imageOnlyAnimation": true,
+        "gifts": [
+          {
+            "id": 201,
+            "name": "صاروخ",
+            "image": "perfume.png"
+          },
+          {
+            "id": 202,
+            "name": "نيزك",
+            "image": "1791197748042-81cb495abfe066981b9c135cfff21c7a.png~tplv-obj.webp"
+          },
+          {
+            "id": 203,
+            "name": "تبطئ الاعبين",
+            "image": "1791197915043-374dfe46d5b09ce1db19be06202d34f5.png~tplv-obj.webp"
+          },
+          {
+            "id": 204,
+            "name": "نقل اسطوري",
+            "image": "1791198055544-79a02148079526539f7599150da9fd28.png~tplv-obj.webp"
+          }
+        ]
+      }
     }
   },
   "board_test": {
@@ -433,6 +491,64 @@
             "count": 1,
             "giftName": "مكوك فضائي",
             "giftImage": "/images/1791197817001-eb77ead5c3abb6da6034d3cf6cfeb438~tplv-obj.webp"
+          }
+        ]
+      }
+    },
+    "teamGifts": {
+      "team1": {
+        "title": "المساعدين",
+        "color": "#22ff88",
+        "icon": "💚",
+        "imageOnlyAnimation": true,
+        "gifts": [
+          {
+            "id": 101,
+            "name": "تيربو",
+            "image": "rose.png"
+          },
+          {
+            "id": 102,
+            "name": "حمايه",
+            "image": "1791197852391-e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp"
+          },
+          {
+            "id": 103,
+            "name": "بوابه",
+            "image": "donut.png"
+          },
+          {
+            "id": 104,
+            "name": "اسرع لاعب",
+            "image": "1791198042522-9f8bd92363c400c284179f6719b6ba9c~tplv-obj.webp"
+          }
+        ]
+      },
+      "team2": {
+        "title": "المخربين",
+        "color": "#ff2a4a",
+        "icon": "🔥",
+        "imageOnlyAnimation": true,
+        "gifts": [
+          {
+            "id": 201,
+            "name": "صاروخ",
+            "image": "perfume.png"
+          },
+          {
+            "id": 202,
+            "name": "نيزك",
+            "image": "1791197748042-81cb495abfe066981b9c135cfff21c7a.png~tplv-obj.webp"
+          },
+          {
+            "id": 203,
+            "name": "تبطئ الاعبين",
+            "image": "1791197915043-374dfe46d5b09ce1db19be06202d34f5.png~tplv-obj.webp"
+          },
+          {
+            "id": 204,
+            "name": "نقل اسطوري",
+            "image": "1791198055544-79a02148079526539f7599150da9fd28.png~tplv-obj.webp"
           }
         ]
       }
@@ -577,6 +693,64 @@
           }
         ]
       }
+    },
+    "teamGifts": {
+      "team1": {
+        "title": "المساعدين",
+        "color": "#22ff88",
+        "icon": "💚",
+        "imageOnlyAnimation": true,
+        "gifts": [
+          {
+            "id": 101,
+            "name": "تيربو",
+            "image": "rose.png"
+          },
+          {
+            "id": 102,
+            "name": "حمايه",
+            "image": "1791197852391-e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp"
+          },
+          {
+            "id": 103,
+            "name": "بوابه",
+            "image": "donut.png"
+          },
+          {
+            "id": 104,
+            "name": "اسرع لاعب",
+            "image": "1791198042522-9f8bd92363c400c284179f6719b6ba9c~tplv-obj.webp"
+          }
+        ]
+      },
+      "team2": {
+        "title": "المخربين",
+        "color": "#ff2a4a",
+        "icon": "🔥",
+        "imageOnlyAnimation": true,
+        "gifts": [
+          {
+            "id": 201,
+            "name": "صاروخ",
+            "image": "perfume.png"
+          },
+          {
+            "id": 202,
+            "name": "نيزك",
+            "image": "1791197748042-81cb495abfe066981b9c135cfff21c7a.png~tplv-obj.webp"
+          },
+          {
+            "id": 203,
+            "name": "تبطئ الاعبين",
+            "image": "1791197915043-374dfe46d5b09ce1db19be06202d34f5.png~tplv-obj.webp"
+          },
+          {
+            "id": 204,
+            "name": "نقل اسطوري",
+            "image": "1791198055544-79a02148079526539f7599150da9fd28.png~tplv-obj.webp"
+          }
+        ]
+      }
     }
   },
   "default": {
@@ -704,30 +878,6 @@
             "image": "1791198055544-79a02148079526539f7599150da9fd28.png~tplv-obj.webp"
           }
         ]
-      },
-      "teamGifts": {
-        "team1": {
-          "title": "المساعدين الخارقين",
-          "color": "#00ffcc",
-          "gifts": [
-            {
-              "id": 101,
-              "name": "تيربو",
-              "image": "rose.png"
-            }
-          ]
-        },
-        "team2": {
-          "title": "المخربين الأشرار",
-          "color": "#ff0033",
-          "gifts": [
-            {
-              "id": 201,
-              "name": "صاروخ",
-              "image": "perfume.png"
-            }
-          ]
-        }
       }
     },
     "cardsBoard": {

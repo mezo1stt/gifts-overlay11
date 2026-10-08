@@ -1881,6 +1881,12 @@ function renderTeamGiftsUI() {
         }
     }
 
+    // Update preview links with UID
+    const p1 = document.getElementById('team1PreviewLink');
+    if (p1) p1.href = `/overlay-team.html?team=1&uid=${currentUid}`;
+    const p2 = document.getElementById('team2PreviewLink');
+    if (p2) p2.href = `/overlay-team.html?team=2&uid=${currentUid}`;
+
     // 3. Render Mutual Exclusion Library Chips
     renderMutualExclusionGrid();
 }
@@ -2027,7 +2033,32 @@ function setActiveTargetTeam(team) {
     renderMutualExclusionGrid();
 }
 
+function openAddGiftModalForTeam(teamKey) {
+    setActiveTargetTeam(teamKey);
+    const box = document.querySelector('.exclusion-library-box');
+    if (box) {
+        box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        box.style.boxShadow = '0 0 25px rgba(0,255,200,0.6)';
+        box.style.border = '2px solid #00ffcc';
+        setTimeout(() => {
+            box.style.boxShadow = '';
+            box.style.border = '';
+        }, 1800);
+    }
+    const searchInp = document.getElementById('teamGiftsSearchInput');
+    if (searchInp) {
+        searchInp.focus();
+    }
+    const teamTitle = teamKey === 'team1' ? (currentTeamGifts.team1?.title || 'الفريق 1') : (currentTeamGifts.team2?.title || 'الفريق 2');
+    showToast(`🎯 تم تفعيل الإضافة لـ (${teamTitle}). اضغط على أي هدية من المكتبة أدناه لإضافتها فوراً!`, 'info');
+}
+
 function toggleGiftInTeam(gift) {
+    if (!currentTeamGifts.team1) currentTeamGifts.team1 = { title: 'المساعدين', color: '#22ff88', icon: '💚', imageOnlyAnimation: true, gifts: [] };
+    if (!currentTeamGifts.team2) currentTeamGifts.team2 = { title: 'المخربين', color: '#ff2a4a', icon: '🔥', imageOnlyAnimation: true, gifts: [] };
+    if (!Array.isArray(currentTeamGifts.team1.gifts)) currentTeamGifts.team1.gifts = [];
+    if (!Array.isArray(currentTeamGifts.team2.gifts)) currentTeamGifts.team2.gifts = [];
+
     const target = currentTeamGifts[activeTargetTeam];
     if (!target) return;
 
@@ -2036,7 +2067,7 @@ function toggleGiftInTeam(gift) {
     const otherImages = new Set((currentTeamGifts[otherTeamKey]?.gifts || []).map(g => normalizeImgPath(g.image)));
 
     if (otherImages.has(norm)) {
-        showToast('⚠️ لا يمكن إضافة هذه الهدية لأنها مستخدمة في الفريق الآخر! ممنوع التكرار.', 'warning');
+        showToast(`⚠️ هذه الهدية (${gift.name}) محجوزة بالفعل في الفريق المعاكس! قاعدة النظام تمنع تكرار الصور بين الفرق نهائياً.`, 'warning');
         return;
     }
 
@@ -2058,7 +2089,7 @@ function toggleGiftInTeam(gift) {
 }
 
 function removeGiftFromTeam(teamKey, index) {
-    if (currentTeamGifts[teamKey] && currentTeamGifts[teamKey].gifts[index]) {
+    if (currentTeamGifts[teamKey] && currentTeamGifts[teamKey].gifts && currentTeamGifts[teamKey].gifts[index]) {
         const removed = currentTeamGifts[teamKey].gifts.splice(index, 1);
         showToast(`تمت إزالة (${removed[0]?.name})`, 'info');
         renderTeamGiftsUI();
@@ -2096,10 +2127,27 @@ function toggleTeamImageOnly(teamKey) {
 
 async function saveTeamGiftsAction(showFeedback = true) {
     try {
+        const cleanPayload = {
+            team1: {
+                title: currentTeamGifts.team1?.title || 'المساعدين',
+                color: currentTeamGifts.team1?.color || '#22ff88',
+                icon: currentTeamGifts.team1?.icon || '💚',
+                imageOnlyAnimation: currentTeamGifts.team1?.imageOnlyAnimation !== false,
+                gifts: Array.isArray(currentTeamGifts.team1?.gifts) ? currentTeamGifts.team1.gifts : []
+            },
+            team2: {
+                title: currentTeamGifts.team2?.title || 'المخربين',
+                color: currentTeamGifts.team2?.color || '#ff2a4a',
+                icon: currentTeamGifts.team2?.icon || '🔥',
+                imageOnlyAnimation: currentTeamGifts.team2?.imageOnlyAnimation !== false,
+                gifts: Array.isArray(currentTeamGifts.team2?.gifts) ? currentTeamGifts.team2.gifts : []
+            }
+        };
+
         const res = await fetch(`/api/team-gifts/${currentUid}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(currentTeamGifts)
+            body: JSON.stringify(cleanPayload)
         });
         const data = await res.json();
         if (data.success) {
@@ -3456,12 +3504,17 @@ function openVisualGiftPicker(teamKey, slotIdx, context = 'cards3') {
     const searchInput = document.getElementById('visualGiftSearchInput');
     if (searchInput) searchInput.value = '';
 
+    const likesBox = document.getElementById('likesConfigInlineBox');
+    if (likesBox) likesBox.style.display = 'none';
+
     renderVisualGiftsGallery();
 }
 
 function closeVisualGiftPicker() {
     const modal = document.getElementById('visualGiftPickerModal');
     if (modal) modal.classList.remove('open');
+    const likesBox = document.getElementById('likesConfigInlineBox');
+    if (likesBox) likesBox.style.display = 'none';
     activeCardSlotIndex = null;
 }
 
@@ -3583,6 +3636,48 @@ function renderVisualGiftsGallery() {
     }
 }
 
+function toggleLikesConfigBox(forceState) {
+    if (activeCardSlotIndex === null) {
+        showToast('يرجى النقر على زر اختيار الهدية في البطاقة أولاً!', 'warning');
+        return;
+    }
+    const box = document.getElementById('likesConfigInlineBox');
+    if (!box) return;
+    if (typeof forceState === 'boolean') {
+        box.style.display = forceState ? 'block' : 'none';
+    } else {
+        box.style.display = (box.style.display === 'none' || !box.style.display) ? 'block' : 'none';
+    }
+    if (box.style.display === 'block') {
+        const inp = document.getElementById('likesCountCustomInput');
+        if (inp) {
+            inp.focus();
+            inp.select();
+        }
+    }
+}
+
+function setLikesCountValue(val, chipElem) {
+    const inp = document.getElementById('likesCountCustomInput');
+    if (inp) inp.value = val;
+    document.querySelectorAll('.likes-preset-chip').forEach(c => c.classList.remove('active'));
+    if (chipElem) chipElem.classList.add('active');
+}
+
+function confirmLikesTrigger() {
+    if (activeCardSlotIndex === null) {
+        showToast('يرجى النقر على زر اختيار الهدية في البطاقة أولاً!', 'warning');
+        return;
+    }
+    const inp = document.getElementById('likesCountCustomInput');
+    const val = parseInt(inp ? inp.value : '100') || 100;
+    const finalCount = Math.max(1, Math.min(999999, val));
+    const giftName = `تكبيس (❤️ X${finalCount})`;
+    const giftImage = '/images/tiktok_likes.png';
+    applyGiftToCardSlot(giftName, giftImage, finalCount);
+    toggleLikesConfigBox(false);
+}
+
 function selectSpecialTrigger(type) {
     if (activeCardSlotIndex === null) {
         showToast('يرجى النقر على زر اختيار الهدية في البطاقة أولاً!', 'warning');
@@ -3590,12 +3685,7 @@ function selectSpecialTrigger(type) {
     }
 
     if (type === 'likes') {
-        const input = prompt('❤️ أدخل عدد التكبيسات المطلوبة لتفعيل البطاقة (مثال: 100 أو 50 أو 500):', '100');
-        if (input === null) return; // User cancelled
-        const count = parseInt(input.trim()) || 100;
-        const giftName = `تكبيس (❤️ X${count})`;
-        const giftImage = '/images/tiktok_likes.png';
-        applyGiftToCardSlot(giftName, giftImage, count);
+        toggleLikesConfigBox(true);
     } else if (type === 'follow') {
         const giftName = 'متابعة (فولو 👤+)';
         const giftImage = '/images/tiktok_follow.png';
@@ -3614,6 +3704,8 @@ function applyGiftToCardSlot(giftName, giftImage, likesCount = null) {
         team.cards[activeCardSlotIndex].giftImage = giftImage;
         if (likesCount) {
             team.cards[activeCardSlotIndex].likesCount = likesCount;
+            team.cards[activeCardSlotIndex].customText = `X${likesCount}`;
+            team.cards[activeCardSlotIndex].count = likesCount;
         } else {
             delete team.cards[activeCardSlotIndex].likesCount;
         }
@@ -3629,6 +3721,13 @@ function applyGiftToCardSlot(giftName, giftImage, likesCount = null) {
 
         team.cards[activeCardSlotIndex].giftName = giftName;
         team.cards[activeCardSlotIndex].giftImage = giftImage;
+        if (likesCount) {
+            team.cards[activeCardSlotIndex].likesCount = likesCount;
+            team.cards[activeCardSlotIndex].customText = `X${likesCount}`;
+            team.cards[activeCardSlotIndex].count = likesCount;
+        } else {
+            delete team.cards[activeCardSlotIndex].likesCount;
+        }
 
         closeVisualGiftPicker();
         renderCardsDeckList();
