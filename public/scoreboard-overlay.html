@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scoreboard Display | لوحة النتائج</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Changa:wght@700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@800;900&family=Changa:wght@800;900&family=Tajawal:wght@800;900&family=Teko:wght@700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -16,41 +16,43 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: 'Cairo', 'Changa', sans-serif;
+            font-family: 'Tajawal', 'Cairo', 'Changa', sans-serif;
             user-select: none;
         }
 
         :root {
-            --badge-w: 92px;
-            --badge-font-sz: 54px;
+            --badge-w: 96px;
+            --badge-font-sz: 56px;
         }
 
-        /* Perfectly Symmetrical 3-Column Esports Layout */
+        /* Perfectly Symmetrical 3-Column Luxury Esports Layout */
         .scoreboard-stage {
             display: grid;
             grid-template-columns: 1fr auto 1fr;
             align-items: center;
-            gap: clamp(12px, 2vw, 24px);
-            width: min(94vw, 860px);
-            max-width: 860px;
-            background: linear-gradient(135deg, rgba(20, 10, 15, 0.95), rgba(10, 14, 25, 0.95));
-            border: 2px solid rgba(255, 255, 255, 0.16);
-            border-radius: 26px;
-            padding: clamp(10px, 1.5vw, 16px) clamp(16px, 2.5vw, 32px);
+            gap: clamp(14px, 2.2vw, 28px);
+            width: min(94vw, 880px);
+            max-width: 880px;
+            background: linear-gradient(135deg, rgba(16, 8, 24, 0.96), rgba(8, 12, 28, 0.96));
+            border: 2.5px solid rgba(255, 255, 255, 0.22);
+            border-radius: 28px;
+            padding: clamp(12px, 1.6vw, 18px) clamp(18px, 2.8vw, 36px);
             box-shadow: 
-                0 12px 45px rgba(0, 0, 0, 0.9),
-                0 0 30px rgba(255, 42, 74, 0.28),
-                0 0 30px rgba(34, 255, 136, 0.28);
-            backdrop-filter: blur(16px);
+                0 18px 50px rgba(0, 0, 0, 0.95),
+                0 0 35px var(--color-team-a, rgba(255, 42, 74, 0.35)),
+                0 0 35px var(--color-team-b, rgba(34, 255, 136, 0.35)),
+                inset 0 0 25px rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(20px);
             direction: ltr; /* Grid symmetry strictly LTR */
             box-sizing: border-box;
+            position: relative;
         }
 
         /* Team Columns: Equal 1fr width prevents any off-center skew */
         .team-box {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 16px;
             min-width: 0;
             overflow: hidden;
         }
@@ -70,7 +72,7 @@
         .team-info {
             display: flex;
             flex-direction: column;
-            gap: 2px;
+            gap: 3px;
             min-width: 0;
             overflow: hidden;
             flex: 1;
@@ -87,49 +89,56 @@
         }
 
         .team-name {
-            font-size: clamp(16px, 2vw, 24px);
+            font-family: 'Tajawal', 'Cairo', sans-serif;
+            font-size: clamp(18px, 2.3vw, 26px);
             font-weight: 900;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             max-width: 100%;
+            letter-spacing: 0.5px;
+            filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.9));
         }
 
         .team-badge {
-            font-size: 11px;
-            font-weight: 800;
+            font-size: 11.5px;
+            font-weight: 900;
             letter-spacing: 0.5px;
-            opacity: 0.85;
+            opacity: 0.9;
             white-space: nowrap;
         }
 
         /* Mathematically symmetric score badges that dynamically scale */
         .team-score-badge {
-            width: var(--badge-w, 92px);
-            min-width: var(--badge-w, 92px);
-            height: 80px;
+            width: var(--badge-w, 96px);
+            min-width: var(--badge-w, 96px);
+            height: 84px;
             flex-shrink: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 18px;
-            font-family: 'Changa', sans-serif;
-            font-size: var(--badge-font-sz, 54px);
+            border-radius: 20px;
+            font-family: 'Changa', 'Teko', 'Impact', sans-serif;
+            font-size: var(--badge-font-sz, 56px);
             font-weight: 900;
             line-height: 1;
             padding: 0 10px;
             font-variant-numeric: tabular-nums;
             transition: all 0.22s cubic-bezier(0.18, 0.89, 0.32, 1.28);
             box-sizing: border-box;
-            letter-spacing: -0.5px;
+            letter-spacing: 0px;
             white-space: nowrap;
             overflow: hidden;
+            -webkit-text-stroke: 2px #000;
+            text-shadow: 
+                0 4px 12px rgba(0, 0, 0, 0.95),
+                0 0 20px rgba(255, 255, 255, 0.9);
         }
 
-        /* Team A: Customizable Neon */
+        /* Team A: Customizable Luxury Neon */
         .team-a .team-name {
             color: var(--color-team-a, #ff3355);
-            text-shadow: 0 0 10px var(--color-team-a, rgba(255, 51, 85, 0.65));
+            text-shadow: 0 0 14px var(--color-team-a, rgba(255, 51, 85, 0.75)), 0 3px 6px #000;
         }
         .team-a .team-badge {
             color: var(--color-team-a, #ff8899);
@@ -137,18 +146,18 @@
         }
         .team-a .team-score-badge {
             color: #ffffff;
-            background: linear-gradient(135deg, rgba(20, 10, 15, 0.8), rgba(10, 10, 20, 0.9));
-            border: 2.5px solid var(--color-team-a, #ff2a4a);
+            background: linear-gradient(145deg, rgba(30, 10, 20, 0.9), rgba(12, 10, 24, 0.95));
+            border: 3px solid var(--color-team-a, #ff2a4a);
             box-shadow: 
-                0 0 22px var(--color-team-a, rgba(255, 42, 74, 0.65)),
-                inset 0 0 16px var(--color-team-a, rgba(255, 42, 74, 0.3));
-            text-shadow: 0 0 16px rgba(255, 255, 255, 0.85);
+                0 0 26px var(--color-team-a, rgba(255, 42, 74, 0.75)),
+                inset 0 0 20px var(--color-team-a, rgba(255, 42, 74, 0.35)),
+                0 8px 24px rgba(0, 0, 0, 0.9);
         }
 
-        /* Team B: Customizable Neon */
+        /* Team B: Customizable Luxury Neon */
         .team-b .team-name {
             color: var(--color-team-b, #22ff88);
-            text-shadow: 0 0 10px var(--color-team-b, rgba(34, 255, 136, 0.65));
+            text-shadow: 0 0 14px var(--color-team-b, rgba(34, 255, 136, 0.75)), 0 3px 6px #000;
         }
         .team-b .team-badge {
             color: var(--color-team-b, #88ffbb);
@@ -156,12 +165,12 @@
         }
         .team-b .team-score-badge {
             color: #ffffff;
-            background: linear-gradient(135deg, rgba(10, 20, 15, 0.8), rgba(10, 10, 20, 0.9));
-            border: 2.5px solid var(--color-team-b, #22ff88);
+            background: linear-gradient(145deg, rgba(10, 30, 20, 0.9), rgba(10, 14, 26, 0.95));
+            border: 3px solid var(--color-team-b, #22ff88);
             box-shadow: 
-                0 0 22px var(--color-team-b, rgba(34, 255, 136, 0.65)),
-                inset 0 0 16px var(--color-team-b, rgba(34, 255, 136, 0.3));
-            text-shadow: 0 0 16px rgba(255, 255, 255, 0.85);
+                0 0 26px var(--color-team-b, rgba(34, 255, 136, 0.75)),
+                inset 0 0 20px var(--color-team-b, rgba(34, 255, 136, 0.35)),
+                0 8px 24px rgba(0, 0, 0, 0.9);
         }
 
         /* Perfectly Centered VS Divider */
@@ -171,33 +180,36 @@
             align-items: center;
             justify-content: center;
             gap: 4px;
-            padding: 0 18px;
-            border-left: 1.5px solid rgba(255, 255, 255, 0.12);
-            border-right: 1.5px solid rgba(255, 255, 255, 0.12);
+            padding: 0 20px;
+            border-left: 1.5px solid rgba(255, 255, 255, 0.16);
+            border-right: 1.5px solid rgba(255, 255, 255, 0.16);
             direction: rtl;
         }
 
         .vs-badge {
-            font-family: 'Changa', sans-serif;
-            font-size: 28px;
+            font-family: 'Changa', 'Tajawal', sans-serif;
+            font-size: 34px;
             font-weight: 900;
-            color: #ffd700;
-            text-shadow: 0 0 18px rgba(255, 215, 0, 0.85);
-            letter-spacing: 2px;
+            background: linear-gradient(180deg, #ffffff 0%, #ffd700 45%, #ff9900 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 18px rgba(255, 215, 0, 0.9));
+            letter-spacing: 2.5px;
             line-height: 1;
         }
 
         .scoreboard-title-text {
-            font-size: 12.5px;
-            font-weight: 800;
-            color: #cbd5e1;
+            font-size: 13px;
+            font-weight: 900;
+            color: #f1f5f9;
             white-space: nowrap;
             letter-spacing: 0.5px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.8);
         }
 
         .score-bump {
-            transform: scale(1.3) !important;
-            filter: brightness(1.3);
+            transform: scale(1.32) !important;
+            filter: brightness(1.4) drop-shadow(0 0 25px currentColor);
         }
     </style>
 </head>

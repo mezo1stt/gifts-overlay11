@@ -54,6 +54,13 @@
                     <span class="nav-badge hot">جديد 👑</span>
                 </button>
 
+                <!-- 3.5 هدايا تيك توك 4 (بطاقات كلاسيك / MC Royale) -->
+                <button class="nav-item" data-tab="cards4GiftsSection">
+                    <span class="nav-icon">🎴</span>
+                    <span class="nav-label">هدايا تيك توك 4 (كلاسيك)</span>
+                    <span class="nav-badge hot">جديد ⚔️</span>
+                </button>
+
                 <!-- 3. نص (متغير) -->
                 <button class="nav-item" data-tab="fireSection">
                     <span class="nav-icon">📝</span>
@@ -705,6 +712,197 @@
                                             🔴 نسخ رابط الفريق الأحمر
                                         </button>
                                         <button class="btn-obs-action" onclick="copyCardsOverlayUrl('blue')" style="font-size:11.5px; padding:7px;">
+                                            🔵 نسخ رابط الفريق الأزرق
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- ================= SECTION 3.5: هدايا تيك توك 4 (بطاقات كلاسيك / MC Royale) ================= -->
+                <section class="tab-section" id="cards4GiftsSection">
+                    <div class="dashboard-grid">
+                        
+                        <!-- Left Column: Settings & Cards Decks for Both Teams -->
+                        <div class="panel-section control-panel">
+
+                            <!-- Card Appearance & Neon & Fonts -->
+                            <div class="panel-card">
+                                <div class="card-header-flex">
+                                    <h3 class="card-title"><span>🎴 مظهر وإعدادات بطاقات كلاسيك (MC Royale)</span></h3>
+                                    <span class="badge-tag" style="background:#7928ca;">هدايا تيك توك 4 ⚔️</span>
+                                </div>
+
+                                <!-- Neon Glow Option (وضع نيون ولا لا) -->
+                                <div class="form-group mt-3" style="background:rgba(255,255,255,0.03); padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,0.08); display:flex; justify-content:space-between; align-items:center;">
+                                    <div>
+                                        <label style="margin:0; font-size:13px; font-weight:800; color:#fff;">💡 توهج النيون (Neon Glow):</label>
+                                        <div style="font-size:11px; color:#94a3b8; margin-top:2px;">خيار بطاقات بتوهج نيون مشع أو بطاقات طبيعية بدقة عالية</div>
+                                    </div>
+                                    <div class="btn-toggle-group" style="margin:0;">
+                                        <button type="button" class="btn-toggle active" id="btnCards4NeonOn" onclick="toggleCards4Neon(true)">✨ نيون مشع</button>
+                                        <button type="button" class="btn-toggle" id="btnCards4NeonOff" onclick="toggleCards4Neon(false)">⚪ بدون نيون</button>
+                                    </div>
+                                </div>
+
+                                <!-- Fonts for Card Bottom Text -->
+                                <div class="form-group mt-3">
+                                    <label>🔤 نوع الخط للنص أسفل البطاقة (عربي وإنجليزي):</label>
+                                    <div class="cards-font-chips-grid mt-1" id="cards4FontChips">
+                                        <button type="button" class="chip active font-impact-preview" data-font="impact" onclick="setCards4Font('impact')">🔥 ألعاب (Impact)</button>
+                                        <button type="button" class="chip font-pixel-preview" data-font="pixel" onclick="setCards4Font('pixel')">🎮 بكسل (Minecraft)</button>
+                                        <button type="button" class="chip font-cyber-preview" data-font="cyber" onclick="setCards4Font('cyber')">⚡ سايبر (Changa)</button>
+                                        <button type="button" class="chip font-cairo-preview" data-font="cairo" onclick="setCards4Font('cairo')">🌟 كايرو (Cairo 900)</button>
+                                        <button type="button" class="chip font-tajawal-preview" data-font="tajawal" onclick="setCards4Font('tajawal')">👑 فخامة (Tajawal)</button>
+                                    </div>
+                                </div>
+
+                                <!-- Gift Position on Card -->
+                                <div class="form-group mt-3">
+                                    <label>📍 مكان ظهور صورة الهدية على البطاقة:</label>
+                                    <div class="cards-pos-chips-grid mt-1" id="cards4GiftPosChips">
+                                        <button type="button" class="chip active" data-pos="top-right" onclick="setCards4GiftPos('top-right')">↗️ أعلى اليمين</button>
+                                        <button type="button" class="chip" data-pos="top-left" onclick="setCards4GiftPos('top-left')">↖️ أعلى اليسار</button>
+                                        <button type="button" class="chip" data-pos="center" onclick="setCards4GiftPos('center')">⏺️ في المنتصف</button>
+                                        <button type="button" class="chip" data-pos="bottom-right" onclick="setCards4GiftPos('bottom-right')">↘️ أسفل اليمين</button>
+                                        <button type="button" class="chip" data-pos="bottom-left" onclick="setCards4GiftPos('bottom-left')">↙️ أسفل اليسار</button>
+                                        <button type="button" class="chip" data-pos="beside" onclick="setCards4GiftPos('beside')">➡️ بجانب البطاقة</button>
+                                        <button type="button" class="chip" data-pos="none" onclick="setCards4GiftPos('none')">🚫 إخفاء أيقونة الهدية</button>
+                                    </div>
+                                </div>
+
+                                <!-- Disappearance Mode -->
+                                <div class="form-group mt-3">
+                                    <label>⏱️ وضع وتأثير اختفاء الهدية والبطاقة:</label>
+                                    <div class="pos-preset-buttons mt-1">
+                                        <button type="button" class="btn-pos active" id="btnDisappear4GiftOnly" onclick="setCards4DisappearMode('gift_only')">
+                                             📌 الهدية تختفي وتبقى البطاقة ثابتة دائماً
+                                        </button>
+                                        <button type="button" class="btn-pos" id="btnDisappear4CardAndGift" onclick="setCards4DisappearMode('card_and_gift')">
+                                            🔄 تختفي البطاقة كاملة مع الهدية
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Vertical Offset -->
+                                <div class="slider-group mt-3">
+                                    <div class="slider-header">
+                                        <label>↕️ إزاحة رأسية للشاشتين (Y-Offset):</label>
+                                        <span class="slider-badge" id="cards4OffsetYBadge">0 px</span>
+                                    </div>
+                                    <input type="range" id="cards4OffsetYSlider" min="-300" max="300" value="0" oninput="onCards4OffsetYChange(this.value)">
+                                </div>
+
+                            </div>
+
+                            <!-- Cards Teams Dual Boxes -->
+                            <div class="team-dual-grid mt-3">
+                                
+                                <!-- 1. Team Red Box -->
+                                <div class="team-manage-card team-2-card" style="border-color:#ff2a4a; box-shadow:0 0 15px rgba(255,42,74,0.25);">
+                                    <div class="team-card-header">
+                                        <div class="team-badge-tag red">🔴 الفريق الأحمر</div>
+                                        <div class="team-color-picker-box">
+                                            <label for="cards4TeamRedColor">اللون:</label>
+                                            <input type="color" id="cards4TeamRedColor" value="#ff2a4a" onchange="onCards4TeamColorChange('teamRed', this.value)">
+                                            <span id="cards4TeamRedColorHex" style="font-size:12px; color:#ff2a4a; font-weight:800;">#ff2a4a</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="cards4TeamRedTitle">اسم الفريق الأحمر:</label>
+                                        <input type="text" id="cards4TeamRedTitle" class="form-input" value="الفريق الأحمر" placeholder="الفريق الأحمر" oninput="onCards4TeamTitleChange('teamRed', this.value)">
+                                    </div>
+
+                                    <div class="team-assigned-box mt-3">
+                                        <div class="slider-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+                                            <label>🃏 بطاقات الأحمر (<span id="cards4RedCount">5</span>):</label>
+                                            <div style="display:flex; gap:6px; align-items:center;">
+                                                <button type="button" onclick="addNewCard4Slot('teamRed')" class="btn-mini" style="background:rgba(255,42,74,0.25); border:1px solid #ff2a4a; color:#fff;" title="إضافة بطاقة جديدة">➕ إضافة بطاقة</button>
+                                                <button type="button" onclick="clearTeam4Cards('teamRed')" class="btn-mini del" title="حذف جميع بطاقات هذا الفريق">🗑️ تفريغ</button>
+                                            </div>
+                                        </div>
+                                        <div class="cards-deck-items-list mt-2" id="cards4RedDeckList">
+                                            <!-- Dynamically generated -->
+                                        </div>
+                                    </div>
+
+                                    <div class="team-actions-row mt-3">
+                                        <button class="btn-obs-action" onclick="copyCards4OverlayUrl('red')">📋 نسخ رابط OBS للأحمر</button>
+                                        <a id="cards4RedPreviewLink" href="/cards4-overlay.html?team=red" target="_blank" class="btn-open-preview">👁️ فتح</a>
+                                    </div>
+                                </div>
+
+                                <!-- 2. Team Blue Box -->
+                                <div class="team-manage-card team-1-card" style="border-color:#00b4d8; box-shadow:0 0 15px rgba(0,180,216,0.25);">
+                                    <div class="team-card-header">
+                                        <div class="team-badge-tag blue" style="background:#00b4d8;">🔵 الفريق الأزرق</div>
+                                        <div class="team-color-picker-box">
+                                            <label for="cards4TeamBlueColor">اللون:</label>
+                                            <input type="color" id="cards4TeamBlueColor" value="#00b4d8" onchange="onCards4TeamColorChange('teamBlue', this.value)">
+                                            <span id="cards4TeamBlueColorHex" style="font-size:12px; color:#00b4d8; font-weight:800;">#00b4d8</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="cards4TeamBlueTitle">اسم الفريق الأزرق:</label>
+                                        <input type="text" id="cards4TeamBlueTitle" class="form-input" value="الفريق الأزرق" placeholder="الفريق الأزرق" oninput="onCards4TeamTitleChange('teamBlue', this.value)">
+                                    </div>
+
+                                    <div class="team-assigned-box mt-3">
+                                        <div class="slider-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+                                            <label>🃏 بطاقات الأزرق (<span id="cards4BlueCount">5</span>):</label>
+                                            <div style="display:flex; gap:6px; align-items:center;">
+                                                <button type="button" onclick="addNewCard4Slot('teamBlue')" class="btn-mini" style="background:rgba(0,180,216,0.25); border:1px solid #00b4d8; color:#fff;" title="إضافة بطاقة جديدة">➕ إضافة بطاقة</button>
+                                                <button type="button" onclick="clearTeam4Cards('teamBlue')" class="btn-mini del" title="حذف جميع بطاقات هذا الفريق">🗑️ تفريغ</button>
+                                            </div>
+                                        </div>
+                                        <div class="cards-deck-items-list mt-2" id="cards4BlueDeckList">
+                                            <!-- Dynamically generated -->
+                                        </div>
+                                    </div>
+
+                                    <div class="team-actions-row mt-3">
+                                        <button class="btn-obs-action" onclick="copyCards4OverlayUrl('blue')">📋 نسخ رابط OBS للأزرق</button>
+                                        <a id="cards4BluePreviewLink" href="/cards4-overlay.html?team=blue" target="_blank" class="btn-open-preview">👁️ فتح</a>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="mt-3">
+                                <button type="button" class="btn-primary" onclick="saveCards4BoardConfig()" style="width:100%; padding:12px; font-weight:900; background:linear-gradient(135deg, #7928ca, #ff0080); box-shadow:0 0 20px rgba(121,40,202,0.5);">
+                                    💾 حفظ ونشر إعدادات بطاقات كلاسيك (هدايا 4) فوراً لـ OBS
+                                </button>
+                            </div>
+
+                        </div>
+
+                        <!-- Right Column: OBS Live Cards4 Dual Simulator -->
+                        <div class="panel-section gifts-panel">
+                            <div class="panel-card">
+                                <div class="card-header-flex">
+                                    <h3 class="card-title"><span>👁️ محاكي شاشات بطاقات كلاسيك تيك توك 4 (Live Dual OBS)</span></h3>
+                                    <a id="cards4PreviewExternalLink" href="/cards4-overlay.html" target="_blank" class="preview-external-btn">شاشة كاملة ↗</a>
+                                </div>
+                                <p style="font-size:12px; color:#94a3b8; margin-bottom:10px;">معاينة حية لشاشة البث لبطاقات كلاسيك رويال (الأزرق يساراً، والأحمر يميناً):</p>
+
+                                <div class="cards-sim-container" style="height:380px; border-radius:16px; overflow:hidden; position:relative; background:#070a14; border:1.5px solid rgba(121,40,202,0.45);">
+                                    <iframe id="cards4SimIframe" src="/cards4-overlay.html" style="width:100%; height:100%; border:none; background:transparent;"></iframe>
+                                </div>
+
+                                <div class="mt-3" style="display:flex; flex-direction:column; gap:8px;">
+                                    <button class="btn-obs-action" onclick="copyCards4OverlayUrl('dual')" style="width:100%;">
+                                        📺 نسخ رابط الشاشتين معاً لـ OBS (Dual Screen)
+                                    </button>
+                                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+                                        <button class="btn-obs-action" onclick="copyCards4OverlayUrl('red')" style="font-size:11.5px; padding:7px;">
+                                            🔴 نسخ رابط الفريق الأحمر
+                                        </button>
+                                        <button class="btn-obs-action" onclick="copyCards4OverlayUrl('blue')" style="font-size:11.5px; padding:7px;">
                                             🔵 نسخ رابط الفريق الأزرق
                                         </button>
                                     </div>
@@ -1369,6 +1567,36 @@
                                     <button type="button" class="chip" onclick="applySbPalette('#ff007f', '#00f0ff')">💖 نيون وردي vs سماوي ⚡</button>
                                 </div>
 
+                                <!-- Scoreboard Hotkeys Card (اختصارات الكيبورد السريعة مع الصوت) -->
+                                <div class="sb-hotkeys-box mt-3" style="background:rgba(255,215,0,0.06); border:1.5px solid rgba(255,215,0,0.35); border-radius:14px; padding:12px 14px;">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                                        <div style="display:flex; align-items:center; gap:10px;">
+                                            <span style="font-size:22px;">⌨️</span>
+                                            <div>
+                                                <div style="font-size:13.5px; font-weight:900; color:#ffd700;">اختصارات الكيبورد السريعة (مع صوت تأكيد فوري 🔔):</div>
+                                                <div style="font-size:12px; color:#cbd5e1; margin-top:3px;">
+                                                    <kbd style="background:#1e293b; border:1px solid #475569; padding:2px 7px; border-radius:5px; color:#fff; font-weight:800;">Alt</kbd> + <kbd style="background:#1e293b; border:1px solid #475569; padding:2px 7px; border-radius:5px; color:#22ff88; font-weight:900;">+</kbd> زيادة النتيجة (+1) &nbsp;|&nbsp;
+                                                    <kbd style="background:#1e293b; border:1px solid #475569; padding:2px 7px; border-radius:5px; color:#fff; font-weight:800;">Alt</kbd> + <kbd style="background:#1e293b; border:1px solid #475569; padding:2px 7px; border-radius:5px; color:#ff2a4a; font-weight:900;">-</kbd> إنقاص النتيجة (-1)
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div style="display:flex; align-items:center; gap:8px;">
+                                            <span style="font-size:11.5px; font-weight:800; color:#94a3b8;">الفريق المستهدف:</span>
+                                            <div style="display:flex; gap:4px; background:rgba(0,0,0,0.4); padding:3px; border-radius:8px; border:1px solid rgba(255,255,255,0.1);">
+                                                <button type="button" class="btn-pos active" id="sbHotkeyTeamA" onclick="setSbHotkeyTargetTeam('a')" style="font-size:11px; padding:4px 10px;">🔴 الفريق 1</button>
+                                                <button type="button" class="btn-pos" id="sbHotkeyTeamB" onclick="setSbHotkeyTargetTeam('b')" style="font-size:11px; padding:4px 10px;">🟢 الفريق 2</button>
+                                            </div>
+                                            <button type="button" class="btn-mini" id="btnToggleSbSound" onclick="toggleSbSound()" style="background:rgba(255,215,0,0.15); border:1px solid #ffd700; color:#fff; font-weight:800; padding:6px 10px;" title="تشغيل أو كتم صوت التنبيه">
+                                                <span id="sbSoundIcon">🔊 الصوت مفعل</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div style="margin-top:8px; font-size:11px; color:#94a3b8; border-top:1px dashed rgba(255,255,255,0.1); padding-top:6px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+                                        <span>💡 <strong>للتحكم خارج المتصفح أثناء الألعاب وOBS:</strong> تم توفير ملف <code style="color:#ffd700;">تشغيل_اختصارات_الاسكوربورد.bat</code> في المجلد ليعمل في خلفية الويندوز بالكامل!</span>
+                                    </div>
+                                </div>
+
                                 <div class="score-reset-bar mt-3">
                                     <button class="btn-danger-outline" onclick="resetSbScores()">
                                         🔄 تصفير النتيجة للصفر
@@ -1841,10 +2069,53 @@
                     </div>
                 </div>
 
+                <!-- 7. هدايا تيك توك 4 (بطاقات كلاسيك / MC Royale) -->
+                <div class="obs-link-card">
+                    <div class="obs-link-meta">
+                        <span class="obs-icon">🎴</span>
+                        <div>
+                            <h4>هدايا تيك توك 4 (بطاقات كلاسيك رويال)</h4>
+                            <p>أوفرلاي البطاقات الكلاسيكية (هيكل عظمي، إيفوكر، خنزير...) مع صور الهدايا والنص</p>
+                        </div>
+                    </div>
+                    <div class="obs-copy-row">
+                        <input type="text" id="linkCards4Url" readonly>
+                        <button class="btn-copy" onclick="copyInput('linkCards4Url')">📋 نسخ</button>
+                        <a id="openCards4Url" href="/cards4-overlay.html" target="_blank" class="btn-open-preview">👁️ فتح</a>
+                    </div>
+                </div>
+
             </div>
 
             <div class="modal-footer">
                 <button class="btn-secondary" onclick="closeAllObsModal()">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: VISUAL CARD 4 PICKER (معرض بطاقات كلاسيك MC Royale) ================= -->
+    <div class="modal-backdrop" id="visualCard4PickerModal">
+        <div class="modal-box modal-wide" style="max-width:740px; max-height:85vh; display:flex; flex-direction:column;">
+            <button class="modal-close" onclick="closeVisualCard4Picker()">✕</button>
+            
+            <div class="modal-header-simple" style="margin-bottom:14px;">
+                <h3 style="color:#fff; font-size:18px; font-weight:900; display:flex; align-items:center; gap:8px;">
+                    <span>⚔️ اختيار بطاقة كلاسيك (MC Royale)</span>
+                    <span class="badge-tag" style="background:linear-gradient(135deg, #7928ca, #ff0080); font-size:11px;">اضغط على البطاقة لاختيارها فوراً 🎯</span>
+                </h3>
+                <p style="color:#94a3b8; font-size:12.5px; margin-top:4px;">
+                    اختر شخصية البطاقة الكلاسيكية التي تريدها من مكتبة MC Royale:
+                </p>
+            </div>
+
+            <!-- Visual Cards Grid (5 classic Minecraft cards) -->
+            <div id="visualCard4GalleryGrid" class="visual-characters-gallery-grid" style="flex:1; overflow-y:auto; max-height:450px; display:grid; grid-template-columns:repeat(auto-fill, minmax(190px, 1fr)); gap:14px; padding:12px; background:rgba(0,0,0,0.35); border-radius:14px; border:1px solid rgba(255,255,255,0.08);">
+                <!-- Dynamically populated with large MC cards -->
+            </div>
+
+            <div class="modal-footer" style="margin-top:14px; display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:12px; color:#94a3b8;">5 بطاقات كلاسيك رويال مميزة ⚔️</span>
+                <button class="btn-secondary" onclick="closeVisualCard4Picker()">إغلاق</button>
             </div>
         </div>
     </div>

@@ -322,6 +322,40 @@ function getDefaultCardsBoard(uid = 'default') {
     };
 }
 
+function getDefaultCards4Board(uid = 'default') {
+    return {
+        neonEnabled: true,
+        glowIntensity: 18,
+        fontFamily: 'impact', // 'impact', 'pixel', 'cyber', 'cairo', 'tajawal'
+        giftPosition: 'top-right', // 'top-right', 'top-left', 'center', 'bottom-right', 'bottom-left', 'beside', 'none'
+        disappearMode: 'gift_only', // 'gift_only' or 'card_and_gift'
+        offsetY: 0,
+        scale: 100,
+        teamRed: {
+            title: 'الفريق الأحمر',
+            color: '#ff2a4a',
+            cards: [
+                { id: 1, cardType: 'skeleton_bandana', customText: 'X1', count: 1, giftName: 'وردة', giftImage: '/images/rose.png' },
+                { id: 2, cardType: 'skeleton_cap', customText: 'X2', count: 2, giftName: 'دونات', giftImage: '/images/donut.png' },
+                { id: 3, cardType: 'golem_pumpkin', customText: 'X1', count: 1, giftName: 'حوت', giftImage: '/images/whale.png' },
+                { id: 4, cardType: 'hog_rider', customText: 'X3', count: 3, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
+                { id: 5, cardType: 'evoker_mage', customText: 'X1', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' }
+            ]
+        },
+        teamBlue: {
+            title: 'الفريق الأزرق',
+            color: '#00b4d8',
+            cards: [
+                { id: 101, cardType: 'evoker_mage', customText: 'X1', count: 1, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
+                { id: 102, cardType: 'hog_rider', customText: 'X1', count: 1, giftName: 'قلب', giftImage: '/images/heart.png' },
+                { id: 103, cardType: 'skeleton_bandana', customText: 'X2', count: 2, giftName: 'دونات', giftImage: '/images/donut.png' },
+                { id: 104, cardType: 'golem_pumpkin', customText: 'X1', count: 1, giftName: 'حمايه', giftImage: '/images/1791197852391-e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp' },
+                { id: 105, cardType: 'skeleton_cap', customText: 'X3', count: 3, giftName: 'وردة', giftImage: '/images/rose.png' }
+            ]
+        }
+    };
+}
+
 function getDefaultSupporterFrame(uid = 'default') {
     return {
         uid: uid,
@@ -1014,6 +1048,40 @@ app.all(['/api/cards-board/:uid/settings', '/api/cards-board/:uid'], (req, res) 
     writeData(data);
     io.emit('cards_board_update', { uid, board: data[uid].cardsBoard });
     res.json({ success: true, board: data[uid].cardsBoard });
+});
+
+// ================= CARDS 4 BOARD (GIFTS 4 - CLASSIC MC ROYALE) ENDPOINTS ================= //
+app.get('/api/cards4-board/:uid', (req, res) => {
+    const uid = req.params.uid;
+    const data = readData();
+    const def = getDefaultCards4Board(uid);
+    const board = (data[uid] && data[uid].cards4Board) ? { ...def, ...data[uid].cards4Board } : def;
+    res.json({ success: true, board });
+});
+
+app.all(['/api/cards4-board/:uid/settings', '/api/cards4-board/:uid'], (req, res) => {
+    const uid = req.params.uid;
+    const data = readData();
+    if (!data[uid]) data[uid] = getDefaultBoard(uid);
+
+    const def = getDefaultCards4Board(uid);
+    const currentCards4Board = data[uid].cards4Board ? { ...def, ...data[uid].cards4Board } : def;
+
+    if (req.method === 'GET') {
+        return res.json({ success: true, board: currentCards4Board });
+    }
+
+    const settings = req.body || {};
+    data[uid].cards4Board = {
+        ...currentCards4Board,
+        ...settings,
+        teamRed: settings.teamRed || currentCards4Board.teamRed || def.teamRed,
+        teamBlue: settings.teamBlue || currentCards4Board.teamBlue || def.teamBlue
+    };
+
+    writeData(data);
+    io.emit('cards4_board_update', { uid, board: data[uid].cards4Board });
+    res.json({ success: true, board: data[uid].cards4Board });
 });
 
 // Get Gifts only

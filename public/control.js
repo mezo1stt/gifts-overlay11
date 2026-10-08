@@ -120,6 +120,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadGiftsData();
     loadTeamGiftsData();
     loadCardsData();
+    loadCards4Data();
     loadFireData();
     loadSupporterFrameConfig();
     loadCameraData();
@@ -140,7 +141,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 const NAV_TAB_TITLES = {
     giftsSection: '🎁 هدايا التيك توك 1 · لوحة التحكم التفاعلية',
     teamGiftsSection: '⚔️ هدايا تيك توك 2 · أوفرلاي الفرق المتنافسة (ممنوع تكرار الصور)',
-    cardsGiftsSection: '🃏 هدايا تيك توك 3 (بطاقات وجنود اللعبة) · إعدادات البطاقات والنيون',
+    cardsGiftsSection: '🃏 هدايا تيك توك 3 (عناصر GIF متحركة) · إعدادات البطاقات والنيون',
+    cards4GiftsSection: '🎴 هدايا تيك توك 4 (بطاقات كلاسيك رويال) · بطاقات MC Royale مع الهدايا والنص',
     fireSection: '📝 نص (متغير) · شريط النصوص والدخان والبانرات الديناميكية',
     lastSupporterFramesSection: '👑 إطارات آخر داعم · إطارات فيديو أزهار الساكورا والنيون الموحدة لـ OBS',
     cameraSection: '📷 بنرات الكاميرا · 10 أنماط إطارات نيون للبث',
@@ -1528,7 +1530,85 @@ async function loadScoreboardData() {
     } catch (e) {}
 }
 
+// Web Audio chime for Scoreboard adjustments
+let sbAudioCtx = null;
+let sbSoundEnabled = true;
+let sbHotkeyTargetTeam = 'a'; // 'a' or 'b'
+
+function playScoreChime(type = 'up') {
+    if (!sbSoundEnabled) return;
+    try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        if (!sbAudioCtx) {
+            sbAudioCtx = new AudioContext();
+        }
+        if (sbAudioCtx.state === 'suspended') {
+            sbAudioCtx.resume();
+        }
+        const ctx = sbAudioCtx;
+        const now = ctx.currentTime;
+        
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        
+        if (type === 'up') {
+            // Ascending bright chime (D5 -> A5)
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(587.33, now);
+            osc.frequency.exponentialRampToValueAtTime(880.0, now + 0.12);
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+            osc.start(now);
+            osc.stop(now + 0.25);
+        } else {
+            // Descending deeper chime (A4 -> C4)
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(440.0, now);
+            osc.frequency.exponentialRampToValueAtTime(261.63, now + 0.15);
+            gain.gain.setValueAtTime(0.32, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+            osc.start(now);
+            osc.stop(now + 0.28);
+        }
+    } catch (e) {
+        console.warn('Audio chime error:', e);
+    }
+}
+
+function setSbHotkeyTargetTeam(team) {
+    sbHotkeyTargetTeam = team === 'b' ? 'b' : 'a';
+    const btnA = document.getElementById('sbHotkeyTeamA');
+    const btnB = document.getElementById('sbHotkeyTeamB');
+    if (btnA) btnA.classList.toggle('active', sbHotkeyTargetTeam === 'a');
+    if (btnB) btnB.classList.toggle('active', sbHotkeyTargetTeam === 'b');
+    const teamName = sbHotkeyTargetTeam === 'a' 
+        ? (document.getElementById('sbTeamAName')?.value || 'الفريق الأول') 
+        : (document.getElementById('sbTeamBName')?.value || 'الفريق الثاني');
+    showToast(`🎯 تم تحديد ${teamName} للتحكم بالاختصارات (Alt + / Alt -)`, 'info');
+}
+
+function toggleSbSound() {
+    sbSoundEnabled = !sbSoundEnabled;
+    const icon = document.getElementById('sbSoundIcon');
+    const btn = document.getElementById('btnToggleSbSound');
+    if (icon) icon.textContent = sbSoundEnabled ? '🔔 الصوت مفعل' : '🔕 الصوت صامت';
+    if (btn) {
+        btn.style.borderColor = sbSoundEnabled ? '#ffd700' : 'rgba(255,255,255,0.2)';
+        btn.style.opacity = sbSoundEnabled ? '1' : '0.6';
+    }
+    if (sbSoundEnabled) {
+        playScoreChime('up');
+        showToast('🔔 تم تفعيل التنبيه الصوتي عند تعديل النتيجة', 'success');
+    } else {
+        showToast('🔕 تم كتم صوت النتيجة', 'info');
+    }
+}
+
 async function adjustSbScore(team, delta) {
+    playScoreChime(delta > 0 ? 'up' : 'down');
     try {
         const res = await fetch(`/api/scoreboard/${currentUid}/score`, {
             method: 'POST',
@@ -2077,6 +2157,11 @@ function openAllObsModal() {
     const openCards = document.getElementById('openCardsUrl');
     if (openCards) openCards.href = `${origin}/cards-overlay.html?uid=${currentUid}`;
 
+    const linkCards4 = document.getElementById('linkCards4Url');
+    if (linkCards4) linkCards4.value = `${origin}/cards4-overlay.html?uid=${currentUid}`;
+    const openCards4 = document.getElementById('openCards4Url');
+    if (openCards4) openCards4.href = `${origin}/cards4-overlay.html?uid=${currentUid}`;
+
     const linkSupporter = document.getElementById('linkSupporterFrameUrl');
     if (linkSupporter) linkSupporter.value = `${origin}/supporter-frame-overlay.html?uid=${currentUid}`;
     const openSupporter = document.getElementById('openSupporterFrameUrl');
@@ -2106,6 +2191,7 @@ function copyCurrentOverlayUrl(type) {
     else if (type === 'team1') url = `${origin}/overlay-team.html?team=1&uid=${currentUid}`;
     else if (type === 'team2') url = `${origin}/overlay-team.html?team=2&uid=${currentUid}`;
     else if (type === 'cards') url = `${origin}/cards-overlay.html?uid=${currentUid}`;
+    else if (type === 'cards4') url = `${origin}/cards4-overlay.html?uid=${currentUid}`;
     else if (type === 'fire') url = `${origin}/fire-text.html?uid=${currentUid}`;
     else if (type === 'supporterFrame') url = `${origin}/supporter-frame-overlay.html?uid=${currentUid}`;
     else if (type === 'camera') url = `${origin}/camera-overlay.html?uid=${currentUid}`;
@@ -2113,7 +2199,7 @@ function copyCurrentOverlayUrl(type) {
     else if (type === 'race') url = `${origin}/race-overlay.html`;
 
     navigator.clipboard.writeText(url);
-    const labelMap = { race: 'صراع الحكام', cards: 'بطاقات تيك توك 3', fire: 'نص (متغير)', supporterFrame: 'إطار آخر داعم', camera: 'إطار الكاميرا', scoreboard: 'لوحة النتائج' };
+    const labelMap = { race: 'صراع الحكام', cards: 'بطاقات تيك توك 3', cards4: 'بطاقات تيك توك 4 كلاسيك', fire: 'نص (متغير)', supporterFrame: 'إطار آخر داعم', camera: 'إطار الكاميرا', scoreboard: 'لوحة النتائج' };
     showToast(`📺 تم نسخ رابط (${labelMap[type] || type}) بنجاح!`, 'copy');
 }
 
@@ -2126,6 +2212,14 @@ function setupSocket() {
             if (!data || !data.uid || data.uid === currentUid) {
                 const sim = document.getElementById('cardsSimIframe');
                 if (sim) sim.src = `/cards-overlay.html?uid=${currentUid}&t=${Date.now()}`;
+            }
+        });
+
+        socket.on('cards4_board_update', (data) => {
+            if (!data || !data.uid || data.uid === currentUid) {
+                const sim = document.getElementById('cards4SimIframe');
+                if (sim) sim.src = `/cards4-overlay.html?uid=${currentUid}&t=${Date.now()}`;
+                loadCards4Data();
             }
         });
 
@@ -2202,6 +2296,7 @@ function setupEventListeners() {
                 loadGiftsData();
                 loadTeamGiftsData();
                 loadCardsData();
+                loadCards4Data();
                 loadFireData();
                 loadCameraData();
                 loadScoreboardData();
@@ -2362,6 +2457,46 @@ function setupEventListeners() {
             btn.classList.add('active');
             document.getElementById(btn.dataset.tab).classList.add('active');
         });
+    });
+
+    // Global Keyboard Hotkeys for Scoreboard (Alt + / Alt - / Alt 1 / Alt 2)
+    window.addEventListener('keydown', (e) => {
+        if (!e.altKey) return;
+
+        const isEditing = ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName);
+
+        // Alt + Plus / Alt + Equals / Numpad Plus
+        if (e.key === '+' || e.key === '=' || e.code === 'NumpadAdd' || (e.shiftKey && e.code === 'Equal')) {
+            e.preventDefault();
+            adjustSbScore(sbHotkeyTargetTeam, 1);
+            const teamName = sbHotkeyTargetTeam === 'a' 
+                ? (document.getElementById('sbTeamAName')?.value || 'الفريق الأول') 
+                : (document.getElementById('sbTeamBName')?.value || 'الفريق الثاني');
+            showToast(`➕ +1 نقطة لـ (${teamName}) [اختصار Alt +]`, 'success');
+        }
+        // Alt + Minus / Numpad Subtract
+        else if (e.key === '-' || e.key === '_' || e.code === 'NumpadSubtract' || e.code === 'Minus') {
+            e.preventDefault();
+            adjustSbScore(sbHotkeyTargetTeam, -1);
+            const teamName = sbHotkeyTargetTeam === 'a' 
+                ? (document.getElementById('sbTeamAName')?.value || 'الفريق الأول') 
+                : (document.getElementById('sbTeamBName')?.value || 'الفريق الثاني');
+            showToast(`➖ -1 نقطة لـ (${teamName}) [اختصار Alt -]`, 'info');
+        }
+        // Alt + 1: Switch hotkey to Team A
+        else if (e.key === '1' || e.code === 'Digit1' || e.code === 'Numpad1') {
+            if (!isEditing) {
+                e.preventDefault();
+                setSbHotkeyTargetTeam('a');
+            }
+        }
+        // Alt + 2: Switch hotkey to Team B
+        else if (e.key === '2' || e.code === 'Digit2' || e.code === 'Numpad2') {
+            if (!isEditing) {
+                e.preventDefault();
+                setSbHotkeyTargetTeam('b');
+            }
+        }
     });
 }
 
@@ -3243,9 +3378,12 @@ function selectVisualCharacter(itemId, itemName, itemImg) {
 
 // ================= VISUAL GIFT PICKER MODAL (اختيار الهدية كصورة) ================= //
 
-function openVisualGiftPicker(teamKey, slotIdx) {
+let activeVisualGiftContext = 'cards3'; // 'cards3' or 'cards4'
+
+function openVisualGiftPicker(teamKey, slotIdx, context = 'cards3') {
     cardsActiveTargetTeam = teamKey || 'teamRed';
     activeCardSlotIndex = slotIdx;
+    activeVisualGiftContext = context || 'cards3';
     const modal = document.getElementById('visualGiftPickerModal');
     if (!modal) return;
 
@@ -3355,8 +3493,9 @@ function renderVisualGiftsGallery() {
     const displayList = filtered;
 
     grid.innerHTML = '';
-    const currentSelectedImg = (activeCardSlotIndex !== null && cardsBoardConfig[cardsActiveTargetTeam]?.cards[activeCardSlotIndex])
-        ? normalizeImgPath(cardsBoardConfig[cardsActiveTargetTeam].cards[activeCardSlotIndex].giftImage)
+    const activeCfg = activeVisualGiftContext === 'cards4' ? cards4BoardConfig : cardsBoardConfig;
+    const currentSelectedImg = (activeCardSlotIndex !== null && activeCfg[cardsActiveTargetTeam]?.cards[activeCardSlotIndex])
+        ? normalizeImgPath(activeCfg[cardsActiveTargetTeam].cards[activeCardSlotIndex].giftImage)
         : null;
 
     displayList.forEach(g => {
@@ -3382,18 +3521,533 @@ function renderVisualGiftsGallery() {
 
 function selectVisualGift(giftName, giftImage) {
     if (activeCardSlotIndex === null) return;
-    const team = cardsBoardConfig[cardsActiveTargetTeam];
-    if (!team || !team.cards[activeCardSlotIndex]) return;
+    
+    if (activeVisualGiftContext === 'cards4') {
+        const team = cards4BoardConfig[cardsActiveTargetTeam];
+        if (!team || !team.cards[activeCardSlotIndex]) return;
 
-    team.cards[activeCardSlotIndex].giftName = giftName;
-    team.cards[activeCardSlotIndex].giftImage = giftImage;
+        team.cards[activeCardSlotIndex].giftName = giftName;
+        team.cards[activeCardSlotIndex].giftImage = giftImage;
 
-    closeVisualGiftPicker();
-    renderCardsDeckList();
-    saveCardsBoardConfig(true);
-    const teamLabel = cardsActiveTargetTeam === 'teamRed' ? 'الفريق الأحمر' : 'الفريق الأزرق';
-    showToast(`تم اختيار هدية (${giftName}) لـ ${teamLabel} للبطاقة رقم ${activeCardSlotIndex + 1}! ✨`, 'success');
+        closeVisualGiftPicker();
+        renderCards4DeckList();
+        saveCards4BoardConfig(true);
+        const teamLabel = cardsActiveTargetTeam === 'teamRed' ? 'الفريق الأحمر' : 'الفريق الأزرق';
+        showToast(`تم اختيار هدية (${giftName}) لـ ${teamLabel} للبطاقة رقم ${activeCardSlotIndex + 1}! ✨`, 'success');
+    } else {
+        const team = cardsBoardConfig[cardsActiveTargetTeam];
+        if (!team || !team.cards[activeCardSlotIndex]) return;
+
+        team.cards[activeCardSlotIndex].giftName = giftName;
+        team.cards[activeCardSlotIndex].giftImage = giftImage;
+
+        closeVisualGiftPicker();
+        renderCardsDeckList();
+        saveCardsBoardConfig(true);
+        const teamLabel = cardsActiveTargetTeam === 'teamRed' ? 'الفريق الأحمر' : 'الفريق الأزرق';
+        showToast(`تم اختيار هدية (${giftName}) لـ ${teamLabel} للبطاقة رقم ${activeCardSlotIndex + 1}! ✨`, 'success');
+    }
 }
+
+// ================= SECTION: TIKTOK GIFTS 4 (بطاقات كلاسيك رويال MC Royale) ================= //
+const CARD4_MC_ITEMS = [
+    {
+        id: 'skeleton_bandana',
+        name: 'هيكل عظمي باندانا',
+        badge: '💀 كلاسيك',
+        desc: 'مقاتل الرماية الأسطوري بباندانا الهيكل',
+        image: '/images/mcroyale/skeleton_bandana.png'
+    },
+    {
+        id: 'evoker_mage',
+        name: 'الساحر إيفوكر',
+        badge: '🧙‍♂️ ساحر',
+        desc: 'ساحر الاستدعاء القوي بتميمة الخلود',
+        image: '/images/mcroyale/evoker_mage.png'
+    },
+    {
+        id: 'skeleton_cap',
+        name: 'محارب القبعة',
+        badge: '⚔️ مقاتل',
+        desc: 'هيكل مدرع بقبعة الحرب وسيف الفولاذ',
+        image: '/images/mcroyale/skeleton_cap.png'
+    },
+    {
+        id: 'hog_rider',
+        name: 'راكب الخنزير',
+        badge: '🐗 اقتحام',
+        desc: 'فارس المطرقة والمغامرة الخاطفة السريعة',
+        image: '/images/mcroyale/hog_rider.png'
+    },
+    {
+        id: 'golem_pumpkin',
+        name: 'وحش اليقطين (غولم)',
+        badge: '🎃 دبابة',
+        desc: 'وحش الحراسة الصامد برأس اليقطين المضيء',
+        image: '/images/mcroyale/golem_pumpkin.png'
+    }
+];
+
+function getCard4McItem(cardType) {
+    return CARD4_MC_ITEMS.find(c => c.id === cardType) || CARD4_MC_ITEMS[0];
+}
+
+let cards4BoardConfig = {
+    neonEnabled: true,
+    fontFamily: 'impact',
+    giftPosition: 'top-right',
+    disappearMode: 'gift_only',
+    offsetY: 0,
+    teamRed: {
+        color: '#ff2a4a',
+        title: 'الفريق الأحمر',
+        cards: [
+            { id: 1, cardType: 'skeleton_bandana', customText: 'X1', count: 1, giftName: 'وردة', giftImage: '/images/rose.png' },
+            { id: 2, cardType: 'evoker_mage', customText: 'X2', count: 2, giftName: 'دونات', giftImage: '/images/donut.png' },
+            { id: 3, cardType: 'skeleton_cap', customText: 'X3', count: 3, giftName: 'حوت', giftImage: '/images/whale.png' },
+            { id: 4, cardType: 'hog_rider', customText: 'X4', count: 4, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
+            { id: 5, cardType: 'golem_pumpkin', customText: 'X5', count: 5, giftName: 'قلب', giftImage: '/images/heart.png' }
+        ]
+    },
+    teamBlue: {
+        color: '#00b4d8',
+        title: 'الفريق الأزرق',
+        cards: [
+            { id: 101, cardType: 'hog_rider', customText: 'X1', count: 1, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
+            { id: 102, cardType: 'skeleton_bandana', customText: 'X2', count: 2, giftName: 'قلب', giftImage: '/images/heart.png' },
+            { id: 103, cardType: 'golem_pumpkin', customText: 'X3', count: 3, giftName: 'دونات', giftImage: '/images/donut.png' },
+            { id: 104, cardType: 'evoker_mage', customText: 'X4', count: 4, giftName: 'حمايه', giftImage: '/images/1791197852391-e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp' },
+            { id: 105, cardType: 'skeleton_cap', customText: 'X5', count: 5, giftName: 'وردة', giftImage: '/images/rose.png' }
+        ]
+    }
+};
+
+let activeVisualCard4Team = 'teamRed';
+let activeVisualCard4SlotIdx = null;
+
+async function loadCards4Data() {
+    if (!currentUid) return;
+
+    try {
+        const res = await fetch(`/api/cards4-board/${currentUid}`);
+        if (res.ok) {
+            const data = await res.json();
+            if (data && data.board) {
+                cards4BoardConfig = {
+                    ...cards4BoardConfig,
+                    ...data.board,
+                    teamRed: {
+                        ...cards4BoardConfig.teamRed,
+                        ...(data.board.teamRed || {})
+                    },
+                    teamBlue: {
+                        ...cards4BoardConfig.teamBlue,
+                        ...(data.board.teamBlue || {})
+                    }
+                };
+
+                if (!Array.isArray(cards4BoardConfig.teamRed.cards) || cards4BoardConfig.teamRed.cards.length === 0) {
+                    cards4BoardConfig.teamRed.cards = [
+                        { id: 1, cardType: 'skeleton_bandana', customText: 'X1', count: 1, giftName: 'وردة', giftImage: '/images/rose.png' },
+                        { id: 2, cardType: 'evoker_mage', customText: 'X2', count: 2, giftName: 'دونات', giftImage: '/images/donut.png' },
+                        { id: 3, cardType: 'skeleton_cap', customText: 'X3', count: 3, giftName: 'حوت', giftImage: '/images/whale.png' },
+                        { id: 4, cardType: 'hog_rider', customText: 'X4', count: 4, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
+                        { id: 5, cardType: 'golem_pumpkin', customText: 'X5', count: 5, giftName: 'قلب', giftImage: '/images/heart.png' }
+                    ];
+                }
+
+                if (!Array.isArray(cards4BoardConfig.teamBlue.cards) || cards4BoardConfig.teamBlue.cards.length === 0) {
+                    cards4BoardConfig.teamBlue.cards = [
+                        { id: 101, cardType: 'hog_rider', customText: 'X1', count: 1, giftName: 'صاروخ', giftImage: '/images/perfume.png' },
+                        { id: 102, cardType: 'skeleton_bandana', customText: 'X2', count: 2, giftName: 'قلب', giftImage: '/images/heart.png' },
+                        { id: 103, cardType: 'golem_pumpkin', customText: 'X3', count: 3, giftName: 'دونات', giftImage: '/images/donut.png' },
+                        { id: 104, cardType: 'evoker_mage', customText: 'X4', count: 4, giftName: 'حمايه', giftImage: '/images/1791197852391-e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp' },
+                        { id: 105, cardType: 'skeleton_cap', customText: 'X5', count: 5, giftName: 'وردة', giftImage: '/images/rose.png' }
+                    ];
+                }
+            }
+        }
+    } catch (e) {
+        console.error('Failed to load cards4 board data:', e);
+    }
+
+    applyCards4ConfigToUI();
+    renderCards4DeckList();
+}
+
+function applyCards4ConfigToUI() {
+    // 1. Neon Toggle
+    const neonOnBtn = document.getElementById('btnCards4NeonOn');
+    const neonOffBtn = document.getElementById('btnCards4NeonOff');
+    if (neonOnBtn && neonOffBtn) {
+        neonOnBtn.classList.toggle('active', cards4BoardConfig.neonEnabled !== false);
+        neonOffBtn.classList.toggle('active', cards4BoardConfig.neonEnabled === false);
+    }
+
+    // 2. Team Red Color & Title
+    const redColorInput = document.getElementById('cards4TeamRedColor');
+    const redHexSpan = document.getElementById('cards4TeamRedColorHex');
+    const redTitleInput = document.getElementById('cards4TeamRedTitle');
+    if (redColorInput) redColorInput.value = cards4BoardConfig.teamRed.color || '#ff2a4a';
+    if (redHexSpan) {
+        redHexSpan.textContent = cards4BoardConfig.teamRed.color || '#ff2a4a';
+        redHexSpan.style.color = cards4BoardConfig.teamRed.color || '#ff2a4a';
+    }
+    if (redTitleInput) redTitleInput.value = cards4BoardConfig.teamRed.title || 'الفريق الأحمر';
+
+    // 3. Team Blue Color & Title
+    const blueColorInput = document.getElementById('cards4TeamBlueColor');
+    const blueHexSpan = document.getElementById('cards4TeamBlueColorHex');
+    const blueTitleInput = document.getElementById('cards4TeamBlueTitle');
+    if (blueColorInput) blueColorInput.value = cards4BoardConfig.teamBlue.color || '#00b4d8';
+    if (blueHexSpan) {
+        blueHexSpan.textContent = cards4BoardConfig.teamBlue.color || '#00b4d8';
+        blueHexSpan.style.color = cards4BoardConfig.teamBlue.color || '#00b4d8';
+    }
+    if (blueTitleInput) blueTitleInput.value = cards4BoardConfig.teamBlue.title || 'الفريق الأزرق';
+
+    // 4. Font Chips
+    document.querySelectorAll('#cards4FontChips .chip').forEach(c => {
+        c.classList.toggle('active', c.dataset.font === (cards4BoardConfig.fontFamily || 'impact'));
+    });
+
+    // 5. Gift Pos Chips
+    document.querySelectorAll('#cards4GiftPosChips .chip').forEach(c => {
+        c.classList.toggle('active', c.dataset.pos === (cards4BoardConfig.giftPosition || 'top-right'));
+    });
+
+    // 6. Disappear Mode
+    const disGiftOnly = document.getElementById('btnDisappear4GiftOnly');
+    const disCardAndGift = document.getElementById('btnDisappear4CardAndGift');
+    if (disGiftOnly && disCardAndGift) {
+        disGiftOnly.classList.toggle('active', cards4BoardConfig.disappearMode !== 'card_and_gift');
+        disCardAndGift.classList.toggle('active', cards4BoardConfig.disappearMode === 'card_and_gift');
+    }
+
+    // 7. Offset Slider
+    const offsetSlider = document.getElementById('cards4OffsetYSlider');
+    const offsetBadge = document.getElementById('cards4OffsetYBadge');
+    if (offsetSlider) offsetSlider.value = cards4BoardConfig.offsetY || 0;
+    if (offsetBadge) offsetBadge.textContent = `${cards4BoardConfig.offsetY || 0} px`;
+
+    // 8. Preview links
+    const redLink = document.getElementById('cards4RedPreviewLink');
+    const blueLink = document.getElementById('cards4BluePreviewLink');
+    const extLink = document.getElementById('cards4PreviewExternalLink');
+    const simIframe = document.getElementById('cards4SimIframe');
+
+    if (redLink) redLink.href = `/cards4-overlay.html?uid=${currentUid}&team=red`;
+    if (blueLink) blueLink.href = `/cards4-overlay.html?uid=${currentUid}&team=blue`;
+    if (extLink) extLink.href = `/cards4-overlay.html?uid=${currentUid}`;
+    if (simIframe && (!simIframe.src || simIframe.src.endsWith('/cards4-overlay.html'))) {
+        simIframe.src = `/cards4-overlay.html?uid=${currentUid}`;
+    }
+}
+
+function renderCards4DeckList() {
+    renderTeam4CardsDeck('teamRed', 'cards4RedDeckList', 'cards4RedCount');
+    renderTeam4CardsDeck('teamBlue', 'cards4BlueDeckList', 'cards4BlueCount');
+}
+
+function renderTeam4CardsDeck(teamKey, containerId, countId) {
+    const container = document.getElementById(containerId);
+    const countBadge = document.getElementById(countId);
+    if (!container) return;
+
+    const team = cards4BoardConfig[teamKey];
+    if (!team || !Array.isArray(team.cards)) return;
+
+    if (countBadge) countBadge.textContent = team.cards.length;
+
+    if (team.cards.length === 0) {
+        container.innerHTML = `
+            <div style="text-align:center; padding:24px 10px; color:#64748b; font-size:12.5px;">
+                لا توجد بطاقات مضافة لهذا الفريق حالياً.<br>
+                <button type="button" class="btn-mini mt-2" onclick="addNewCard4Slot('${teamKey}')" style="background:rgba(121,40,202,0.3); border:1px solid #7928ca; color:#fff;">➕ أضف بطاقة كلاسيك الآن</button>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = team.cards.map((card, idx) => {
+        const charItem = getCard4McItem(card.cardType);
+        const cardSrc = charItem.image || `/images/mcroyale/${card.cardType}.png`;
+        const giftSrc = normalizeImgPath(card.giftImage || '/images/rose.png');
+
+        return `
+            <div class="card-slot-item ${idx % 2 === 1 ? 'even' : ''}" data-idx="${idx}" style="border-right: 4px solid ${team.color || '#7928ca'};">
+                <div class="card-slot-header">
+                    <div class="card-slot-badge">
+                        <span class="slot-num">#${idx + 1}</span>
+                        <span class="slot-name">${escapeHtml(charItem.name)}</span>
+                    </div>
+                    <div class="card-slot-actions">
+                        ${idx > 0 ? `<button type="button" class="btn-order" onclick="moveCard4Slot('${teamKey}', ${idx}, -1)" title="رفع للأعلى">⬆️</button>` : ''}
+                        ${idx < team.cards.length - 1 ? `<button type="button" class="btn-order" onclick="moveCard4Slot('${teamKey}', ${idx}, 1)" title="تنزيل للأسفل">⬇️</button>` : ''}
+                        <button type="button" class="btn-del-slot" onclick="deleteCard4Slot('${teamKey}', ${idx})" title="حذف البطاقة">🗑️</button>
+                    </div>
+                </div>
+
+                <!-- MC Royale Card Visual Trigger -->
+                <div class="card-slot-field">
+                    <label>بطاقة كلاسيك رويال:</label>
+                    <button type="button" class="btn-visual-char-trigger" onclick="openVisualCard4Picker('${teamKey}', ${idx})" title="انقر لاختيار بطاقة كلاسيك رويال">
+                        <img class="char-thumb-img" src="${cardSrc}" alt="${escapeHtml(charItem.name)}" onerror="this.src='/images/mcroyale/skeleton_bandana.png'">
+                        <span class="char-name-label">${escapeHtml(charItem.name)}</span>
+                        <span class="char-click-hint">انقر للتغيير 🎴</span>
+                    </button>
+                </div>
+
+                <!-- Card Bottom Text (النص أسفل البطاقة) -->
+                <div class="card-slot-field">
+                    <label>النص الظاهر أسفل البطاقة:</label>
+                    <input type="text" 
+                           class="form-input card-bottom-text-input" 
+                           placeholder="اكتب النص هنا (مثال: X1 أو هجوم أو دفاع...)" 
+                           value="${escapeHtml(card.customText !== undefined && card.customText !== null ? card.customText : (card.count ? 'X' + card.count : ''))}" 
+                           oninput="onCard4TextChange('${teamKey}', ${idx}, this.value)">
+                </div>
+
+                <!-- Visual Gift Trigger -->
+                <div class="card-slot-field">
+                    <label>الهدية المطلوبة لإسقاط البطاقة:</label>
+                    <button type="button" class="btn-visual-gift-trigger" onclick="openVisualGiftPicker('${teamKey}', ${idx}, 'cards4')" title="اختيار الهدية من قائمة الهدايا">
+                        <img src="${giftSrc}" alt="${escapeHtml(card.giftName || 'هدية')}" onerror="this.src='/images/rose.png'">
+                        <span class="gift-name-label">${escapeHtml(card.giftName || 'اختر هدية')}</span>
+                        <span class="gift-click-hint">انقر للتغيير 🎁</span>
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function onCard4TextChange(teamKey, idx, val) {
+    if (!cards4BoardConfig[teamKey] || !cards4BoardConfig[teamKey].cards[idx]) return;
+    cards4BoardConfig[teamKey].cards[idx].customText = val;
+    const numMatch = (val || '').match(/\d+/);
+    if (numMatch) {
+        cards4BoardConfig[teamKey].cards[idx].count = parseInt(numMatch[0]) || 1;
+    }
+    saveCards4BoardConfig(true);
+}
+
+function moveCard4Slot(teamKey, idx, direction) {
+    const team = cards4BoardConfig[teamKey];
+    if (!team || !Array.isArray(team.cards)) return;
+    const targetIdx = idx + direction;
+    if (targetIdx < 0 || targetIdx >= team.cards.length) return;
+    const temp = team.cards[idx];
+    team.cards[idx] = team.cards[targetIdx];
+    team.cards[targetIdx] = temp;
+    renderCards4DeckList();
+    saveCards4BoardConfig(true);
+    showToast('تم تعديل ترتيب البطاقات بنجاح! 🔄', 'info');
+}
+
+function addNewCard4Slot(teamKey) {
+    if (!cards4BoardConfig[teamKey]) return;
+    const teamCards = cards4BoardConfig[teamKey].cards;
+    const nextId = (teamCards.length ? Math.max(...teamCards.map(c => c.id || 0)) : 0) + 1;
+    const itemChoice = CARD4_MC_ITEMS[teamCards.length % CARD4_MC_ITEMS.length];
+    teamCards.push({
+        id: nextId,
+        cardType: itemChoice.id,
+        customText: `X${teamCards.length + 1}`,
+        count: teamCards.length + 1,
+        giftName: 'وردة',
+        giftImage: '/images/rose.png'
+    });
+    renderCards4DeckList();
+    saveCards4BoardConfig(true);
+    showToast(`تمت إضافة بطاقة كلاسيك جديدة (${itemChoice.name}) بنجاح! ✨`, 'success');
+}
+
+function deleteCard4Slot(teamKey, idx) {
+    if (!cards4BoardConfig[teamKey] || !cards4BoardConfig[teamKey].cards[idx]) return;
+    cards4BoardConfig[teamKey].cards.splice(idx, 1);
+    renderCards4DeckList();
+    saveCards4BoardConfig(true);
+    showToast('تم حذف بطاقة الكلاسيك.', 'info');
+}
+
+function clearTeam4Cards(teamKey) {
+    if (!cards4BoardConfig[teamKey]) return;
+    const teamTitle = cards4BoardConfig[teamKey].title || (teamKey === 'teamRed' ? 'الفريق الأحمر' : 'الفريق الأزرق');
+    if (confirm(`هل أنت متأكد من حذف جميع بطاقات ${teamTitle}؟`)) {
+        cards4BoardConfig[teamKey].cards = [];
+        renderCards4DeckList();
+        saveCards4BoardConfig(true);
+        showToast(`تم تفريغ بطاقات ${teamTitle}.`, 'info');
+    }
+}
+
+function toggleCards4Neon(enabled) {
+    cards4BoardConfig.neonEnabled = !!enabled;
+    const neonOnBtn = document.getElementById('btnCards4NeonOn');
+    const neonOffBtn = document.getElementById('btnCards4NeonOff');
+    if (neonOnBtn) neonOnBtn.classList.toggle('active', cards4BoardConfig.neonEnabled);
+    if (neonOffBtn) neonOffBtn.classList.toggle('active', !cards4BoardConfig.neonEnabled);
+    saveCards4BoardConfig(true);
+}
+
+function setCards4Font(font) {
+    cards4BoardConfig.fontFamily = font;
+    document.querySelectorAll('#cards4FontChips .chip').forEach(c => {
+        c.classList.toggle('active', c.dataset.font === font);
+    });
+    saveCards4BoardConfig(true);
+}
+
+function setCards4GiftPos(pos) {
+    cards4BoardConfig.giftPosition = pos;
+    document.querySelectorAll('#cards4GiftPosChips .chip').forEach(c => {
+        c.classList.toggle('active', c.dataset.pos === pos);
+    });
+    saveCards4BoardConfig(true);
+}
+
+function setCards4DisappearMode(mode) {
+    cards4BoardConfig.disappearMode = mode;
+    const disGiftOnly = document.getElementById('btnDisappear4GiftOnly');
+    const disCardAndGift = document.getElementById('btnDisappear4CardAndGift');
+    if (disGiftOnly) disGiftOnly.classList.toggle('active', mode !== 'card_and_gift');
+    if (disCardAndGift) disCardAndGift.classList.toggle('active', mode === 'card_and_gift');
+    saveCards4BoardConfig(true);
+}
+
+function onCards4OffsetYChange(val) {
+    cards4BoardConfig.offsetY = parseInt(val) || 0;
+    const offsetBadge = document.getElementById('cards4OffsetYBadge');
+    if (offsetBadge) offsetBadge.textContent = `${val} px`;
+    saveCards4BoardConfig(true);
+}
+
+function onCards4TeamColorChange(teamKey, colorVal) {
+    if (!cards4BoardConfig[teamKey]) return;
+    cards4BoardConfig[teamKey].color = colorVal;
+    const hexSpan = document.getElementById(teamKey === 'teamRed' ? 'cards4TeamRedColorHex' : 'cards4TeamBlueColorHex');
+    if (hexSpan) {
+        hexSpan.textContent = colorVal;
+        hexSpan.style.color = colorVal;
+    }
+    saveCards4BoardConfig(true);
+}
+
+function onCards4TeamTitleChange(teamKey, titleVal) {
+    if (!cards4BoardConfig[teamKey]) return;
+    cards4BoardConfig[teamKey].title = titleVal;
+    saveCards4BoardConfig(true);
+}
+
+async function saveCards4BoardConfig(silent = false) {
+    if (!currentUid) return;
+    try {
+        const res = await fetch(`/api/cards4-board/${currentUid}/settings`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(cards4BoardConfig)
+        });
+        const data = await res.json();
+        if (data.success) {
+            if (!silent) showToast('✅ تم حفظ ونشر إعدادات بطاقات كلاسيك (هدايا 4) لـ OBS بنجاح!', 'success');
+            const iframe = document.getElementById('cards4SimIframe');
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.location.reload();
+            }
+        }
+    } catch (e) {
+        console.error('Error saving cards4 settings:', e);
+        if (!silent) showToast('حدث خطأ أثناء حفظ الإعدادات', 'error');
+    }
+}
+
+function copyCards4OverlayUrl(type = 'dual') {
+    const origin = window.location.origin;
+    let url = `${origin}/cards4-overlay.html?uid=${currentUid}`;
+    if (type === 'red') url += '&team=red';
+    else if (type === 'blue') url += '&team=blue';
+    navigator.clipboard.writeText(url).then(() => {
+        const label = type === 'red' ? 'الفريق الأحمر' : type === 'blue' ? 'الفريق الأزرق' : 'الشاشتين معاً (Dual Screen)';
+        showToast(`📋 تم نسخ رابط بطاقات كلاسيك 4 (${label}) لـ OBS!`, 'success');
+    }).catch(() => {
+        prompt('انسخ الرابط يدوياً:', url);
+    });
+}
+
+// ================= MODAL: VISUAL CARD 4 PICKER (MC Royale) ================= //
+function openVisualCard4Picker(teamKey, slotIdx) {
+    activeVisualCard4Team = teamKey || 'teamRed';
+    activeVisualCard4SlotIdx = slotIdx;
+    const modal = document.getElementById('visualCard4PickerModal');
+    if (!modal) return;
+    modal.classList.add('open');
+    renderVisualCard4Gallery();
+}
+
+function closeVisualCard4Picker() {
+    const modal = document.getElementById('visualCard4PickerModal');
+    if (modal) modal.classList.remove('open');
+    activeVisualCard4SlotIdx = null;
+}
+
+function renderVisualCard4Gallery() {
+    const grid = document.getElementById('visualCard4GalleryGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    const currentCard = (activeVisualCard4SlotIdx !== null && cards4BoardConfig[activeVisualCard4Team]?.cards[activeVisualCard4SlotIdx])
+        ? cards4BoardConfig[activeVisualCard4Team].cards[activeVisualCard4SlotIdx]
+        : null;
+    const currentType = currentCard ? (currentCard.cardType || 'skeleton_bandana') : '';
+
+    CARD4_MC_ITEMS.forEach(item => {
+        const isSelected = currentType === item.id;
+        const cardEl = document.createElement('div');
+        cardEl.className = `visual-char-option-card ${isSelected ? 'selected' : ''}`;
+        cardEl.style.cssText = `
+            position: relative;
+            background: ${isSelected ? 'rgba(121, 40, 202, 0.25)' : 'rgba(255, 255, 255, 0.04)'};
+            border: 2px solid ${isSelected ? '#b594f8' : 'rgba(255, 255, 255, 0.12)'};
+            border-radius: 14px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.22s ease;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        `;
+        cardEl.onclick = () => selectVisualCard4(item.id, item.name);
+
+        cardEl.innerHTML = `
+            <div style="width:100%; height:110px; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle, rgba(121,40,202,0.2), transparent); border-radius:10px; margin-bottom:8px;">
+                <img src="${item.image}" alt="${escapeHtml(item.name)}" style="max-height:95px; max-width:95px; object-fit:contain; filter:drop-shadow(0 4px 10px rgba(0,0,0,0.6));" onerror="this.src='/images/mcroyale/skeleton_bandana.png'">
+            </div>
+            <div style="width:100%;">
+                <span style="background:rgba(121,40,202,0.35); color:#e2bbf7; border:1px solid #7928ca; font-size:10.5px; font-weight:800; padding:2px 8px; border-radius:10px; display:inline-block; margin-bottom:4px;">${escapeHtml(item.badge)}</span>
+                <h4 style="margin:2px 0 4px 0; color:#fff; font-size:13.5px; font-weight:900;">${escapeHtml(item.name)}</h4>
+                <p style="margin:0; font-size:11px; color:#94a3b8; line-height:1.3;">${escapeHtml(item.desc)}</p>
+            </div>
+            ${isSelected ? '<div style="position:absolute; top:8px; right:8px; background:#22c55e; color:#fff; border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:900; box-shadow:0 0 8px #22c55e;">✓</div>' : ''}
+        `;
+        grid.appendChild(cardEl);
+    });
+}
+
+function selectVisualCard4(cardTypeId, cardTypeName) {
+    if (activeVisualCard4SlotIdx === null) return;
+    const team = cards4BoardConfig[activeVisualCard4Team];
+    if (!team || !team.cards[activeVisualCard4SlotIdx]) return;
+
+    team.cards[activeVisualCard4SlotIdx].cardType = cardTypeId;
+    closeVisualCard4Picker();
+    renderCards4DeckList();
+    saveCards4BoardConfig(true);
+    const teamLabel = activeVisualCard4Team === 'teamRed' ? 'الفريق الأحمر' : 'الفريق الأزرق';
+    showToast(`تم اختيار بطاقة (${cardTypeName}) لـ ${teamLabel} للخانة رقم ${activeVisualCard4SlotIdx + 1}! 🎴`, 'success');
+}
+
+
 
 // ================= SECTION: LAST SUPPORTER FRAMES (إطارات آخر داعم) ================= //
 let supporterFrameConfig = {
