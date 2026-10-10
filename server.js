@@ -3471,6 +3471,27 @@ app.get('/api/luckyspin/:id/events', (req, res) => {
     });
 });
 
+app.post(['/api/upload-sound', '/api/luckyspin/:id/upload-sound'], (req, res) => {
+    try {
+        const body = req.body || {};
+        const soundsDir = path.join(__dirname, 'public', 'sounds');
+        if (!fs.existsSync(soundsDir)) fs.mkdirSync(soundsDir, { recursive: true });
+        let savedName = (body.name || ('sound_' + Date.now())).replace(/[^a-zA-Z0-9_.-]/g, '_');
+        if (!savedName.endsWith('.mp3') && !savedName.endsWith('.wav') && !savedName.endsWith('.ogg')) savedName += '.mp3';
+        if (body.data) {
+            const base64Data = body.data.replace(/^data:audio\/\w+;base64,/, '');
+            fs.writeFileSync(path.join(soundsDir, savedName), Buffer.from(base64Data, 'base64'));
+            const gamesSounds = path.join(__dirname, 'public', 'games', 'luckyspin', 'sounds');
+            if (fs.existsSync(gamesSounds)) {
+                try { fs.copyFileSync(path.join(soundsDir, savedName), path.join(gamesSounds, savedName)); } catch(e){}
+            }
+        }
+        res.json({ success: true, url: '/sounds/' + savedName, name: savedName });
+    } catch(err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
 app.post('/api/luckyspin/:id/broadcast', (req, res) => {
     const board = getLuckySpinBoard(req.params.id);
     const body = req.body || {};

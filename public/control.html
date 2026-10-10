@@ -2647,18 +2647,45 @@
     </div>
 
     <!-- ================= MODAL: VISUAL CARD 4 PICKER (معرض بطاقات كلاسيك MC Royale) ================= -->
+    <!-- ================= MODAL: VISUAL CARD 4 PICKER (MC Royale) ================= -->
     <div class="modal-backdrop" id="visualCard4PickerModal">
         <div class="modal-box modal-wide" style="max-width:740px; max-height:85vh; display:flex; flex-direction:column;">
             <button class="modal-close" onclick="closeVisualCard4Picker()">✕</button>
             
-            <div class="modal-header-simple" style="margin-bottom:14px;">
+            <div class="modal-header-simple" style="margin-bottom:12px;">
                 <h3 style="color:#fff; font-size:18px; font-weight:900; display:flex; align-items:center; gap:8px;">
-                    <span>⚔️ اختيار بطاقة كلاسيك (MC Royale)</span>
-                    <span class="badge-tag" style="background:linear-gradient(135deg, #7928ca, #ff0080); font-size:11px;">اضغط على البطاقة لاختيارها فوراً 🎯</span>
+                    <span>⚔️ اختيار بطاقة كلاسيك (MC Royale) أو صورة مخصصة</span>
+                    <span class="badge-tag" style="background:linear-gradient(135deg, #7928ca, #ff0080); font-size:11px;">اضغط على البطاقة أو ارفع من جهازك 🎯</span>
                 </h3>
                 <p style="color:#94a3b8; font-size:12.5px; margin-top:4px;">
-                    اختر شخصية البطاقة الكلاسيكية التي تريدها من مكتبة MC Royale:
+                    تقدر ترفع أي صورة من جهازك أو تختار بطاقة كلاسيكية جاهزة:
                 </p>
+            </div>
+
+            <!-- Upload Custom Image from Device for Cards 4 -->
+            <div class="custom-card-upload-box" style="background:linear-gradient(135deg, rgba(121,40,202,0.15), rgba(255,0,128,0.15)); border:2px dashed #7928ca; border-radius:14px; padding:12px 16px; margin-bottom:12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                    <div style="text-align:right; flex:1; min-width:200px;">
+                        <div style="font-weight:900; font-size:13.5px; color:#fff; display:flex; align-items:center; gap:6px;">
+                            <span>📁 رفع صورة من جهازك للبطاقة</span>
+                            <span class="badge-tag" style="background:#7928ca; font-size:10px;">PNG, GIF, JPG, WEBP</span>
+                        </div>
+                        <div style="font-size:11px; color:#cbd5e1; margin-top:2px;">
+                            حط أي شخصية أو تصميم خاص بك مكان البطاقة
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                        <label class="btn-primary" style="display:inline-flex; align-items:center; gap:6px; cursor:pointer; background:linear-gradient(135deg, #7928ca, #ff0080); padding:7px 14px; font-size:12.5px; font-weight:900; border-radius:8px; margin:0;">
+                            <span>📤 اختيار صورة من الكمبيوتر</span>
+                            <input type="file" accept="image/*" style="display:none;" onchange="uploadModalCard4Image(this.files[0])">
+                        </label>
+                        <div id="modalCard4CurrentCustomBox" style="display:none;">
+                            <button type="button" class="btn-secondary" onclick="resetCurrentCard4CustomImage()" style="border-color:#ef4444; color:#ef4444; font-size:11px; padding:6px 10px;" title="إلغاء واستعادة الشكل الافتراضي">
+                                🔄 استعادة الافتراضي
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Visual Cards Grid (5 classic Minecraft cards) -->
@@ -2673,19 +2700,55 @@
         </div>
     </div>
 
-    <!-- ================= MODAL: VISUAL CHARACTER / ITEM PICKER (معرض اختيار عنصر البطاقة - GIF متحرك) ================= -->
+    <!-- ================= MODAL: VISUAL CHARACTER / ITEM PICKER (معرض اختيار عنصر البطاقة - GIF متحرك أو صورة من الجهاز) ================= -->
     <div class="modal-backdrop" id="visualCharacterPickerModal">
         <div class="modal-box modal-wide" style="max-width:740px; max-height:85vh; display:flex; flex-direction:column;">
             <button class="modal-close" onclick="closeVisualCharacterPicker()">✕</button>
             
-            <div class="modal-header-simple" style="margin-bottom:14px;">
+            <div class="modal-header-simple" style="margin-bottom:12px;">
                 <h3 style="color:#fff; font-size:18px; font-weight:900; display:flex; align-items:center; gap:8px;">
-                    <span>✨ اختيار عنصر / شخصية البطاقة (GIF متحرك)</span>
-                    <span class="badge-tag" style="background:linear-gradient(135deg, #00b4d8, #7928ca); font-size:11px;">اضغط على العنصر لاختياره فوراً 🎯</span>
+                    <span>✨ اختيار عنصر / شخصية البطاقة (GIF متحرك أو صورة من جهازك)</span>
+                    <span class="badge-tag" style="background:linear-gradient(135deg, #00b4d8, #7928ca); font-size:11px;">اضغط على العنصر أو ارفع من جهازك 🎯</span>
                 </h3>
                 <p style="color:#94a3b8; font-size:12.5px; margin-top:4px;">
-                    اختر العنصر المتحرك الذي تريده في هذه البطاقة من مكتبة العناصر:
+                    تقدر ترفع أي صورة أو GIF متحرك من جهازك، أو تختار عنصراً متحركاً جاهزاً:
                 </p>
+            </div>
+
+            <!-- Upload Custom Image from Device for Cards 3 (تيك توك 3) -->
+            <div class="custom-card-upload-box" style="background:linear-gradient(135deg, rgba(16,185,129,0.14), rgba(0,180,216,0.14)); border:2px dashed #10b981; border-radius:14px; padding:14px 16px; margin-bottom:12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                    <div style="text-align:right; flex:1; min-width:220px;">
+                        <div style="font-weight:900; font-size:14px; color:#fff; display:flex; align-items:center; gap:8px;">
+                            <span>📁 رفع صورة من جهازك للبطاقة</span>
+                            <span class="badge-tag" style="background:#10b981; font-size:10.5px;">PNG شفاف، GIF متحرك، JPG، WEBP</span>
+                        </div>
+                        <div style="font-size:11.5px; color:#cbd5e1; margin-top:3px;">
+                            حط أي صورة أو شخصية أو لوجو من جهازك لتظهر في بطاقة اللعبة فوراً
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                        <label class="btn-primary" style="display:inline-flex; align-items:center; gap:7px; cursor:pointer; background:linear-gradient(135deg, #10b981, #059669); padding:8px 16px; font-size:13px; font-weight:900; border-radius:10px; box-shadow:0 4px 12px rgba(16,185,129,0.35); margin:0;">
+                            <span>📤 اختيار صورة من الكمبيوتر</span>
+                            <input type="file" id="modalCardImageUploadInput" accept="image/*" style="display:none;" onchange="uploadModalCardImage(this.files[0])">
+                        </label>
+                        <div id="modalCardCurrentCustomBox" style="display:none;">
+                            <button type="button" class="btn-secondary" onclick="resetCurrentCardCustomImage()" style="border-color:#ef4444; color:#ef4444; font-size:11.5px; padding:7px 11px;" title="إلغاء الصورة المخصصة والرجوع للشكل الافتراضي">
+                                🔄 استعادة الافتراضي
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div id="modalCardUploadLoading" style="display:none; margin-top:8px; font-size:12px; font-weight:800; color:#10b981;">
+                    ⏳ جاري رفع الصورة وتطبيقها على البطاقة الآن...
+                </div>
+            </div>
+
+            <!-- Divider -->
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+                <div style="flex:1; height:1px; background:rgba(255,255,255,0.12);"></div>
+                <span style="font-size:11.5px; font-weight:800; color:#94a3b8;">أو اختر من عناصر وتأثيرات اللعبة المتحركة (GIF شفاف) 👇</span>
+                <div style="flex:1; height:1px; background:rgba(255,255,255,0.12);"></div>
             </div>
 
             <!-- Visual Characters Grid (Large cards with animated GIFs) -->
@@ -2706,13 +2769,23 @@
             <button class="modal-close" onclick="closeVisualGiftPicker()">✕</button>
             
             <div class="modal-header-simple" style="margin-bottom:12px;">
-                <h3 style="color:#fff; font-size:18px; font-weight:900; display:flex; align-items:center; gap:8px;">
-                    <span>🎁 اختيار صورة الهدية للبطاقة</span>
-                    <span class="badge-tag" style="background:#ff2a4a; font-size:11px;">اضغط على صورة الهدية لاختيارها فوراً ✨</span>
-                </h3>
-                <p style="color:#94a3b8; font-size:12.5px; margin-top:4px;">
-                    اختر صورة الهدية أو تفعيل وضع التكبيس والفولو السريع لهذه البطاقة:
-                </p>
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                    <div>
+                        <h3 style="color:#fff; font-size:18px; font-weight:900; display:flex; align-items:center; gap:8px;">
+                            <span>🎁 اختيار صورة الهدية للبطاقة</span>
+                            <span class="badge-tag" style="background:#ff2a4a; font-size:11px;">اضغط على صورة الهدية لاختيارها فوراً ✨</span>
+                        </h3>
+                        <p style="color:#94a3b8; font-size:12.5px; margin-top:4px;">
+                            اختر صورة الهدية من قائمة تيك توك، أو ارفع صورة هدية خاصة من جهازك:
+                        </p>
+                    </div>
+                    <div>
+                        <label class="btn-secondary" style="display:inline-flex; align-items:center; gap:6px; cursor:pointer; font-size:12px; font-weight:800; padding:7px 13px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.18); border-radius:8px; margin:0;" title="رفع صورة هدية مخصصة من جهازك">
+                            <span>📁 رفع صورة هدية من جهازك</span>
+                            <input type="file" accept="image/*" style="display:none;" onchange="uploadCustomGiftImage(this.files[0])">
+                        </label>
+                    </div>
+                </div>
             </div>
 
             <!-- Special Modes: Likes (التكبيس) & Follow (الفولو) -->

@@ -120,15 +120,15 @@ function _extends(){
 }var {
   useState,useEffect,useRef,useMemo,useCallback
 }=React,plainText=i=>String((typeof window!=="undefined"&&window["normalizeFancyText"]?window["normalizeFancyText"](i):i)??""),DEFAULT_LIBRARY=[{
-  'id':"def_spin",'name':"Wheel Spinning",'url':"sounds/spin.mp3",'type':"spin",'active':!![],'min':0x0,'isCustom':![]
+  'id':"def_spin",'name':"Wheel Spinning",'url':"/sounds/spin.mp3",'type':"spin",'active':!![],'min':0x0,'isCustom':![]
 },{
-  'id':"def_win",'name':"Winner Tada",'url':"sounds/Tada.mp3",'type':"win",'active':!![],'min':0x0,'isCustom':![]
+  'id':"def_win",'name':"Winner Tada",'url':"/sounds/Tada.mp3",'type':"win",'active':!![],'min':0x0,'isCustom':![]
 },{
-  'id':"def_coin",'name':"Join Sound (join.mp3)",'url':"sounds/join.mp3",'type':"coin",'active':!![],'min':0x0,'isCustom':![]
+  'id':"def_coin",'name':"Join Sound (join.mp3)",'url':"/sounds/join.mp3",'type':"coin",'active':!![],'min':0x0,'isCustom':![]
 },{
-  'id':"def_win_music",'name':"Victory Music",'url':"sounds/win.mp3",'type':"win",'active':!![],'min':0x0,'isCustom':![]
+  'id':"def_win_music",'name':"Victory Music",'url':"/sounds/win.mp3",'type':"win",'active':!![],'min':0x0,'isCustom':![]
 },{
-  'id':"def_elim",'name':"Elimination Sound (fart.mp3)",'url':"sounds/fart.mp3",'type':"elimination",'active':!![],'min':0x0,'isCustom':![]
+  'id':"def_elim",'name':"Elimination Sound (fart.mp3)",'url':"/sounds/fart.mp3",'type':"elimination",'active':!![],'min':0x0,'isCustom':![]
 }],MULTI_ELIM_FLOOR=typeof window!=="undefined"&&window["LuckySpinMultiElim"]?window["LuckySpinMultiElim"]["MIN_SURVIVORS"]:0xa,CogIcon=()=>React["createElement"]("svg",{
   'className':"w-5 h-5",'fill':"currentColor",'viewBox':"0 0 20 20"
 },React["createElement"]("path",{
@@ -469,11 +469,15 @@ function _extends(){
   var fJ=fy;
   if(i["length"]===0x0){
     return React["createElement"]("div",{
-      'className':"relative w-full h-full overflow-hidden p-2 grid grid-cols-3 gap-2"
-    },Array.from({length: 9}).map((_,idx)=>React["createElement"]("div",{
+      'className':"relative w-full h-full overflow-hidden p-2 grid grid-cols-3 sm:grid-cols-4 gap-2"
+    },Array.from({length: 8}).map((_,idx)=>React["createElement"]("div",{
       'key':"sq_empty_"+idx,
-      'className':"rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm flex items-center justify-center shadow-inner transition-all"
-    })));
+      'className':"rounded-xl border-2 border-purple-500/40 bg-gray-950/85 backdrop-blur-md flex flex-col items-center justify-center p-2 text-center shadow-lg select-none"
+    },React["createElement"]("span",{
+      'className':"text-xs font-black text-purple-400 mb-0.5"
+    },"#"+(idx+1)),React["createElement"]("span",{
+      'className':"text-[10px] font-bold text-gray-400 uppercase tracking-wider"
+    },"+ WAITING"))));
   }
   var s=i["length"],t=Math["ceil"](Math["sqrt"](s*1.2));
   if(s<=0x4)t=0x2;
@@ -1525,21 +1529,20 @@ function pickGiftFromLauncher(i,j,k){
     ez["preventDefault"](),ez["stopPropagation"](),cv(eB=>eB["filter"](eC=>eC['id']!==eA));
     
   },dG=ez=>{
-    var hP=fQ,eA=ez["target"]["files"][0x0];
+    var eA=ez["target"]["files"]&&ez["target"]["files"][0x0];
     if(eA){
-      var eB='';
-      if(eA["path"])eB=eA["path"];
-      else{
-        var eC=new FileReader();
-        eC["onload"]=eD=>{
-          var hQ=hP;
-          cB(eD["target"]["result"]);
-          
-        },eC["readAsDataURL"](eA);
-        return;
-        
-      }cB(eB),cz(eA["name"]["replace"](/\.[^/.]+$/,'')),cD(eA["name"]);
-      
+      var sName=eA["name"]["replace"](/\.[^/.]+$/,'');
+      cz(sName),cD(eA["name"]);
+      if(eA["path"])cB(eA["path"]);
+      var eC=new FileReader();
+      eC["onload"]=eD=>{
+        var dataUrl=eD["target"]["result"];
+        cB(dataUrl);
+        try{
+          fetch(API_BASE+"/api/upload-sound",{'method':"POST",'headers':{'Content-Type':"application/json"},'body':JSON["stringify"]({'name':sName,'data':dataUrl})})["then"](r=>r["json"]())["then"](res=>{if(res&&res["url"])cB(res["url"]);})["catch"](()=>{});
+        }catch(err){}
+      };
+      eC["readAsDataURL"](eA);
     }
   },dH=()=>{
     var hR=fQ;
@@ -4011,8 +4014,10 @@ function pickGiftFromLauncher(i,j,k){
   },x["pic"]?React["createElement"]("img",{
     'src':x["pic"],'alt':'','className':"w-full h-full object-cover grayscale"
   }):React["createElement"]("div",{
-    'className':"w-full h-full bg-red-950/80 flex items-center justify-center font-black text-sm text-red-200 p-2 text-center break-words leading-tight"
-  },plainText(x["name"]))),React["createElement"]("div",{
+    'className':"w-full h-full bg-gradient-to-br from-red-950/90 to-gray-900 flex items-center justify-center p-1"
+  },React["createElement"]("div",{
+    'className':"w-12 h-12 rounded-full bg-red-600/30 border-2 border-red-500/60 flex items-center justify-center text-lg font-black text-red-200 shadow-inner uppercase"
+  },getInitials(x["name"])))),React["createElement"]("div",{
     'className':"w-full bg-black/90 py-1 px-1 text-center"
   },React["createElement"]("span",{
     'className':"text-xs font-black text-white uppercase truncate block"
@@ -4021,7 +4026,7 @@ function pickGiftFromLauncher(i,j,k){
   },React["createElement"]('h2',{
     'className':"text-xl font-black text-red-400 super-outline leading-tight drop-shadow-xl break-words w-full"
   },plainText(x["name"])))) : React["createElement"]("div",{
-    'className':"grid grid-cols-3 sm:grid-cols-4 gap-2 max-w-[360px] max-h-[220px] overflow-hidden my-2 select-none"
+    'className':"flex flex-wrap justify-center items-center gap-2 max-w-[380px] max-h-[240px] overflow-hidden my-2 select-none"
   },Array["from"](new Map([x,...av]["map"](p=>[p["userId"]||p["name"],p]))["values"]())["slice"](0x0,0x8)["map"]((ez,eA)=>React["createElement"]("div",{
     'key':"elim_card_"+eA,
     'className':"w-[82px] h-[96px] rounded-xl border-2 border-red-500 bg-gray-900 shadow-[0_0_12px_rgba(239,68,68,0.5)] overflow-hidden flex flex-col items-center justify-between"
@@ -4030,8 +4035,10 @@ function pickGiftFromLauncher(i,j,k){
   },ez["pic"]?React["createElement"]("img",{
     'src':ez["pic"],'alt':'','className':"w-full h-full object-cover grayscale"
   }):React["createElement"]("div",{
-    'className':"w-full h-full bg-red-950/80 flex items-center justify-center font-black text-xs text-red-200 p-1 text-center break-words leading-tight"
-  },plainText(ez["name"]))),React["createElement"]("div",{
+    'className':"w-full h-full bg-gradient-to-br from-red-950/90 to-gray-900 flex items-center justify-center p-1"
+  },React["createElement"]("div",{
+    'className':"w-9 h-9 rounded-full bg-red-600/30 border border-red-500/60 flex items-center justify-center text-xs font-black text-red-200 shadow-inner uppercase"
+  },getInitials(ez["name"])))),React["createElement"]("div",{
     'className':"w-full bg-black/90 py-0.5 px-1 text-center"
   },React["createElement"]("span",{
     'className':"text-[10px] font-black text-white uppercase truncate block"

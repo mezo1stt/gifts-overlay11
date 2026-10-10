@@ -3178,6 +3178,14 @@ function getCardGifItem(cardType) {
     return CARD_GIF_ITEMS[0];
 }
 
+function formatImageSrc(image) {
+    if (!image) return '/images/rose.png';
+    if (image.startsWith('http://') || image.startsWith('https://') || image.startsWith('data:')) {
+        return image;
+    }
+    return image.startsWith('/') ? image : `/images/${image}`;
+}
+
 let activeVisualCharTeam = 'teamRed';
 let activeVisualCharSlotIdx = null;
 let cardsActiveTargetTeam = 'teamRed'; // 'teamRed' or 'teamBlue'
@@ -3344,8 +3352,10 @@ function renderTeamCardsDeck(teamKey, listContainerId, countDisplayId) {
         item.setAttribute('data-team', teamKey);
 
         const charItem = getCardGifItem(card.cardType);
-        const cardSrc = charItem.img;
-        const giftSrc = normalizeImgPath(card.giftImage || '/images/rose.png');
+        const hasCustomImg = !!card.customImage;
+        const cardSrc = hasCustomImg ? formatImageSrc(card.customImage) : charItem.img;
+        const cardDisplayName = hasCustomImg ? (card.customImageName || 'صورة من جهازك 🖼️') : charItem.name;
+        const giftSrc = formatImageSrc(card.giftImage || '/images/rose.png');
 
         item.innerHTML = `
             <!-- Order Arrows (رفع بطاقة فوق أو تنزيل تحت زي هدايا تيك توك 1) -->
@@ -3356,20 +3366,30 @@ function renderTeamCardsDeck(teamKey, listContainerId, countDisplayId) {
 
             <span class="card-slot-idx">#${idx + 1}</span>
 
-            <div class="card-slot-avatar-wrap">
-                <img class="card-slot-avatar-img" src="${cardSrc}" alt="${escapeHtml(charItem.name)}" id="${teamKey}_slotAvatar_${idx}" onerror="this.src='/images/cards_gif/meteor.gif'">
+            <div class="card-slot-avatar-wrap" onclick="openVisualCharacterPicker('${teamKey}', ${idx})" title="انقر لتغيير الصورة أو رفع صورة من جهازك" style="cursor:pointer;">
+                <img class="card-slot-avatar-img" src="${cardSrc}" alt="${escapeHtml(cardDisplayName)}" id="${teamKey}_slotAvatar_${idx}" onerror="this.src='/images/cards_gif/meteor.gif'">
                 <img class="card-slot-badge-preview" src="${giftSrc}" alt="Gift" id="${teamKey}_slotBadge_${idx}" onerror="this.src='/images/rose.png'">
             </div>
 
             <div class="card-slot-controls-wrap">
-                <!-- Character & Item Visual Selector (اختيار العنصر بنافذة عرض كبيرة ومجسمة) -->
+                <!-- Character & Item Visual Selector (اختيار العنصر بنافذة عرض كبيرة ومجسمة أو رفع من الجهاز) -->
                 <div class="card-slot-field">
-                    <label>عنصر البطاقة (GIF متحرك شفاف):</label>
-                    <button type="button" class="btn-visual-char-trigger" onclick="openVisualCharacterPicker('${teamKey}', ${idx})" title="انقر لفتح معرض العناصر واختيار عنصر من المعرض الكبير">
-                        <img class="char-thumb-img" src="${cardSrc}" alt="${escapeHtml(charItem.name)}" onerror="this.src='/images/cards_gif/meteor.gif'">
-                        <span class="char-name-label">${escapeHtml(charItem.name)}</span>
-                        <span class="char-click-hint">تغيير العنصر 🖼️</span>
-                    </button>
+                    <label>عنصر البطاقة (شكل أو صورة مخصصة):</label>
+                    <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+                        <button type="button" class="btn-visual-char-trigger" style="flex:1; min-width:130px;" onclick="openVisualCharacterPicker('${teamKey}', ${idx})" title="انقر لفتح معرض العناصر واختيار عنصر من المعرض أو رفع صورة">
+                            <img class="char-thumb-img" src="${cardSrc}" alt="${escapeHtml(cardDisplayName)}" onerror="this.src='/images/cards_gif/meteor.gif'">
+                            <span class="char-name-label">${escapeHtml(cardDisplayName)}</span>
+                            <span class="char-click-hint">تغيير 🖼️</span>
+                        </button>
+                        <label class="btn-mini-upload" title="رفع صورة أو GIF مباشرة من جهازك لهذا العنصر" style="background:linear-gradient(135deg, #10b981, #059669); color:#fff; border-radius:8px; padding:7px 11px; font-size:12px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:5px; border:1px solid rgba(255,255,255,0.18); white-space:nowrap; box-shadow:0 2px 8px rgba(16,185,129,0.3); transition:transform 0.15s ease;">
+                            <span>📤 جهازك</span>
+                            <input type="file" accept="image/*" style="display:none;" onchange="uploadDirectCardImage('${teamKey}', ${idx}, this.files[0])">
+                        </label>
+                        ${hasCustomImg ? `
+                        <button type="button" class="btn-mini-reset" onclick="resetCardCustomImage('${teamKey}', ${idx})" title="إلغاء الصورة المخصصة والرجوع للشكل الافتراضي" style="background:rgba(239,68,68,0.15); border:1px solid #ef4444; color:#ef4444; border-radius:8px; padding:7px 9px; font-size:11.5px; font-weight:800; cursor:pointer; white-space:nowrap;">
+                            🔄 استعادة
+                        </button>` : ''}
+                    </div>
                 </div>
 
                 <!-- Card Bottom Text (بدل عدد الجنود حط نص تحت البطاقه وانا اكتبه) -->
@@ -3586,9 +3606,30 @@ function renderVisualCharactersGallery() {
         ? cardsBoardConfig[activeVisualCharTeam].cards[activeVisualCharSlotIdx]
         : null;
     const currentType = currentCard ? (currentCard.cardType || 'meteor') : '';
+    const hasCustomImg = !!(currentCard && currentCard.customImage);
+
+    // Toggle reset button in modal header
+    const currentCustomBox = document.getElementById('modalCardCurrentCustomBox');
+    if (currentCustomBox) {
+        currentCustomBox.style.display = hasCustomImg ? 'block' : 'none';
+    }
+
+    // If card currently has custom image from device, display it at the top as selected
+    if (hasCustomImg) {
+        const customCard = document.createElement('div');
+        customCard.className = 'visual-character-card selected';
+        customCard.style.borderColor = '#10b981';
+        customCard.style.boxShadow = '0 0 16px rgba(16, 185, 129, 0.45)';
+        customCard.innerHTML = `
+            <img src="${formatImageSrc(currentCard.customImage)}" alt="صورة من جهازك" loading="lazy" onerror="this.src='/images/cards_gif/meteor.gif'">
+            <span class="v-char-name" style="color:#10b981;">${escapeHtml(currentCard.customImageName || 'صورة من جهازك')}</span>
+            <span class="v-char-badge" style="background:#10b981; color:#fff;">✓ صورتك المخصصة الحالية</span>
+        `;
+        grid.appendChild(customCard);
+    }
 
     CARD_GIF_ITEMS.forEach(item => {
-        const isSelected = currentType === item.id;
+        const isSelected = (!hasCustomImg && currentType === item.id);
         const card = document.createElement('div');
         card.className = `visual-character-card ${isSelected ? 'selected' : ''}`;
         card.onclick = () => selectVisualCharacter(item.id, item.name, item.img);
@@ -3608,6 +3649,7 @@ function selectVisualCharacter(itemId, itemName, itemImg) {
     if (!team || !team.cards[activeVisualCharSlotIdx]) return;
 
     delete team.cards[activeVisualCharSlotIdx].customImage;
+    delete team.cards[activeVisualCharSlotIdx].customImageName;
     team.cards[activeVisualCharSlotIdx].cardType = itemId;
 
     closeVisualCharacterPicker();
@@ -3615,6 +3657,91 @@ function selectVisualCharacter(itemId, itemName, itemImg) {
     saveCardsBoardConfig(true);
     const teamLabel = activeVisualCharTeam === 'teamRed' ? 'الفريق الأحمر' : 'الفريق الأزرق';
     showToast(`تم اختيار (${itemName}) لـ ${teamLabel} للبطاقة رقم ${activeVisualCharSlotIdx + 1}! ✨`, 'success');
+}
+
+// Upload Card Image Directly from Device (Cards 3)
+async function uploadDirectCardImage(teamKey, idx, file) {
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+        showToast('يرجى اختيار ملف صورة صالح (PNG, GIF, JPG, WEBP)', 'error');
+        return;
+    }
+
+    try {
+        showToast('جاري رفع صورة البطاقة من جهازك... ⏳', 'info');
+        let finalImageUrl = '';
+
+        try {
+            const formData = new FormData();
+            formData.append('cardImage', file);
+            const res = await fetch('/api/upload-card-image', {
+                method: 'POST',
+                body: formData
+            });
+            if (res.ok) {
+                const data = await res.json();
+                if (data && data.success && data.url) {
+                    finalImageUrl = data.url;
+                }
+            }
+        } catch (netErr) {
+            console.warn('Server upload-card-image failed, falling back to DataURL:', netErr);
+        }
+
+        // Reliable fallback if server upload failed or offline
+        if (!finalImageUrl) {
+            finalImageUrl = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        const team = cardsBoardConfig[teamKey];
+        if (team && team.cards && team.cards[idx]) {
+            team.cards[idx].customImage = finalImageUrl;
+            team.cards[idx].customImageName = file.name || 'صورة مخصصة';
+            renderCardsDeckList();
+            await saveCardsBoardConfig(true);
+            showToast('تم رفع وتعيين الصورة بنجاح وتحديث البث فوراً! 🖼️✨', 'success');
+        }
+    } catch (e) {
+        console.error('Upload card image error:', e);
+        showToast('حدث خطأ أثناء رفع الصورة', 'error');
+    }
+}
+
+// Upload Card Image from Modal (Cards 3)
+async function uploadModalCardImage(file) {
+    if (!file || activeVisualCharSlotIdx === null) return;
+    const teamKey = activeVisualCharTeam;
+    const slotIdx = activeVisualCharSlotIdx;
+    const loadingEl = document.getElementById('modalCardUploadLoading');
+    if (loadingEl) loadingEl.style.display = 'block';
+
+    await uploadDirectCardImage(teamKey, slotIdx, file);
+
+    if (loadingEl) loadingEl.style.display = 'none';
+    closeVisualCharacterPicker();
+}
+
+// Reset Custom Image back to Default GIF (Cards 3)
+function resetCardCustomImage(teamKey, idx) {
+    const team = cardsBoardConfig[teamKey];
+    if (!team || !team.cards || !team.cards[idx]) return;
+    delete team.cards[idx].customImage;
+    delete team.cards[idx].customImageName;
+    renderCardsDeckList();
+    saveCardsBoardConfig(true);
+    showToast('تمت استعادة العنصر الافتراضي للبطاقة بنجاح! 🔄', 'info');
+}
+
+function resetCurrentCardCustomImage() {
+    if (activeVisualCharSlotIdx === null) return;
+    resetCardCustomImage(activeVisualCharTeam, activeVisualCharSlotIdx);
+    renderVisualCharactersGallery();
 }
 
 // ================= VISUAL GIFT PICKER MODAL (اختيار الهدية كصورة) ================= //
@@ -3896,6 +4023,54 @@ function applyGiftToCardSlot(giftName, giftImage, likesCount = null) {
 
 function selectVisualGift(giftName, giftImage) {
     applyGiftToCardSlot(giftName, giftImage, null);
+}
+
+// Upload Custom Gift Image from Device (Cards 3, Cards 4, Tarkibat)
+async function uploadCustomGiftImage(file) {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+        showToast('يرجى اختيار ملف صورة صالح (PNG, GIF, JPG, WEBP)', 'error');
+        return;
+    }
+
+    try {
+        showToast('جاري رفع صورة الهدية من جهازك... ⏳', 'info');
+        let giftUrl = '';
+
+        try {
+            const formData = new FormData();
+            formData.append('cardImage', file);
+            const res = await fetch('/api/upload-card-image', {
+                method: 'POST',
+                body: formData
+            });
+            if (res.ok) {
+                const data = await res.json();
+                if (data && data.success && data.url) {
+                    giftUrl = data.url;
+                }
+            }
+        } catch (netErr) {
+            console.warn('Server upload failed, falling back to data URL:', netErr);
+        }
+
+        if (!giftUrl) {
+            giftUrl = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        const giftName = file.name ? file.name.replace(/\.[^/.]+$/, '') : 'هدية مخصصة';
+        applyGiftToCardSlot(giftName, giftUrl, null);
+        closeVisualGiftPicker();
+        showToast(`تم تعيين صورة الهدية (${giftName}) بنجاح! 🎁✨`, 'success');
+    } catch (e) {
+        console.error('Upload custom gift image error:', e);
+        showToast('حدث خطأ أثناء رفع صورة الهدية', 'error');
+    }
 }
 
 // ================= SECTION: TIKTOK GIFTS 4 (بطاقات كلاسيك رويال MC Royale) ================= //
@@ -4189,15 +4364,17 @@ function renderTeam4CardsDeck(teamKey, containerId, countId) {
 
     container.innerHTML = team.cards.map((card, idx) => {
         const charItem = getCard4McItem(card.cardType);
-        const cardSrc = charItem.image || `/images/mcroyale/${card.cardType}.png`;
-        const giftSrc = normalizeImgPath(card.giftImage || '/images/rose.png');
+        const hasCustomImg = !!card.customImage;
+        const cardSrc = hasCustomImg ? formatImageSrc(card.customImage) : (charItem.image || `/images/mcroyale/${card.cardType}.png`);
+        const cardDisplayName = hasCustomImg ? (card.customImageName || 'صورة من جهازك 🖼️') : charItem.name;
+        const giftSrc = formatImageSrc(card.giftImage || '/images/rose.png');
 
         return `
             <div class="card-slot-item ${idx % 2 === 1 ? 'even' : ''}" data-idx="${idx}" style="border-right: 4px solid ${team.color || '#7928ca'};">
                 <div class="card-slot-header">
                     <div class="card-slot-badge">
                         <span class="slot-num">#${idx + 1}</span>
-                        <span class="slot-name">${escapeHtml(charItem.name)}</span>
+                        <span class="slot-name">${escapeHtml(cardDisplayName)}</span>
                     </div>
                     <div class="card-slot-actions">
                         ${idx > 0 ? `<button type="button" class="btn-order" onclick="moveCard4Slot('${teamKey}', ${idx}, -1)" title="رفع للأعلى">⬆️</button>` : ''}
@@ -4208,12 +4385,22 @@ function renderTeam4CardsDeck(teamKey, containerId, countId) {
 
                 <!-- MC Royale Card Visual Trigger -->
                 <div class="card-slot-field">
-                    <label>بطاقة كلاسيك رويال:</label>
-                    <button type="button" class="btn-visual-char-trigger" onclick="openVisualCard4Picker('${teamKey}', ${idx})" title="انقر لاختيار بطاقة كلاسيك رويال">
-                        <img class="char-thumb-img" src="${cardSrc}" alt="${escapeHtml(charItem.name)}" onerror="this.src='/images/mcroyale/skeleton_bandana.png'">
-                        <span class="char-name-label">${escapeHtml(charItem.name)}</span>
-                        <span class="char-click-hint">انقر للتغيير 🎴</span>
-                    </button>
+                    <label>بطاقة كلاسيك رويال (شكل أو صورة مخصصة):</label>
+                    <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+                        <button type="button" class="btn-visual-char-trigger" style="flex:1; min-width:130px;" onclick="openVisualCard4Picker('${teamKey}', ${idx})" title="انقر لاختيار بطاقة كلاسيك رويال أو رفع صورة">
+                            <img class="char-thumb-img" src="${cardSrc}" alt="${escapeHtml(cardDisplayName)}" onerror="this.src='/images/mcroyale/skeleton_bandana.png'">
+                            <span class="char-name-label">${escapeHtml(cardDisplayName)}</span>
+                            <span class="char-click-hint">تغيير 🎴</span>
+                        </button>
+                        <label class="btn-mini-upload" title="رفع صورة مباشرة من جهازك لهذه البطاقة" style="background:linear-gradient(135deg, #7928ca, #ff0080); color:#fff; border-radius:8px; padding:7px 11px; font-size:12px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:5px; border:1px solid rgba(255,255,255,0.18); white-space:nowrap; box-shadow:0 2px 8px rgba(121,40,202,0.3); transition:transform 0.15s ease;">
+                            <span>📤 جهازك</span>
+                            <input type="file" accept="image/*" style="display:none;" onchange="uploadDirectCard4Image('${teamKey}', ${idx}, this.files[0])">
+                        </label>
+                        ${hasCustomImg ? `
+                        <button type="button" class="btn-mini-reset" onclick="resetCard4CustomImage('${teamKey}', ${idx})" title="إلغاء الصورة المخصصة والرجوع للبطاقة الافتراضية" style="background:rgba(239,68,68,0.15); border:1px solid #ef4444; color:#ef4444; border-radius:8px; padding:7px 9px; font-size:11.5px; font-weight:800; cursor:pointer; white-space:nowrap;">
+                            🔄 استعادة
+                        </button>` : ''}
+                    </div>
                 </div>
 
                 <!-- Card Bottom Text (النص أسفل البطاقة) -->
@@ -4417,9 +4604,43 @@ function renderVisualCard4Gallery() {
         ? cards4BoardConfig[activeVisualCard4Team].cards[activeVisualCard4SlotIdx]
         : null;
     const currentType = currentCard ? (currentCard.cardType || 'skeleton_bandana') : '';
+    const hasCustomImg = !!(currentCard && currentCard.customImage);
+
+    const currentCustomBox = document.getElementById('modalCard4CurrentCustomBox');
+    if (currentCustomBox) {
+        currentCustomBox.style.display = hasCustomImg ? 'block' : 'none';
+    }
+
+    if (hasCustomImg) {
+        const customCardEl = document.createElement('div');
+        customCardEl.className = 'visual-char-option-card selected';
+        customCardEl.style.cssText = `
+            position: relative;
+            background: rgba(121, 40, 202, 0.35);
+            border: 2px solid #22c55e;
+            border-radius: 14px;
+            padding: 12px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 0 16px rgba(34, 197, 94, 0.4);
+        `;
+        customCardEl.innerHTML = `
+            <div style="width:100%; height:110px; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle, rgba(121,40,202,0.2), transparent); border-radius:10px; margin-bottom:8px;">
+                <img src="${formatImageSrc(currentCard.customImage)}" alt="صورة مخصصة" style="max-height:95px; max-width:95px; object-fit:contain; filter:drop-shadow(0 4px 10px rgba(0,0,0,0.6));" onerror="this.src='/images/mcroyale/skeleton.gif'">
+            </div>
+            <div style="width:100%;">
+                <span style="background:#22c55e; color:#fff; font-size:10.5px; font-weight:800; padding:2px 8px; border-radius:10px; display:inline-block; margin-bottom:4px;">✓ صورتك المخصصة</span>
+                <h4 style="margin:2px 0 4px 0; color:#fff; font-size:13.5px; font-weight:900;">${escapeHtml(currentCard.customImageName || 'صورة من جهازك')}</h4>
+            </div>
+            <div style="position:absolute; top:8px; right:8px; background:#22c55e; color:#fff; border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:900; box-shadow:0 0 8px #22c55e;">✓</div>
+        `;
+        grid.appendChild(customCardEl);
+    }
 
     CARD4_MC_ITEMS.forEach(item => {
-        const isSelected = currentType === item.id;
+        const isSelected = (!hasCustomImg && currentType === item.id);
         const cardEl = document.createElement('div');
         cardEl.className = `visual-char-option-card ${isSelected ? 'selected' : ''}`;
         cardEl.style.cssText = `
@@ -4457,12 +4678,92 @@ function selectVisualCard4(cardTypeId, cardTypeName) {
     const team = cards4BoardConfig[activeVisualCard4Team];
     if (!team || !team.cards[activeVisualCard4SlotIdx]) return;
 
+    delete team.cards[activeVisualCard4SlotIdx].customImage;
+    delete team.cards[activeVisualCard4SlotIdx].customImageName;
     team.cards[activeVisualCard4SlotIdx].cardType = cardTypeId;
     closeVisualCard4Picker();
     renderCards4DeckList();
     saveCards4BoardConfig(true);
     const teamLabel = activeVisualCard4Team === 'teamRed' ? 'الفريق الأحمر' : 'الفريق الأزرق';
     showToast(`تم اختيار بطاقة (${cardTypeName}) لـ ${teamLabel} للخانة رقم ${activeVisualCard4SlotIdx + 1}! 🎴`, 'success');
+}
+
+// Upload Direct Card Image (Cards 4)
+async function uploadDirectCard4Image(teamKey, idx, file) {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+        showToast('يرجى اختيار ملف صورة صالح (PNG, GIF, JPG, WEBP)', 'error');
+        return;
+    }
+
+    try {
+        showToast('جاري رفع صورة البطاقة من جهازك... ⏳', 'info');
+        let finalImageUrl = '';
+
+        try {
+            const formData = new FormData();
+            formData.append('cardImage', file);
+            const res = await fetch('/api/upload-card-image', {
+                method: 'POST',
+                body: formData
+            });
+            if (res.ok) {
+                const data = await res.json();
+                if (data && data.success && data.url) {
+                    finalImageUrl = data.url;
+                }
+            }
+        } catch (netErr) {
+            console.warn('Server upload failed, falling back to data URL:', netErr);
+        }
+
+        if (!finalImageUrl) {
+            finalImageUrl = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        const team = cards4BoardConfig[teamKey];
+        if (team && team.cards && team.cards[idx]) {
+            team.cards[idx].customImage = finalImageUrl;
+            team.cards[idx].customImageName = file.name || 'صورة مخصصة';
+            renderCards4DeckList();
+            await saveCards4BoardConfig(true);
+            showToast('تم رفع وتعيين صورة البطاقة بنجاح وتحديث البث! 🎴✨', 'success');
+        }
+    } catch (e) {
+        console.error('Upload card4 image error:', e);
+        showToast('حدث خطأ أثناء رفع الصورة', 'error');
+    }
+}
+
+// Upload Modal Card Image (Cards 4)
+async function uploadModalCard4Image(file) {
+    if (!file || activeVisualCard4SlotIdx === null) return;
+    const teamKey = activeVisualCard4Team;
+    const slotIdx = activeVisualCard4SlotIdx;
+    await uploadDirectCard4Image(teamKey, slotIdx, file);
+    closeVisualCard4Picker();
+}
+
+// Reset Card Image (Cards 4)
+function resetCard4CustomImage(teamKey, idx) {
+    const team = cards4BoardConfig[teamKey];
+    if (!team || !team.cards || !team.cards[idx]) return;
+    delete team.cards[idx].customImage;
+    delete team.cards[idx].customImageName;
+    renderCards4DeckList();
+    saveCards4BoardConfig(true);
+    showToast('تمت استعادة البطاقة الافتراضية بنجاح! 🔄', 'info');
+}
+
+function resetCurrentCard4CustomImage() {
+    if (activeVisualCard4SlotIdx === null) return;
+    resetCard4CustomImage(activeVisualCard4Team, activeVisualCard4SlotIdx);
+    renderVisualCard4Gallery();
 }
 
 
