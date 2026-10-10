@@ -3388,7 +3388,8 @@ const luckyspinBoards = {};
 const luckyspinSeenCtrlIds = new Set();
 
 function getLuckySpinBoard(rawId) {
-    const id = String(rawId || 'mz_6e60223656d3863d21bb918dc1dc').trim() || 'mz_6e60223656d3863d21bb918dc1dc';
+    let id = String(rawId || 'mz_6e60223656d3863d21bb918dc1dc').trim();
+    if (!id || id === 'default') id = 'mz_6e60223656d3863d21bb918dc1dc';
     if (!luckyspinBoards[id]) {
         luckyspinBoards[id] = {
             id,

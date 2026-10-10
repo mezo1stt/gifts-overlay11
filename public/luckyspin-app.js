@@ -11,7 +11,8 @@ var CLOUD_OVERLAY_BASE = (typeof window !== "undefined" && window.location && wi
 var OVERLAY_BOARD_ID = (function(){
   try {
     var p = new URLSearchParams(window.location.search);
-    return p.get("cid") || p.get("id") || p.get("uid") || "mz_6e60223656d3863d21bb918dc1dc";
+    var raw = p.get("cid") || p.get("uid") || p.get("id") || "default";
+    return (raw === "default" || !raw) ? "mz_6e60223656d3863d21bb918dc1dc" : raw;
   } catch (e) {
     return "mz_6e60223656d3863d21bb918dc1dc";
   }
@@ -405,7 +406,7 @@ function _extends(){
   return[j,k];
   
 },WheelSVG=React["memo"](({
-  slices:i,isProportional:j,lastUpdatedPlayer:k,hideLabels:l,theme:m,wheelBgColor:n,wheelBorderColor:o
+  slices:i,isProportional:j,lastUpdatedPlayer:k,hideLabels:l,theme:m,wheelBgColor:n,wheelBorderColor:o,multiElimRevealed:elimList
 })=>{
   var fH=fy;
   if(i["length"]===0x0){
@@ -430,8 +431,10 @@ function _extends(){
     'cx':'0','cy':'0','r':"0.15"
   }))),i["map"]((q,r)=>{
     var fI=fH,s=getCoordinatesForPercent(q["startAngle"]/0x168),t=getCoordinatesForPercent(q["endAngle"]/0x168),u=q["degrees"]>0xb4?0x1:0x0,v=q["degrees"]===0x168?"M 1 0 A 1 1 0 1 1 -1 0 A 1 1 0 1 1 1 0":"M 0 0 L "+s[0x0]+'\x20'+s[0x1]+" A 1 1 0 "+u+" 1 "+t[0x0]+'\x20'+t[0x1]+" L 0 0",w=q["startAngle"]+q["degrees"]/0x2,x=0x2*Math['PI']*(w/0x168),y=Math["cos"](x)*0.65,z=Math["sin"](x)*0.65,A=w+0x5a+0xb4,B=q["name"]===k;
+    var isElimSlice = Array["isArray"](elimList) && elimList["some"](e => e && (e['id'] === q['id'] || (e["userId"] && e["userId"] === q["userId"]) || (e["name"] && e["name"] === q["name"])));
     return React["createElement"]('g',{
-      'key':q['id']||r
+      'key':q['id']||r,
+      'style':isElimSlice?{'filter':"grayscale(100%) contrast(70%) brightness(0.65)",'opacity':0.65}:{}
     },React["createElement"]("path",{
       'd':v,'fill':q["color"],'stroke':o||"#1f2937",'strokeWidth':"0.03",'className':B?"wheel-highlight-anim":''
     }),!l&&q["degrees"]>0x3&&React["createElement"]('g',{
@@ -459,7 +462,7 @@ function _extends(){
   }));
   
 }),SquareGrid=React["memo"](({
-  players:i,highlightIndex:j,isEliminationMode:k,showWinner:l,winner:m,wheelScale:n,wheelTheme:o,instantClaimEnabled:q,instantClaimAmount:r
+  players:i,highlightIndex:j,isEliminationMode:k,showWinner:l,winner:m,wheelScale:n,wheelTheme:o,instantClaimEnabled:q,instantClaimAmount:r,multiElimRevealed:elimList
 })=>{
   var fJ=fy;
   if(i["length"]===0x0){
@@ -485,8 +488,9 @@ function _extends(){
       var B=k?"rgb(239, 68, 68)":o==="cyberpunk"?"rgb(34, 211, 238)":o==="gold_luxury"?"rgb(234, 179, 8)":o==="neon_vibes"?"rgb(168, 85, 247)":"rgb(250, 204, 21)";
       A="ring-4 scale-110 z-10 bg-white/20 shadow-[0_0_30px_"+B+']',A+=k?" ring-red-500":o==="cyberpunk"?" ring-cyan-400":o==="gold_luxury"?" ring-yellow-500":o==="neon_vibes"?" ring-purple-500":" ring-yellow-400";
       
-    }return z&&(A="ring-4 ring-yellow-400 shadow-[0_0_40px_rgba(250,204,21,1)] z-20 scale-125 animate-pulse bg-yellow-400/50"),React["createElement"]("div",{
-      'key':w['id'],'className':"relative w-full h-full rounded-sm transition-all duration-75 flex flex-col items-center p-0.5 overflow-hidden "+A+'\x20'+(!y&&!z?"bg-gray-800/40 border border-white/5":''),'title':w["name"]
+    }var isElimCard = Array["isArray"](elimList) && elimList["some"](e => e && (e['id'] === w['id'] || (e["userId"] && e["userId"] === w["userId"]) || (e["name"] && e["name"] === w["name"])));
+    return z&&(A="ring-4 ring-yellow-400 shadow-[0_0_40px_rgba(250,204,21,1)] z-20 scale-125 animate-pulse bg-yellow-400/50"),React["createElement"]("div",{
+      'key':w['id'],'className':"relative w-full h-full rounded-sm transition-all duration-75 flex flex-col items-center p-0.5 overflow-hidden "+A+'\x20'+(!y&&!z?"bg-gray-800/40 border border-white/5":''),'title':w["name"],'style':isElimCard?{'filter':"grayscale(100%) contrast(70%) brightness(0.6)",'opacity':0.55}:{}
     },React["createElement"]("div",{
       'className':"relative flex-1 w-full flex items-center justify-center overflow-hidden rounded-sm "+(u?"h-full":"h-[70%]")
     },w["pic"]&&!v?React["createElement"](SafeAvatar,{
@@ -2083,18 +2087,18 @@ function pickGiftFromLauncher(i,j,k){
     }
   },getOverlayUrl=(mode="cloud")=>{
     try{
-      if(mode==="short"||mode==="cloud"){
-        return "https://gifts-overlay11.onrender.com/games/luckyspin";
+      if(mode==="local"){
+        return "http://localhost:2137/luckyspin-overlay.html?uid=default";
+      }
+      if(mode==="cloud"||mode==="short"){
+        return "https://gifts-overlay11.onrender.com/luckyspin-overlay.html?uid=default";
       }
       if(mode==="full"){
-        return "https://gifts-overlay11.onrender.com/games/luckyspin/index.html?stream=true&scale=1.15&cid="+OVERLAY_BOARD_ID;
+        return "https://gifts-overlay11.onrender.com/games/luckyspin/index.html?stream=true&scale=1.15&cid=mz_6e60223656d3863d21bb918dc1dc";
       }
-      if(mode==="local"){
-        return "http://localhost:2137/games/luckyspin";
-      }
-      return "https://gifts-overlay11.onrender.com/games/luckyspin";
+      return "https://gifts-overlay11.onrender.com/luckyspin-overlay.html?uid=default";
     }catch(e){}
-    return "https://gifts-overlay11.onrender.com/games/luckyspin";
+    return "https://gifts-overlay11.onrender.com/luckyspin-overlay.html?uid=default";
   },copyOverlayUrl=(mode="cloud")=>{
     var url=getOverlayUrl(mode);
     if(navigator["clipboard"]&&navigator["clipboard"]["writeText"]){
@@ -2104,7 +2108,7 @@ function pickGiftFromLauncher(i,j,k){
       ta["value"]=url,document["body"]["appendChild"](ta),ta["select"](),document["execCommand"]("copy"),document["body"]["removeChild"](ta);
     }
     setOverlayCopied(mode);
-    ct(mode==="full"?"✓ تم نسخ الرابط الكامل!":mode==="local"?"✓ تم نسخ الرابط المحلي!":"✓ تم نسخ رابط الأوفرلاي السحابي!");
+    ct(mode==="local"?"✓ تم نسخ الرابط المحلي!":mode==="full"?"✓ تم نسخ الرابط الكامل!":"✓ تم نسخ رابط الأوفرلاي السحابي!");
     setTimeout(()=>{
       setOverlayCopied(null);
       ct(null);
@@ -2320,6 +2324,11 @@ function pickGiftFromLauncher(i,j,k){
       }
     }cU["current"]=eF,n(eF);
     var eL=new Set(eF["map"](eS=>eS["userId"]||eS["name"]))["size"];
+    if(!k&&ez&&ap&&eL>0x1){
+      setTimeout(()=>{
+        if(!d6["current"]&&dk["current"])dk["current"]();
+      },0x15e);
+    }
     if(ez&&eL===0x1&&eF["length"]>0x0){
       var eM=eF[0x0];
       dm(eM),y({
@@ -2485,12 +2494,9 @@ function pickGiftFromLauncher(i,j,k){
           if(fe){
             var fp=eI["findIndex"](fq=>fq['id']===fm['id']);
             if(fp>=0x0)bi(fp);
-            
-          }dB("elimination");
-          
+          }
         },fi["step"]*(fn+0x1));
         df["current"]["push"](()=>clearTimeout(fo));
-        
       });
       var fl=setTimeout(()=>{
         dn(),fg();
@@ -2654,7 +2660,7 @@ function pickGiftFromLauncher(i,j,k){
     var ez=setTimeout(()=>{
       var iS=h,eA=document["getElementById"]("btn-close-winner");
       if(eA)eA["click"]();
-    },0x708);
+    },0x1388);
     return()=>clearTimeout(ez);
   },[v,N,k,ev]),React["createElement"]("div",{
     'className':"h-screen overflow-hidden flex flex-col font-sans relative",'style':{
@@ -3733,17 +3739,15 @@ function pickGiftFromLauncher(i,j,k){
       'className':"w-3 h-3 text-yellow-400"
     }),eA["totalCoins"]["toLocaleString"]())),!t&&React["createElement"]("button",{
       'onClick':()=>{
-        n(eB=>{
-          var ja=h,eC=eB["findIndex"](eE=>(eE["userId"]||eE["name"])===(eA["userId"]||eA["name"]));
-          if(eC>=0x0){
-            var eD=[...eB];
-            return eD["splice"](eC,0x1),eD;
-            
-          }return eB;
-          
-        });
-        
-      },'className':"text-red-500 opacity-0 group-hover:opacity-100 p-1 hover:bg-red-900/30 rounded",'title':"Remove 1 slot"
+        var targetUser = eA["userId"] || eA["name"];
+        if(cR["current"]) delete cR["current"][targetUser];
+        if(cQ["current"]) delete cQ["current"][targetUser];
+        a8(prev => { var cp = {...prev}; delete cp[targetUser]; return cp; });
+        a6(prev => { var cp = {...prev}; delete cp[targetUser]; return cp; });
+        cU["current"] = (cU["current"] || []).filter(p => (p["userId"] || p["name"]) !== targetUser);
+        n(prev => prev.filter(p => (p["userId"] || p["name"]) !== targetUser));
+        if(dX["current"]) dX["current"]();
+      },'className':"text-red-500 opacity-0 group-hover:opacity-100 p-1 hover:bg-red-900/30 rounded cursor-pointer",'title':"حذف المشترك بالكامل (All slots)"
     },React["createElement"](TrashIconOutline,null))));
     
   })())))),React["createElement"]("div",{
@@ -3878,9 +3882,9 @@ function pickGiftFromLauncher(i,j,k){
   },"LUXURY"),dt==="cyberpunk"&&React["createElement"]("div",{
     'className':"text-cyan-400/20 font-black text-6xl uppercase -rotate-12 tracking-widest"
   },"CYBER"))),bf?React["createElement"](SquareGrid,{
-    'players':dY,'highlightIndex':bh,'isEliminationMode':al,'showWinner':v,'winner':x,'wheelScale':bN,'wheelTheme':dt,'instantClaimEnabled':b1,'instantClaimAmount':b3
+    'players':dY,'highlightIndex':bh,'isEliminationMode':al,'showWinner':v,'winner':x,'wheelScale':bN,'wheelTheme':dt,'instantClaimEnabled':b1,'instantClaimAmount':b3,'multiElimRevealed':az
   }):React["createElement"](WheelSVG,{
-    'slices':dY,'isProportional':ah,'lastUpdatedPlayer':F,'theme':dt,'wheelBgColor':ad,'wheelBorderColor':af
+    'slices':dY,'isProportional':ah,'lastUpdatedPlayer':F,'theme':dt,'wheelBgColor':ad,'wheelBorderColor':af,'multiElimRevealed':az
   })),!bf&&React["createElement"]("div",{
     'className':"absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 "+("w-[32%] h-[32%] bg-gradient-to-br from-gray-800/95 to-gray-950/95 border-[6px] border-cyan-500/60 shadow-[inset_0_0_20px_rgba(0,0,0,0.8),0_0_20px_rgba(6,182,212,0.35)]")+" rounded-full flex flex-col items-center justify-center z-30 overflow-visible transition-all duration-300 "+(dt==="gold_luxury"?"border-yellow-500 shadow-[0_0_30px_rgba(255,215,0,0.4)]":'')
   },(!cf||dt==="laagency_dark")&&React["createElement"]("div",{
