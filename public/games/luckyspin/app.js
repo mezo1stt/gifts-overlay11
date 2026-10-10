@@ -1916,10 +1916,9 @@ function pickGiftFromLauncher(i,j,k){
     if(isNaN(eG)||eG<0x1)return;
     var eH=Number(d2["current"]||Z||0x1);
     if(!eD&&!eF&&eG<eH)return;
-    if(aZ&&!eD&&!eF){
-      console["log"]("LuckySpin: Entry BLOCKED for "+eA+" because game is locked.");
+    if(aZ&&(b7||t)&&!eD&&!eF){
+      console["log"]("LuckySpin: Entry BLOCKED for "+eA+" because game has started (Lock Entries).");
       return;
-      
     }var eI=cU["current"]||[];
     if(by>0x0){
       var eJ=new Set(eI["map"](eX=>eX["userId"]||eX["name"]))["size"],eK=eI["some"](eX=>eX["userId"]&&eX["userId"]===ez||eX["name"]&&eX["name"]===eA);
@@ -1996,13 +1995,15 @@ function pickGiftFromLauncher(i,j,k){
         if(f1<0x1&&eF)f1=0x1;
         if(f1<0x1)return eX;
         var f3=[];
+        var visualSlots=Math["min"](f1,0xfa);
+        var slotWeight=f1/visualSlots;
         for(var f4=0x0;
-        f4<f1;
+        f4<visualSlots;
         f4++){
           f3["push"]({
-            'id':"ticket-"+ez+'-'+Date["now"]()+'-'+f4+'-'+Math["random"]()["toString"](0x24)["substr"](0x2,0x9),'userId':ez,'name':eA,'coins':eH,'pic':eY,'color':dq[(eX["length"]+f4)%dq["length"]],'sortKey':Math["random"](),'joinedViaLike':eE
+            'id':"ticket-"+ez+'-'+Date["now"]()+'-'+f4+'-'+Math["random"]()["toString"](0x24)["substr"](0x2,0x9),
+            'userId':ez,'name':eA,'coins':eH,'tickets':slotWeight,'pic':eY,'color':dq[(eX["length"]+f4)%dq["length"]],'sortKey':Math["random"](),'joinedViaLike':eE
           });
-          
         }return[...eX,...f3];
         
       }else{
@@ -2134,9 +2135,10 @@ function pickGiftFromLauncher(i,j,k){
     var i8=fQ;
     if(m["length"]===0x0)return[];
     var ez=0x0,eA=[...m]["sort"]((eC,eD)=>(eC["sortKey"]||0x0)-(eD["sortKey"]||0x0)),eB=0x0;
+    var totalWeight=m["reduce"]((acc,x)=>acc+(Number(x["tickets"])||0x1),0x0)||0x1;
     return ah&&b5&&(eB=m["reduce"]((eC,eD)=>eC+0x1/Math["max"](0x1,eD["coins"]),0x0)),eA["map"]((eC,eD)=>{
       var i9=i8,eE;
-      ah?b5?eE=0x1/Math["max"](0x1,eC["coins"])/eB:eE=eC["coins"]/dP:eE=0x1/m["length"];
+      ah?b5?eE=0x1/Math["max"](0x1,eC["coins"])/eB:eE=eC["coins"]/dP:eE=(Number(eC["tickets"])||0x1)/totalWeight;
       var eF=eE*0x168,eG=eC["color"];
       if(dt==="gold_luxury"){
         var eH=["#FFD700","#FFC800","#FFB900","#DAA520","#B8860B","#CFB53B"];
@@ -2388,9 +2390,10 @@ function pickGiftFromLauncher(i,j,k){
     var eH=[...cU["current"]||[]],eI=[];
     if(eH["length"]>0x0){
       var eJ=[...eH]["sort"]((fe,ff)=>(fe["sortKey"]||0x0)-(ff["sortKey"]||0x0)),eK=eJ["reduce"]((fe,ff)=>fe+ff["coins"],0x0),eL=da["current"],eM=db["current"],eN=eL&&eM?eJ["reduce"]((fe,ff)=>fe+0x1/Math["max"](0x1,ff["coins"]),0x0):0x0,eO=0x0;
+      var totalWeight=eJ["reduce"]((acc,x)=>acc+(Number(x["tickets"])||0x1),0x0)||0x1;
       eI=eJ["map"](fe=>{
         var it=is,ff;
-        eL?ff=eM?0x1/Math["max"](0x1,fe["coins"])/eN:fe["coins"]/Math["max"](0x1,eK):ff=0x1/eJ["length"];
+        eL?ff=eM?0x1/Math["max"](0x1,fe["coins"])/eN:fe["coins"]/Math["max"](0x1,eK):ff=(Number(fe["tickets"])||0x1)/totalWeight;
         var fg=ff*0x168,fh={
           ...fe,'startAngle':eO,'endAngle':eO+fg,'degrees':fg
         };
@@ -3712,7 +3715,7 @@ function pickGiftFromLauncher(i,j,k){
       !ez[eB]&&(ez[eB]={
         ...eA,'ticketCount':0x0,'totalCoins':0x0,'joinedViaLike':![]
       });
-      ez[eB]["ticketCount"]++,ez[eB]["totalCoins"]+=eA["coins"];
+      ez[eB]["ticketCount"]+=Math["round"](Number(eA["tickets"])||0x1),ez[eB]["totalCoins"]=(cR["current"]&&cR["current"][eB]!==undefined)?cR["current"][eB]:(ez[eB]["totalCoins"]+eA["coins"]);
       if(eA["joinedViaLike"])ez[eB]["joinedViaLike"]=!![];
       
     }),Object["values"](ez)["sort"]((eA,eB)=>eB["totalCoins"]-eA["totalCoins"])["map"](eA=>React["createElement"]("div",{
@@ -3928,22 +3931,27 @@ function pickGiftFromLauncher(i,j,k){
   }),React["createElement"]("span",{
     'className':(dt==='og'?"text-[9px]":"text-[11px]")+" text-rose-400 font-black uppercase tracking-tight"
   },b3))))),ax&&React["createElement"]("div",{
-    'className':"absolute inset-0 z-40 flex flex-col items-center justify-center pointer-events-none"
+    'className':"absolute inset-0 z-40 flex items-center justify-center pointer-events-none"
   },React["createElement"]("div",{
-    'className':"absolute inset-0 bg-black/60 backdrop-blur-sm rounded-2xl"
+    'className':"absolute inset-0 bg-black/20 pointer-events-none"
   }),React["createElement"]("div",{
-    'className':"relative z-10 flex flex-col items-center gap-2 px-5 py-4 text-center rounded-2xl border-4 border-red-500 bg-gray-900/95 shadow-[0_0_50px_rgba(239,68,68,0.45)] animate-scaleIn"
+    'className':"relative z-10 flex flex-col items-center justify-center text-center rounded-2xl border-4 border-red-500 bg-gray-950/95 shadow-[0_0_50px_rgba(239,68,68,0.6)] select-none",
+    'style':{'width':"280px",'height':"190px",'minWidth':"280px",'minHeight':"190px",'maxWidth':"280px",'maxHeight':"190px",'boxSizing':"border-box",'padding':"12px"}
   },React["createElement"]("span",{
-    'className':"text-[10px] font-black text-red-400 uppercase tracking-[0.35em] animate-pulse"
+    'className':"text-[11px] font-black text-red-400 uppercase tracking-[0.35em] leading-none mb-1 animate-pulse"
   },"ELIMINATING"),React["createElement"]("div",{
-    'className':"text-5xl font-black text-red-500 super-outline leading-none"
+    'className':"text-5xl font-black text-red-500 super-outline leading-none my-1 h-12 flex items-center justify-center"
   },az["length"]),React["createElement"]("div",{
-    'className':"grid grid-cols-5 gap-1.5 max-w-[240px]"
-  },az["slice"](-0xa)["map"]((ez,eA)=>React["createElement"]("div",{
-    'key':ez['id']||(ez["userId"]||ez["name"])+'-'+eA,'className':"w-9 h-9 rounded-lg border-2 border-red-500 overflow-hidden bg-gray-800 shadow-[0_0_14px_rgba(239,68,68,0.7)] animate-scaleIn"
-  },React["createElement"](SafeAvatar,{
-    'src':ez["pic"],'name':ez["name"],'className':"w-full h-full object-cover grayscale"
-  })))))),v&&x&&React["createElement"]("div",{
+    'className':"grid grid-cols-5 gap-1.5 w-[230px] h-[78px]"
+  },Array["from"]({'length':0xa})["map"]((_,eIdx)=>{
+    var slotItem=az["slice"](-0xa)[eIdx];
+    return React["createElement"]("div",{
+      'key':"elim_slot_"+eIdx,
+      'className':"w-9 h-9 rounded-lg border-2 overflow-hidden flex items-center justify-center "+(slotItem?"border-red-500 bg-gray-800 shadow-[0_0_12px_rgba(239,68,68,0.7)]":"border-red-950/60 bg-black/40")
+    },slotItem?React["createElement"](SafeAvatar,{
+      'src':slotItem["pic"],'name':slotItem["name"],'className':"w-full h-full object-cover grayscale"
+    }):null);
+  })))),v&&x&&React["createElement"]("div",{
     'className':"absolute inset-0 z-50 flex items-center justify-center overflow-hidden"
   },React["createElement"]("div",{
     'className':"absolute inset-0 pointer-events-none z-0"
@@ -3952,13 +3960,13 @@ function pickGiftFromLauncher(i,j,k){
       'left':Math["random"]()*0x64+'%','animationDelay':Math["random"]()*0x2+'s','backgroundColor':ey[Math["floor"](Math["random"]()*ey["length"])]
     }
   }))),React["createElement"]("div",{
-    'className':"relative z-50 w-full h-full border-[10px] flex flex-col items-center justify-center text-center p-4 animate-scaleIn overflow-hidden shadow-[0_0_60px_rgba(0,0,0,0.6)] "+(bf?"rounded-2xl":"rounded-full")+'\x20'+ex+" bg-gray-900/95 backdrop-blur-md",'style':{
-      'fontFamily':"'Montserrat', sans-serif"
+    'className':"relative z-50 w-[96%] max-w-[530px] max-h-[92vh] border-4 flex flex-col items-center justify-center text-center p-4 rounded-3xl shadow-[0_0_70px_rgba(0,0,0,0.85)] overflow-hidden "+ex+" bg-gray-900/98 backdrop-blur-xl",'style':{
+      'fontFamily':"'Montserrat', sans-serif",'scrollbarWidth':"none"
     }
   },React["createElement"]("div",{
     'className':"absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-gray-800/50 via-gray-900/80 to-black/95 opacity-90"
   }),React["createElement"]("div",{
-    'className':"relative z-50 flex flex-col items-center gap-1.5 w-full px-4 py-3 my-auto max-h-full overflow-y-auto modal-scroll"
+    'className':"relative z-50 flex flex-col items-center gap-1 w-full px-4 py-2 my-auto max-h-full overflow-hidden"
   },React["createElement"]('h3',{
     'className':"font-black tracking-[0.3em] uppercase mb-0.5 drop-shadow-md "+(ev?"text-yellow-400":"text-red-500")+'\x20'+(k?"text-lg":"text-xl")
   },ew),React["createElement"]("div",{

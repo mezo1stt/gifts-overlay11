@@ -2,7 +2,7 @@
   'use strict';
 
   var MIN_SURVIVORS = 1;
-  var MAX_ANIM_MS = 3000;
+  var MAX_ANIM_MS = 2600;
 
   function keyOf(player) {
     return (player && (player.userId || player.name)) || '';
@@ -74,12 +74,14 @@
     if (extraCount <= 0) {
       return { total: 0, step: 0, rollMs: 0 };
     }
-    var step = 280; // Fast snappy reveal so user sees eliminated highlighted quickly!
+    // Cap total animation time to max 2600ms so 100 eliminations NEVER take 30 seconds!
+    var maxAnimTime = extraCount <= 2 ? 800 : Math.min(2600, Math.max(1200, extraCount * 40));
+    var step = Math.max(15, Math.floor(maxAnimTime / extraCount));
     var total = step * extraCount;
     return {
       total: total,
       step: step,
-      rollMs: 70
+      rollMs: Math.max(15, Math.floor(step / 2))
     };
   }
 
