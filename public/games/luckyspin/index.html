@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mezo - Lucky Spin Overlay</title>
+    <script>
+        window.__IS_LUCKYSPIN_OVERLAY__ = true;
+        (function(){
+            try {
+                var p = new URLSearchParams(window.location.search);
+                var sc = parseFloat(p.get("scale"));
+                if (sc && !isNaN(sc) && sc > 0.1 && sc < 5) {
+                    document.documentElement.style.zoom = sc;
+                }
+            } catch(e) {}
+        })();
+    </script>
+    <script src="/vendor/react.production.min.js"></script>
+    <script>if (typeof React === 'undefined') document.write('<script src="https://unpkg.com/react@18/umd/react.production.min.js"><\/script>');</script>
+    <script src="/vendor/react-dom.production.min.js"></script>
+    <script>if (typeof ReactDOM === 'undefined') document.write('<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"><\/script>');</script>
+    <script src="/vendor/tailwindcss.js"></script>
+    <script>if (typeof tailwind === 'undefined') document.write('<script src="https://cdn.tailwindcss.com"><\/script>');</script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        html, body, #root, #root > div {
+            font-family: 'Inter', sans-serif;
+            background: transparent !important;
+            background-color: transparent !important;
+            color: white;
+            overflow: hidden;
+            user-select: none;
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+        }
+        .wheel-container {
+            transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1);
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script src="/gift_db.js"></script>
+    <script src="/multi-elim.js"></script>
+    <script src="/session-stats.js"></script>
+    <script src="/luckyspin-app.js"></script>
+    <script src="/app.js"></script>
+</body>
+</html>
