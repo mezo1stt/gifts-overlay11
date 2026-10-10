@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mezo - Lucky Spin Overlay</title>
+    <script>
+        window.__IS_LUCKYSPIN_OVERLAY__ = true;
+    </script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+        html, body, #root {
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            background: transparent !important;
+            background-color: rgba(0, 0, 0, 0) !important;
+            font-family: 'Inter', sans-serif;
+            color: white;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .wheel-container {
+            transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1);
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% {
+                box-shadow: 0 0 15px rgba(236, 72, 153, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 30px rgba(236, 72, 153, 0.8);
+            }
+        }
+
+        .animate-pulse-glow {
+            animation: pulse-glow 2s infinite;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(31, 41, 55, 0.5);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(75, 85, 99, 0.8);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script src="/gift_db.js"></script>
+    <script src="/multi-elim.js"></script>
+    <script src="/session-stats.js"></script>
+    <script src="/luckyspin-app.js"></script>
+</body>
+
+</html>

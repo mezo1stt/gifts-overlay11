@@ -3383,6 +3383,316 @@ app.post('/api/tarkibat/:uid/test-trigger', (req, res) => {
     });
 });
 
+// ================= SECTION: LUCKYSPIN OVERLAY & REAL-TIME RELAY ================= //
+const luckyspinBoards = {};
+const luckyspinSeenCtrlIds = new Set();
+
+function getLuckySpinBoard(rawId) {
+    const id = String(rawId || 'mz_6e60223656d3863d21bb918dc1dc').trim() || 'mz_6e60223656d3863d21bb918dc1dc';
+    if (!luckyspinBoards[id]) {
+        luckyspinBoards[id] = {
+            id,
+            settings: null,
+            fullState: null,
+            fastSync: null,
+            controlLog: [],
+            sseClients: new Set(),
+            updatedAt: Date.now(),
+            ttConn: null,
+            ttStatus: 'disconnected',
+            ttUsername: '',
+            ttError: null
+        };
+    }
+    return luckyspinBoards[id];
+}
+
+function broadcastLuckySpinSSE(board, payload) {
+    if (!board || !board.sseClients || board.sseClients.size === 0) return;
+    const msg = `data: ${JSON.stringify(payload)}\n\n`;
+    for (const clientRes of board.sseClients) {
+        try {
+            clientRes.write(msg);
+        } catch (e) {
+            board.sseClients.delete(clientRes);
+        }
+    }
+}
+
+app.get(['/luckyspin-overlay.html', '/luckyspin-overlay'], (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'luckyspin-overlay.html'));
+});
+
+app.get('/api/luckyspin/:id/state', (req, res) => {
+    const board = getLuckySpinBoard(req.params.id);
+    const now = Date.now();
+    board.controlLog = (board.controlLog || []).filter(c => c && (now - (c.ts || 0) < 15000));
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+    res.json({
+        success: true,
+        board_id: board.id,
+        settings: board.settings,
+        fullState: board.fullState,
+        fastSync: board.fastSync,
+        controlLog: board.controlLog,
+        updatedAt: board.updatedAt
+    });
+});
+
+app.get('/api/luckyspin/:id/events', (req, res) => {
+    const board = getLuckySpinBoard(req.params.id);
+    res.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache, no-transform',
+        'Connection': 'keep-alive',
+        'Access-Control-Allow-Origin': '*'
+    });
+
+    if (board.ttStatus && board.ttStatus !== 'disconnected') {
+        res.write(`data: ${JSON.stringify({
+            type: 'TIKTOK_STATUS',
+            data: { status: board.ttStatus, username: board.ttUsername, error: board.ttError }
+        })}\n\n`);
+    }
+    if (board.settings) {
+        res.write(`data: ${JSON.stringify({ type: 'LUCKYSPIN_GAME_SETTINGS', data: board.settings })}\n\n`);
+    }
+    if (board.fullState) {
+        res.write(`data: ${JSON.stringify({ type: 'LUCKYSPIN_FULL_STATE', data: board.fullState })}\n\n`);
+    }
+    if (board.fastSync) {
+        res.write(`data: ${JSON.stringify({ type: 'LUCKYSPIN_FAST_SYNC', data: board.fastSync })}\n\n`);
+    }
+
+    board.sseClients.add(res);
+    req.on('close', () => {
+        board.sseClients.delete(res);
+    });
+});
+
+app.post('/api/luckyspin/:id/broadcast', (req, res) => {
+    const board = getLuckySpinBoard(req.params.id);
+    const body = req.body || {};
+    const type = body.type;
+    const data = body.data;
+
+    if (!type) {
+        return res.json({ ok: false, error: 'Missing type' });
+    }
+
+    if (type === 'LUCKYSPIN_GAME_CONTROL' && data) {
+        const ctrlKey = data.ctrlId || `${board.id}_${data.action}_${data.ts || data.targetRotation || ''}`;
+        if (ctrlKey && luckyspinSeenCtrlIds.has(ctrlKey)) {
+            return res.json({ ok: true, deduplicated: true });
+        }
+        if (ctrlKey) {
+            luckyspinSeenCtrlIds.add(ctrlKey);
+            if (luckyspinSeenCtrlIds.size > 500) {
+                const first = luckyspinSeenCtrlIds.values().next().value;
+                luckyspinSeenCtrlIds.delete(first);
+            }
+        }
+        const now = Date.now();
+        board.controlLog.push({ ts: now, data });
+        board.controlLog = board.controlLog.filter(c => now - c.ts < 15000).slice(-25);
+    } else if (type === 'LUCKYSPIN_GAME_SETTINGS') {
+        board.settings = data;
+    } else if (type === 'LUCKYSPIN_FULL_STATE') {
+        board.fullState = data;
+    } else if (type === 'LUCKYSPIN_FAST_SYNC') {
+        board.fastSync = data;
+    } else if (type === 'LUCKYSPIN_SPIN_DATA') {
+        broadcastLuckySpinSSE(board, { type: 'SPIN_DATA', data });
+    }
+
+    board.updatedAt = Date.now();
+    broadcastLuckySpinSSE(board, { type, data });
+    io.emit('luckyspin_update', { board_id: board.id, type, data });
+    res.json({ ok: true });
+});
+
+app.post('/api/luckyspin/:id/connect', async (req, res) => {
+    const board = getLuckySpinBoard(req.params.id);
+    const cleanUser = normalizeTikTokUsername(req.body && req.body.username);
+    if (!cleanUser) {
+        return res.json({ ok: false, status: 'error', error: 'Username is required' });
+    }
+    if (board.ttConn) {
+        try {
+            board.ttConn.removeAllListeners();
+            board.ttConn.disconnect();
+        } catch (e) {}
+        board.ttConn = null;
+    }
+    board.ttUsername = cleanUser;
+    board.ttStatus = 'connecting';
+    board.ttError = null;
+    broadcastLuckySpinSSE(board, {
+        type: 'TIKTOK_STATUS',
+        data: { status: 'connecting', username: cleanUser, error: null }
+    });
+
+    const conn = new TikTokLiveConnection(cleanUser, {
+        processInitialData: true,
+        enableExtendedGiftInfo: true,
+        enableWebsocketUpgrade: true,
+        requestPollingIntervalMs: 2000
+    });
+    board.ttConn = conn;
+
+    conn.on('connected', () => {
+        if (board.ttConn !== conn) return;
+        board.ttStatus = 'connected';
+        board.ttError = null;
+        broadcastLuckySpinSSE(board, {
+            type: 'TIKTOK_STATUS',
+            data: { status: 'connected', username: cleanUser, error: null }
+        });
+    });
+
+    conn.on('disconnected', () => {
+        if (board.ttConn !== conn) return;
+        board.ttStatus = 'disconnected';
+        broadcastLuckySpinSSE(board, {
+            type: 'TIKTOK_STATUS',
+            data: { status: 'disconnected', username: cleanUser, error: null }
+        });
+    });
+
+    conn.on('streamEnd', () => {
+        if (board.ttConn !== conn) return;
+        board.ttStatus = 'disconnected';
+        board.ttError = 'Stream ended';
+        broadcastLuckySpinSSE(board, {
+            type: 'TIKTOK_STATUS',
+            data: { status: 'disconnected', username: cleanUser, error: 'Stream ended' }
+        });
+    });
+
+    conn.on('error', () => {});
+
+    conn.on('roomUser', (data) => {
+        if (board.ttConn !== conn) return;
+        broadcastLuckySpinSSE(board, {
+            type: 'TIKTOK_VIEWERS',
+            data: { count: Number(data?.viewerCount) || 0 }
+        });
+    });
+
+    conn.on('gift', (data) => {
+        if (board.ttConn !== conn) return;
+        if (data.giftType === 1 && !data.repeatEnd) return;
+        const repeatCount = Math.max(1, Number(data.repeatCount) || 1);
+        const unitDiamonds = Number(data.diamondCount) || 1;
+        const totalCoins = Math.max(1, unitDiamonds * repeatCount);
+        const userId = String(data.uniqueId || data.userId || data.nickname || 'user');
+        const userName = String(data.nickname || data.uniqueId || 'Player');
+        const pictureProfil = data.profilePictureUrl || null;
+        const giftName = data.giftName || `Gift #${data.giftId}`;
+        const giftPictureUrl = data.giftPictureUrl || null;
+        const eventId = `${data.msgId || Date.now()}_${userId}_${data.giftId}_${repeatCount}`;
+        broadcastLuckySpinSSE(board, {
+            type: 'SPIN_DATA',
+            data: {
+                eventId,
+                coins: totalCoins,
+                unitDiamonds,
+                repeatCount,
+                giftId: data.giftId,
+                giftName,
+                giftPictureUrl,
+                userName,
+                userId,
+                usernameId: data.uniqueId || userId,
+                pictureProfil,
+                timestamp: Date.now()
+            }
+        });
+    });
+
+    conn.on('like', (data) => {
+        if (board.ttConn !== conn) return;
+        const likes = Math.max(1, Number(data.likeCount) || 1);
+        const userId = String(data.uniqueId || data.userId || data.nickname || 'user');
+        const userName = String(data.nickname || data.uniqueId || 'Player');
+        broadcastLuckySpinSSE(board, {
+            type: 'LIKE_DATA',
+            data: {
+                likes,
+                roomLikes: likes,
+                totalLikeCount: Number(data.totalLikeCount) || 0,
+                userName,
+                userId,
+                pictureProfil: data.profilePictureUrl || null
+            }
+        });
+    });
+
+    conn.on('follow', (data) => {
+        if (board.ttConn !== conn) return;
+        broadcastLuckySpinSSE(board, {
+            type: 'EVENT_DATA',
+            data: {
+                type: 'follow',
+                nickname: data.nickname || data.uniqueId || 'Follower',
+                uniqueId: data.uniqueId || String(data.userId || ''),
+                userId: String(data.uniqueId || data.userId || ''),
+                profilePictureUrl: data.profilePictureUrl || null
+            }
+        });
+    });
+
+    conn.on('chat', (data) => {
+        if (board.ttConn !== conn) return;
+        broadcastLuckySpinSSE(board, {
+            type: 'CHAT_DATA',
+            data: {
+                comment: data.comment || '',
+                userId: String(data.uniqueId || data.userId || ''),
+                nickname: data.nickname || data.uniqueId || 'Viewer',
+                profilePictureUrl: data.profilePictureUrl || null
+            }
+        });
+    });
+
+    try {
+        const state = await conn.connect();
+        board.ttStatus = 'connected';
+        board.ttError = null;
+        broadcastLuckySpinSSE(board, {
+            type: 'TIKTOK_STATUS',
+            data: { status: 'connected', username: cleanUser, error: null }
+        });
+        res.json({ ok: true, status: 'connected', username: cleanUser, roomId: state?.roomId || null });
+    } catch (err) {
+        board.ttStatus = 'error';
+        board.ttError = err?.message || 'Failed to connect';
+        broadcastLuckySpinSSE(board, {
+            type: 'TIKTOK_STATUS',
+            data: { status: 'error', username: cleanUser, error: board.ttError }
+        });
+        res.json({ ok: false, status: 'error', username: cleanUser, error: board.ttError });
+    }
+});
+
+app.post('/api/luckyspin/:id/disconnect', (req, res) => {
+    const board = getLuckySpinBoard(req.params.id);
+    if (board.ttConn) {
+        try {
+            board.ttConn.removeAllListeners();
+            board.ttConn.disconnect();
+        } catch (e) {}
+        board.ttConn = null;
+    }
+    board.ttStatus = 'disconnected';
+    board.ttError = null;
+    broadcastLuckySpinSSE(board, {
+        type: 'TIKTOK_STATUS',
+        data: { status: 'disconnected', username: board.ttUsername, error: null }
+    });
+    res.json({ ok: true, status: 'disconnected' });
+});
+
 // Socket.io Connection & Event Forwarding
 io.on('connection', (socket) => {
     socket.emit('race_state_update', {
