@@ -3534,19 +3534,20 @@ app.post('/api/luckyspin/:id/connect', async (req, res) => {
 
     const conn = new TikTokLiveConnection(cleanUser, {
         processInitialData: true,
-        enableExtendedGiftInfo: true,
+        enableExtendedGiftInfo: false,
+        fetchRoomInfoOnConnect: false,
         enableWebsocketUpgrade: true,
         requestPollingIntervalMs: 2000
     });
     board.ttConn = conn;
 
-    conn.on('connected', () => {
+    conn.on('connected', (state) => {
         if (board.ttConn !== conn) return;
         board.ttStatus = 'connected';
         board.ttError = null;
         broadcastLuckySpinSSE(board, {
             type: 'TIKTOK_STATUS',
-            data: { status: 'connected', username: cleanUser, error: null }
+            data: { status: 'connected', username: cleanUser, error: null, isLive: true, roomId: state?.roomId || null }
         });
     });
 
@@ -3561,11 +3562,11 @@ app.post('/api/luckyspin/:id/connect', async (req, res) => {
 
     conn.on('streamEnd', () => {
         if (board.ttConn !== conn) return;
-        board.ttStatus = 'disconnected';
-        board.ttError = 'Stream ended';
+        board.ttStatus = 'offline';
+        board.ttError = 'انتهى البث المباشر (Stream Ended)';
         broadcastLuckySpinSSE(board, {
             type: 'TIKTOK_STATUS',
-            data: { status: 'disconnected', username: cleanUser, error: 'Stream ended' }
+            data: { status: 'offline', username: cleanUser, isLive: false, error: 'انتهى البث المباشر (Stream Ended)' }
         });
     });
 
@@ -3581,16 +3582,23 @@ app.post('/api/luckyspin/:id/connect', async (req, res) => {
 
     conn.on('gift', (data) => {
         if (board.ttConn !== conn) return;
-        if (data.giftType === 1 && !data.repeatEnd) return;
-        const repeatCount = Math.max(1, Number(data.repeatCount) || 1);
-        const unitDiamonds = Number(data.diamondCount) || 1;
+        const u = extractEventUser(data);
+        const giftType = data?.giftType !== undefined ? data.giftType : data?.giftDetails?.giftType;
+        const repeatEnd = data?.repeatEnd !== undefined ? Boolean(data.repeatEnd) : Boolean(data?.repeatEnd);
+        if (giftType === 1 && !repeatEnd) return;
+
+        const repeatCount = Math.max(1, Number(data?.repeatCount) || 1);
+        const unitDiamonds = Math.max(1, Number(data?.diamondCount || data?.giftDetails?.diamondCount || data?.gift?.diamondCount || 1));
         const totalCoins = Math.max(1, unitDiamonds * repeatCount);
-        const userId = String(data.uniqueId || data.userId || data.nickname || 'user');
-        const userName = String(data.nickname || data.uniqueId || 'Player');
-        const pictureProfil = data.profilePictureUrl || null;
-        const giftName = data.giftName || `Gift #${data.giftId}`;
-        const giftPictureUrl = data.giftPictureUrl || null;
-        const eventId = `${data.msgId || Date.now()}_${userId}_${data.giftId}_${repeatCount}`;
+        const giftId = data?.giftId || data?.gift?.giftId || 0;
+        const giftName = data?.giftName || data?.giftDetails?.giftName || data?.describe || `Gift #${giftId}`;
+        const giftPictureUrl =
+            data?.giftPictureUrl ||
+            data?.giftDetails?.giftImage?.url?.[0] ||
+            data?.giftDetails?.giftImage?.urlList?.[0] ||
+            data?.gift?.icon?.url?.[0] ||
+            null;
+        const eventId = `${data?.msgId || data?.common?.msgId || Date.now()}_${u.username}_${giftId}_${repeatCount}`;
         broadcastLuckySpinSSE(board, {
             type: 'SPIN_DATA',
             data: {
@@ -3598,13 +3606,13 @@ app.post('/api/luckyspin/:id/connect', async (req, res) => {
                 coins: totalCoins,
                 unitDiamonds,
                 repeatCount,
-                giftId: data.giftId,
+                giftId,
                 giftName,
                 giftPictureUrl,
-                userName,
-                userId,
-                usernameId: data.uniqueId || userId,
-                pictureProfil,
+                userName: u.nickname,
+                userId: u.username,
+                usernameId: u.username,
+                pictureProfil: u.avatar,
                 timestamp: Date.now()
             }
         });
@@ -3612,66 +3620,103 @@ app.post('/api/luckyspin/:id/connect', async (req, res) => {
 
     conn.on('like', (data) => {
         if (board.ttConn !== conn) return;
-        const likes = Math.max(1, Number(data.likeCount) || 1);
-        const userId = String(data.uniqueId || data.userId || data.nickname || 'user');
-        const userName = String(data.nickname || data.uniqueId || 'Player');
+        const u = extractEventUser(data);
+        const likes = Math.max(1, Number(data?.likeCount) || 1);
         broadcastLuckySpinSSE(board, {
             type: 'LIKE_DATA',
             data: {
                 likes,
                 roomLikes: likes,
-                totalLikeCount: Number(data.totalLikeCount) || 0,
-                userName,
-                userId,
-                pictureProfil: data.profilePictureUrl || null
+                totalLikeCount: Number(data?.totalLikeCount) || 0,
+                userName: u.nickname,
+                userId: u.username,
+                pictureProfil: u.avatar
             }
         });
     });
 
-    conn.on('follow', (data) => {
+    const handleFollowShare = (data, defaultType) => {
         if (board.ttConn !== conn) return;
+        const u = extractEventUser(data);
+        const displayType = String(data?.displayType || data?.label || defaultType || '').toLowerCase();
+        let evType = defaultType || 'follow';
+        if (displayType.includes('share')) evType = 'share';
+        else if (displayType.includes('follow')) evType = 'follow';
         broadcastLuckySpinSSE(board, {
             type: 'EVENT_DATA',
             data: {
-                type: 'follow',
-                nickname: data.nickname || data.uniqueId || 'Follower',
-                uniqueId: data.uniqueId || String(data.userId || ''),
-                userId: String(data.uniqueId || data.userId || ''),
-                profilePictureUrl: data.profilePictureUrl || null
+                type: evType,
+                nickname: u.nickname,
+                uniqueId: u.username,
+                userId: u.username,
+                profilePictureUrl: u.avatar
             }
         });
-    });
+    };
+
+    conn.on('follow', (data) => handleFollowShare(data, 'follow'));
+    conn.on('share', (data) => handleFollowShare(data, 'share'));
+    conn.on('social', (data) => handleFollowShare(data, 'follow'));
 
     conn.on('chat', (data) => {
         if (board.ttConn !== conn) return;
+        const u = extractEventUser(data);
         broadcastLuckySpinSSE(board, {
             type: 'CHAT_DATA',
             data: {
-                comment: data.comment || '',
-                userId: String(data.uniqueId || data.userId || ''),
-                nickname: data.nickname || data.uniqueId || 'Viewer',
-                profilePictureUrl: data.profilePictureUrl || null
+                comment: data?.comment || '',
+                userId: u.username,
+                nickname: u.nickname,
+                profilePictureUrl: u.avatar
             }
         });
     });
 
     try {
+        let isLive = true;
+        if (typeof conn.fetchIsLive === 'function') {
+            try {
+                isLive = await conn.fetchIsLive();
+            } catch (liveErr) {
+                isLive = true;
+            }
+        }
+
+        if (!isLive) {
+            board.ttStatus = 'offline';
+            board.ttError = `الحساب @${cleanUser} غير فاتح لايف حالياً (Offline)`;
+            board.ttConn = null;
+            broadcastLuckySpinSSE(board, {
+                type: 'TIKTOK_STATUS',
+                data: { status: 'offline', username: cleanUser, isLive: false, error: board.ttError }
+            });
+            return res.json({ ok: false, status: 'offline', isLive: false, username: cleanUser, error: board.ttError });
+        }
+
         const state = await conn.connect();
         board.ttStatus = 'connected';
         board.ttError = null;
         broadcastLuckySpinSSE(board, {
             type: 'TIKTOK_STATUS',
-            data: { status: 'connected', username: cleanUser, error: null }
+            data: { status: 'connected', username: cleanUser, isLive: true, error: null, roomId: state?.roomId || null }
         });
-        res.json({ ok: true, status: 'connected', username: cleanUser, roomId: state?.roomId || null });
+        res.json({ ok: true, status: 'connected', isLive: true, username: cleanUser, roomId: state?.roomId || null });
     } catch (err) {
-        board.ttStatus = 'error';
-        board.ttError = err?.message || 'Failed to connect';
+        const rawMsg = String(err?.message || err || 'Failed to connect');
+        const isOfflineErr =
+            rawMsg.toLowerCase().includes('offline') ||
+            rawMsg.toLowerCase().includes('not live') ||
+            rawMsg.toLowerCase().includes('live has ended') ||
+            rawMsg.toLowerCase().includes('room_id');
+        board.ttStatus = isOfflineErr ? 'offline' : 'error';
+        board.ttError = isOfflineErr
+            ? `الحساب @${cleanUser} غير فاتح لايف حالياً (Offline)`
+            : rawMsg;
         broadcastLuckySpinSSE(board, {
             type: 'TIKTOK_STATUS',
-            data: { status: 'error', username: cleanUser, error: board.ttError }
+            data: { status: board.ttStatus, username: cleanUser, isLive: false, error: board.ttError }
         });
-        res.json({ ok: false, status: 'error', username: cleanUser, error: board.ttError });
+        res.json({ ok: false, status: board.ttStatus, isLive: false, username: cleanUser, error: board.ttError });
     }
 });
 

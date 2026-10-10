@@ -391,11 +391,18 @@ function _extends(){
   slices:i,isProportional:j,lastUpdatedPlayer:k,hideLabels:l,theme:m,wheelBgColor:n,wheelBorderColor:o
 })=>{
   var fH=fy;
-  if(i["length"]===0x0)return React["createElement"]("div",{
-    'className':"w-full h-full rounded-full flex items-center justify-center transition-colors",'style':{
-      'backgroundColor':m==="custom"?n:"transparent"
-    }
-  });
+  if(i["length"]===0x0){
+    var demoColors=["#2563eb","#db2777","#059669","#d97706","#7c3aed","#0891b2","#dc2626","#ca8a04"];
+    return React["createElement"]("svg",{
+      'viewBox':"-1 -1 2 2",'style':{'transform':"rotate(-90deg)"},'className':"w-full h-full overflow-visible"
+    },demoColors["map"]((col,idx)=>{
+      var stA=idx*0x2d,enA=(idx+0x1)*0x2d,s=getCoordinatesForPercent(stA/0x168),t=getCoordinatesForPercent(enA/0x168);
+      var pathD="M 0 0 L "+s[0x0]+" "+s[0x1]+" A 1 1 0 0 1 "+t[0x0]+" "+t[0x1]+" L 0 0";
+      return React["createElement"]("path",{
+        'key':"empty_"+idx,'d':pathD,'fill':m==="custom"?n:col,'fillOpacity':"0.88",'stroke':o||"#0f172a",'strokeWidth':"0.03"
+      });
+    }));
+  }
   return React["createElement"]("svg",{
     'viewBox':"-1 -1 2 2",'style':{
       'transform':"rotate(-90deg)"
@@ -438,7 +445,14 @@ function _extends(){
   players:i,highlightIndex:j,isEliminationMode:k,showWinner:l,winner:m,wheelScale:n,wheelTheme:o,instantClaimEnabled:q,instantClaimAmount:r
 })=>{
   var fJ=fy;
-  if(i["length"]===0x0)return null;
+  if(i["length"]===0x0){
+    var demoColors=["#2563eb","#db2777","#059669","#d97706","#7c3aed","#0891b2","#dc2626","#ca8a04","#4f46e5"];
+    return React["createElement"]("div",{
+      'className':"relative w-full h-full overflow-hidden p-2 grid grid-cols-3 gap-2"
+    },demoColors["map"]((col,idx)=>React["createElement"]("div",{
+      'key':"sq_empty_"+idx,'className':"rounded-xl border border-white/20 flex items-center justify-center font-black text-white/80 text-xs uppercase tracking-wider shadow-inner",'style':{'backgroundColor':col,'opacity':0.85}
+    },"mezo")));
+  }
   var s=i["length"],t=Math["ceil"](Math["sqrt"](s*1.2));
   if(s<=0x4)t=0x2;
   var u=s>0x64,v=s>0x190;
@@ -1039,7 +1053,7 @@ function pickGiftFromLauncher(i,j,k){
           if(!msg||!msg["type"])return;
           if(msg["type"]==="TIKTOK_STATUS"&&msg["data"]){
             var st=msg["data"]["status"]||"disconnected";
-            if(st==="connected"||msg["data"]["username"]){
+            if(st==="connected"||st==="offline"||msg["data"]["username"]){
               setTtStatus(st);
               if(msg["data"]["username"]){
                 setTtConnectedUser(msg["data"]["username"]);
@@ -1087,7 +1101,7 @@ function pickGiftFromLauncher(i,j,k){
     cu["length"]>0x0&&!j&&localStorage["setItem"]("ls_sound_config",JSON["stringify"](cu));
     
   },[cu,j]);
-  var [dr,ds]=useState(()=>l("ls_show_logo",![])),[dt,du]=useState(()=>l("ls_wheel_theme","classic",!![]));
+  var [dr,ds]=useState(()=>l("ls_show_logo",!![])),[dt,du]=useState(()=>l("ls_wheel_theme","classic",!![]));
   useEffect(()=>{
     var gE=fQ;
     if(!j)localStorage["setItem"]("ls_timer_enabled",L);
@@ -1985,12 +1999,11 @@ function pickGiftFromLauncher(i,j,k){
     }
     var cleanUser=String(ttUsername||'')["trim"]()["replace"](/^@+/,'');
     if(!cleanUser){
-      setTtError("Enter TikTok Username");
+      setTtStatus("error"),setTtError("أدخل يوزر تيك توك أولاً");
       return;
     }
     if(!j)localStorage["setItem"]("ls_tiktok_username",cleanUser);
-    setTtStatus("connecting"),setTtError(null);
-    var connectedOk=![],lastErr=null;
+    setTtStatus("connecting"),setTtConnectedUser(cleanUser),setTtError(null);
     try{
       var resp=await fetch(API_BASE+"/api/connect",{
         'method':"POST",
@@ -1999,11 +2012,15 @@ function pickGiftFromLauncher(i,j,k){
       });
       var resData=await resp["json"]();
       if(resData&&resData["ok"]&&resData["status"]==="connected"){
-        connectedOk=!![];
         setTtStatus("connected"),setTtConnectedUser(resData["username"]||cleanUser),setTtError(null),bJ(!![]);
+        ct("🟢 متصل بلايف @"+cleanUser),setTimeout(()=>ct(null),0xbb8);
         return;
       }else{
-        lastErr=resData&&resData["error"]||"User offline or not live";
+        var st=resData&&resData["status"]==="offline"?"offline":"error";
+        var errMsg=resData&&resData["error"]||(st==="offline"?"الحساب غير فاتح لايف حالياً":"تعذر الاتصال");
+        setTtStatus(st),setTtError(errMsg),bJ(![]);
+        ct(st==="offline"?"🔴 الحساب @"+cleanUser+" قافل لايف حالياً":"⚠️ "+errMsg),setTimeout(()=>ct(null),0xdac);
+        return;
       }
     }catch(err){
       try{
@@ -2014,18 +2031,19 @@ function pickGiftFromLauncher(i,j,k){
         });
         var cData=await cResp["json"]();
         if(cData&&cData["ok"]&&cData["status"]==="connected"){
-          connectedOk=!![];
           setTtStatus("connected"),setTtConnectedUser(cData["username"]||cleanUser),setTtError(null),bJ(!![]);
+          ct("🟢 متصل بلايف @"+cleanUser),setTimeout(()=>ct(null),0xbb8);
           return;
         }else{
-          lastErr=cData&&cData["error"]||"Connection failed";
+          var st2=cData&&cData["status"]==="offline"?"offline":"error";
+          var errMsg2=cData&&cData["error"]||"الحساب غير فاتح لايف حالياً";
+          setTtStatus(st2),setTtError(errMsg2),bJ(![]);
+          ct("🔴 الحساب @"+cleanUser+" قافل لايف حالياً"),setTimeout(()=>ct(null),0xdac);
+          return;
         }
       }catch(err2){
-        lastErr="Server offline (run start.bat)";
+        setTtStatus("error"),setTtError("شغل ملف start.bat أولاً"),bJ(![]);
       }
-    }
-    if(!connectedOk){
-      setTtStatus("error"),setTtError(lastErr||"Connection failed"),bJ(![]);
     }
   },getOverlayUrl=()=>{
     return CLOUD_OVERLAY_BASE+"/luckyspin-overlay.html?id="+OVERLAY_BOARD_ID;
@@ -2473,13 +2491,13 @@ function pickGiftFromLauncher(i,j,k){
     if(eA>0x0)return eA+':'+eB["toString"]()["padStart"](0x2,'0')+':'+eC["toString"]()["padStart"](0x2,'0');
     return eB+':'+eC["toString"]()["padStart"](0x2,'0');
     
-  },[e2,e3]=useState(()=>typeof window!=="undefined"?window["innerHeight"]:0x258),[e4,e5]=useState(()=>typeof window!=="undefined"?window["innerWidth"]:0x320);
+  },[e2,e3]=useState(()=>typeof window!=="undefined"&&window["innerHeight"]>0x12c?window["innerHeight"]:0x300),[e4,e5]=useState(()=>typeof window!=="undefined"?window["innerWidth"]:0x320);
   useEffect(()=>{
     var iF=fQ;
     if(typeof window==="undefined")return;
     var ez=()=>{
       var iG=iF;
-      e3(window["innerHeight"]),e5(window["innerWidth"]);
+      e3(window["innerHeight"]>0x12c?window["innerHeight"]:0x300),e5(window["innerWidth"]>0x12c?window["innerWidth"]:0x320);
       
     };
     return window["addEventListener"]("resize",ez),()=>window["removeEventListener"]("resize",ez);
@@ -3008,11 +3026,11 @@ function pickGiftFromLauncher(i,j,k){
     'onClick':handleTikTokConnect,
     'className':"px-3 py-1.5 rounded-lg font-black text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer "+(ttStatus==="connected"?"bg-red-600 hover:bg-red-500 text-white shadow-red-600/30":ttStatus==="connecting"?"bg-amber-500 text-black animate-pulse":"bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-cyan-500/30")
   },ttStatus==="connected"?"Disconnect":ttStatus==="connecting"?"Connecting...":"Connect"),React["createElement"]("div",{
-    'className':"flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase border "+(ttStatus==="connected"?"bg-emerald-950/80 border-emerald-500/60 text-emerald-300":ttStatus==="connecting"?"bg-amber-950/80 border-amber-500/60 text-amber-300":"bg-red-950/70 border-red-500/40 text-red-300"),
+    'className':"flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase border "+(ttStatus==="connected"?"bg-emerald-950/80 border-emerald-500/60 text-emerald-300":ttStatus==="connecting"?"bg-amber-950/80 border-amber-500/60 text-amber-300":ttStatus==="offline"?"bg-orange-950/80 border-orange-500/60 text-orange-300":"bg-red-950/70 border-red-500/40 text-red-300"),
     'title':ttError||(ttStatus==="connected"?"Connected to @"+ttConnectedUser:"Not connected to TikTok Live")
   },React["createElement"]("span",{
-    'className':"w-2 h-2 rounded-full "+(ttStatus==="connected"?"bg-emerald-400 animate-ping":ttStatus==="connecting"?"bg-amber-400 animate-ping":"bg-red-500")
-  }),React["createElement"]("span",null,ttStatus==="connected"?"متصل ("+ttConnectedUser+(bK>0x0?" · 👁 "+bK:'')+')':ttStatus==="connecting"?"جاري الاتصال...":ttError?"غير متصل ("+ttError["slice"](0x0,0x18)+")":"غير متصل"))),React["createElement"]("div",{
+    'className':"w-2 h-2 rounded-full "+(ttStatus==="connected"?"bg-emerald-400 animate-ping":ttStatus==="connecting"?"bg-amber-400 animate-ping":ttStatus==="offline"?"bg-orange-400":"bg-red-500")
+  }),React["createElement"]("span",null,ttStatus==="connected"?"متصل (@"+ttConnectedUser+(bK>0x0?" · 👁 "+bK:'')+')':ttStatus==="connecting"?"جاري الفحص...":ttStatus==="offline"?"قافل لايف (@"+(ttConnectedUser||ttUsername)+")":ttError?"غير متصل ("+ttError["slice"](0x0,0x1a)+")":"غير متصل"))),React["createElement"]("div",{
     'className':"flex items-center gap-2 lg:gap-4 bg-black/60 px-3 py-2 lg:px-4 lg:py-2 rounded-lg border-2 border-white/20 shadow-xl"
   },React["createElement"]("div",{
     'className':"flex items-center gap-2",'title':"Alive Players"
@@ -3670,7 +3688,7 @@ function pickGiftFromLauncher(i,j,k){
     'className':"text-black bg-yellow-400 font-black text-lg tracking-[0.3em] px-6 py-1.5 rounded-full shadow-[0_0_40px_rgba(250,204,21,0.6)] border-2 border-white whitespace-nowrap"
   },"ELIMINATION MODE")),aJ&&React["createElement"]("div",{
     'className':"mt-1",'style':{
-      'visibility':v?"hidden":"visible",'width':eb['w']*eq,'height':eb['h']*eq
+      'visibility':v?"hidden":"visible",'width':eb['w']>0x0?eb['w']*eq:"auto",'height':eb['h']>0x0?eb['h']*eq:"auto"
     }
   },React["createElement"]("div",{
     'ref':e7,'style':{
@@ -3786,8 +3804,8 @@ function pickGiftFromLauncher(i,j,k){
   }):React["createElement"](WheelSVG,{
     'slices':dY,'isProportional':ah,'lastUpdatedPlayer':F,'theme':dt,'wheelBgColor':ad,'wheelBorderColor':af
   })),!bf&&React["createElement"]("div",{
-    'className':"absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 "+(dt==="laagency_dark"||dr||cf?"w-[35%] h-[35%] bg-gradient-to-br from-gray-700/90 to-gray-900/95 border-[6px] border-gray-600 shadow-[inset_0_0_20px_rgba(0,0,0,0.8)]":"w-[5%] h-[5%] bg-gray-800 border-[4px] border-gray-600")+" rounded-full flex flex-col items-center justify-center z-30 overflow-visible transition-all duration-300 "+(dt==="gold_luxury"?"border-yellow-500 shadow-[0_0_30px_rgba(255,215,0,0.4)]":'')
-  },(dt==="laagency_dark"||(dr&&!cf))&&React["createElement"]("div",{
+    'className':"absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 "+("w-[32%] h-[32%] bg-gradient-to-br from-gray-800/95 to-gray-950/95 border-[6px] border-cyan-500/60 shadow-[inset_0_0_20px_rgba(0,0,0,0.8),0_0_20px_rgba(6,182,212,0.35)]")+" rounded-full flex flex-col items-center justify-center z-30 overflow-visible transition-all duration-300 "+(dt==="gold_luxury"?"border-yellow-500 shadow-[0_0_30px_rgba(255,215,0,0.4)]":'')
+  },(!cf||dt==="laagency_dark")&&React["createElement"]("div",{
     'className':"absolute inset-0 flex flex-col items-center justify-center transition-transform "+(k?"scale-[1.0]":"scale-[0.9]")+" w-full h-full z-10 opacity-100 animate-logo-float"
   },React["createElement"]("div",{
     'className':"flex flex-col items-center select-none filter drop-shadow-[0_0_10px_rgba(6,182,212,0.5)]"
