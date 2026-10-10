@@ -1705,8 +1705,10 @@ function pickGiftFromLauncher(i,j,k){
   },[o,r,t,v,x,Z,cu,al,aX,cI,dq,aZ,b7,bm,bq,bs]),useEffect(()=>{
     var hY=fQ;
     if(k){
+      var hY=fQ,hZ=fQ,hX=h,i0=null,i1=null;
       var handleOverlayEvent=eC=>{
         if(!eC||!eC["type"])return;
+        dA["current"]=Date["now"]();
         if(eC["type"]==="GLOBAL_VOLUME"){
           if(eC["data"]&&eC["data"]["volume"]!==undefined)window["postMessage"]({
             'type':"SET_VOLUME",'volume':eC["data"]["volume"]
@@ -1780,7 +1782,7 @@ function pickGiftFromLauncher(i,j,k){
           if(eD["timestamp"]&&eD["timestamp"]<=dz["current"])return;
           if(eD["timestamp"])dz["current"]=eD["timestamp"];
           eD["players"]!==undefined&&n(eJ=>{
-            var i0=hZ;
+            var i0=null;
             if(eJ["length"]===eD["players"]["length"]){
               if(eJ["length"]===0x0)return eJ;
               if(eJ[eJ["length"]-0x1]['id']===eD["players"][eD["players"]["length"]-0x1]['id']){
@@ -2033,16 +2035,35 @@ function pickGiftFromLauncher(i,j,k){
         var eZ=Math["floor"](eO/eH),f0=Math["floor"](eP/eH),f1=f0-eZ;
         if(f1<0x1&&eF)f1=0x1;
         if(f1<0x1)return eX;
+        var userSlices=eX["filter"](s=>(s["userId"]||s["name"])===(ez||eA));
+        if(userSlices["length"]>=0x19){
+          var addPerSlice=Math["floor"](f1/userSlices["length"]);
+          var rem=f1%userSlices["length"];
+          return eX["map"](s=>{
+            if((s["userId"]||s["name"])===(ez||eA)){
+              var extra=addPerSlice+(rem>0x0?0x1:0x0);
+              if(rem>0x0)rem--;
+              return {...s,'tickets':(Number(s["tickets"])||0x1)+extra,'coins':eH,'actualCoins':eP,'actualTickets':f0};
+            }
+            return s;
+          });
+        }
+        var slicesToCreate=Math["min"](f1,0x19);
+        var baseT=Math["floor"](f1/slicesToCreate);
+        var remT=f1%slicesToCreate;
         var f3=[];
-        var maxSlots=Math["min"](f1,0x186a0);
-        for(var f4=0x0;
-        f4<maxSlots;
-        f4++){
+        for(var f4=0x0;f4<slicesToCreate;f4++){
+          var sliceTickets=baseT+(remT>0x0?0x1:0x0);
+          if(remT>0x0)remT--;
           f3["push"]({
             'id':"ticket-"+ez+'-'+Date["now"]()+'-'+f4+'-'+Math["random"]()["toString"](0x24)["substr"](0x2,0x9),
-            'userId':ez,'name':eA,'coins':eH,'pic':eY,'color':dq[(eX["length"]+f4)%dq["length"]],'sortKey':Math["random"](),'joinedViaLike':eE
+            'userId':ez,'name':eA,'coins':eH,'pic':eY,'color':dq[(eX["length"]+f4)%dq["length"]],'sortKey':Math["random"](),'joinedViaLike':eE,
+            'tickets':sliceTickets,'actualCoins':eP,'actualTickets':f0
           });
-        }return[...eX,...f3];
+        }
+        var nextTotal=[...eX,...f3];
+        if(nextTotal["length"]>0x12c)nextTotal=nextTotal["slice"](-0x12c);
+        return nextTotal;
         
       }else{
         var f5=eX["findIndex"](f7=>f7["userId"]===ez);
@@ -2301,11 +2322,8 @@ function pickGiftFromLauncher(i,j,k){
       
     }),a4(0x0),Y(0x0),b8(![]),dL("reset");
     else{
-      eF=eC["filter"](eS=>{
-        var ij=ii,eT=eS['id']===eA['id']||eS["userId"]===eA["userId"]&&eS["sortKey"]===eA["sortKey"];
-        return!eT;
-        
-      });
+      var mainElimUser=eA["userId"]||eA["name"];
+      eF=eC["filter"](eS=>(eS["userId"]||eS["name"])!==mainElimUser);
       if(eF["length"]===eC["length"]&&eC["length"]>0x0){
         console["warn"]("LuckySpin: Removal failed for ID "+eA['id']+". Falling back to removing first matching entry.");
         var eG=![];
@@ -2323,19 +2341,8 @@ function pickGiftFromLauncher(i,j,k){
         ...eS,[eD]:0x0
       })));
       if(eB["length"]>0x0){
-        var eI=new Set(eB["map"](eS=>eS['id']));
-        var beforeLen=eF["length"];
-        eF=eF["filter"](eS=>!eI["has"](eS['id']));
-        if(beforeLen-eF["length"]<eB["length"]){
-          eB["forEach"](extraItem=>{
-            if(!extraItem)return;
-            var alreadyRemoved=!eF["some"](s=>s['id']===extraItem['id']);
-            if(!alreadyRemoved){
-              var idx=eF["findIndex"](s=>(s["userId"]||s["name"])===(extraItem["userId"]||extraItem["name"]));
-              if(idx>=0x0)eF["splice"](idx,0x1);
-            }
-          });
-        }
+        var eI=new Set(eB["map"](eS=>eS["userId"]||eS["name"]||eS['id']));
+        eF=eF["filter"](eS=>!eI["has"](eS["userId"])&&!eI["has"](eS["name"])&&!eI["has"](eS['id']));
         var eJ=new Set(eF["map"](eS=>eS["userId"]||eS["name"])),eK=eB["map"](eS=>eS["userId"])["filter"](eS=>eS&&!eJ["has"](eS));
         eK["length"]>0x0&&(eK["forEach"](eS=>{
           var il=ii;
