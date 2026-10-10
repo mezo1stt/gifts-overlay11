@@ -98,27 +98,12 @@ let fireConfig = {
 };
 
 // ================= INITIALIZATION ================= //
-document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Get Board UID from URL or fallback
-    const urlParams = new URLSearchParams(window.location.search);
-    const paramUid = urlParams.get('uid') || urlParams.get('id');
-    if (paramUid) {
-        currentUid = paramUid;
-    } else {
-        const saved = localStorage.getItem('last_board_uid');
-        if (saved) currentUid = saved;
-    }
-
+function loadAllSectionsForCurrentUid() {
     const uidInput = document.getElementById('uidInput');
     if (uidInput) uidInput.value = currentUid;
+    const profileBoard = document.getElementById('profileBoardId');
+    if (profileBoard) profileBoard.textContent = currentUid;
 
-    // 2. Setup Sidebar Navigation
-    setupSidebarNav();
-
-    // 3. Check User Authentication (Shows welcome screen if not logged in)
-    await checkAuth();
-
-    // 4. Load Data for All Sections
     loadGiftsData();
     loadTeamGiftsData();
     loadCardsData();
@@ -129,6 +114,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadScoreboardData();
     loadRaceState();
     loadFollowersState();
+    if (typeof loadTarkibatData === 'function') loadTarkibatData();
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    // 1. Get Board UID from URL or localStorage fallback
+    const urlParams = new URLSearchParams(window.location.search);
+    const paramUid = urlParams.get('uid') || urlParams.get('id');
+    if (paramUid && paramUid !== 'default' && paramUid !== 'board_XXXX') {
+        currentUid = paramUid;
+    } else {
+        const saved = localStorage.getItem('last_board_uid');
+        if (saved && saved !== 'default' && saved !== 'board_XXXX') {
+            currentUid = saved;
+        }
+    }
+
+    const uidInput = document.getElementById('uidInput');
+    if (uidInput) uidInput.value = currentUid;
+
+    // 2. Setup Sidebar Navigation
+    setupSidebarNav();
+
+    // 3. Check User Authentication (Assigns encrypted boardId when logged in)
+    await checkAuth();
+
+    // 4. Load Data for All Sections using encrypted currentUid
+    loadAllSectionsForCurrentUid();
 
     // 5. Populate Library
     populateGiftsLibrary();
@@ -152,6 +164,7 @@ const NAV_TAB_TITLES = {
     scoreboardSection: '⚡ لوحة النتائج (Scoreboard) · نقاط وألوان الفرق والتحديات',
     raceSection: '⚔️ صراع الحكام 👑 · نظام تسجيل انتصارات الحكام والمتسابقين في روبلوكس وتيك توك',
     followersSection: '📈 إجمالي المتابعين المباشر ⚡ · يتجدد كل ثانية مع صورة واسم كل مستخدم في تيك توك',
+    tarkibatSection: '🧩 تركيبات تيك توك لايف (TikTok Live Connector) · فحص اللايف وربط الهدايا بالأوامر',
     accountSection: '👤 إدارة الحساب والمستخدمين · قاعدة البيانات'
 };
 
@@ -265,11 +278,21 @@ async function checkAuth() {
             if (profileUser) profileUser.textContent = `@${currentUser.username}`;
             if (profileBoard) profileBoard.textContent = currentUser.boardId;
 
-            // Switch to user's assigned board if not explicitly set in query
-            if (!new URLSearchParams(window.location.search).get('uid') && currentUser.boardId) {
+            // Always bind currentUid to the logged-in user's unique encrypted boardId
+            if (currentUser.boardId) {
                 currentUid = currentUser.boardId;
+                localStorage.setItem('last_board_uid', currentUid);
                 const uidInput = document.getElementById('uidInput');
                 if (uidInput) uidInput.value = currentUid;
+
+                // Clean any legacy ?uid=default from the URL bar
+                try {
+                    const url = new URL(window.location);
+                    if (url.searchParams.has('uid')) {
+                        url.searchParams.delete('uid');
+                        window.history.replaceState(null, '', url.toString());
+                    }
+                } catch (e) {}
             }
         } else {
             setGuestMode();
@@ -287,7 +310,7 @@ function setGuestMode() {
     const authBtn = document.getElementById('btnAuthToggle');
     const pillName = document.getElementById('sidebarUserName');
     if (authBtn) authBtn.textContent = '👤 تسجيل الدخول';
-    if (pillName) pillName.textContent = 'زائر (تجريبي)';
+    if (pillName) pillName.textContent = 'زائر (غير مسجل)';
 }
 
 function handleAuthBtnClick() {
@@ -314,9 +337,8 @@ async function handleLoginSubmit(e) {
             localStorage.setItem('auth_token', data.token);
             closeAuthModal();
             await checkAuth();
-            loadGiftsData();
-            loadTeamGiftsData();
-            showToast(`👋 مرحباً بك يا ${data.user.displayName || data.user.username}! تم تسجيل الدخول بنجاح.`, 'success');
+            loadAllSectionsForCurrentUid();
+            showToast(`👋 مرحباً بك يا ${data.user.displayName || data.user.username}! تم تفعيل البورد المشفر الخاص بك.`, 'success');
         } else {
             showToast(data.error || 'فشل تسجيل الدخول', 'error');
         }
@@ -342,9 +364,8 @@ async function handleRegisterModalSubmit(e) {
             localStorage.setItem('auth_token', data.token);
             closeAuthModal();
             await checkAuth();
-            loadGiftsData();
-            loadTeamGiftsData();
-            showToast('✨ تم إنشاء حسابك وتسجيل الدخول بنجاح!', 'success');
+            loadAllSectionsForCurrentUid();
+            showToast('✨ تم إنشاء حسابك وتوليد بورد مشفر خاص بك بنجاح!', 'success');
         } else {
             showToast(data.error || 'فشل إنشاء الحساب', 'error');
         }
@@ -367,7 +388,7 @@ async function handleRegisterSubmit(e) {
         });
         const data = await res.json();
         if (data.success) {
-            showToast(`✨ تم إنشاء حساب ${data.user.displayName} بنجاح!`, 'success');
+            showToast(`✨ تم إنشاء حساب ${data.user.displayName} ببورد مشفر (${data.user.boardId})!`, 'success');
             document.getElementById('registerNewUserForm').reset();
         } else {
             showToast(data.error || 'فشل إنشاء الحساب', 'error');
@@ -377,10 +398,44 @@ async function handleRegisterSubmit(e) {
     }
 }
 
-function quickFillAdmin() {
-    document.getElementById('loginUsername').value = '1212';
-    document.getElementById('loginPassword').value = '1212';
-    document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+function copyEncryptedBoardId() {
+    if (!currentUid) return;
+    navigator.clipboard.writeText(currentUid);
+    showToast(`🔐 تم نسخ كود البورد المشفر الخاص بك: ${currentUid}`, 'copy');
+}
+
+async function regenerateMyEncryptedBoardId() {
+    const token = localStorage.getItem('auth_token');
+    if (!token || !currentUser) {
+        showToast('⚠️ يرجى تسجيل الدخول أولاً لتوليد كود بورد مشفر خاص بحسابك', 'warning');
+        openAuthModal();
+        return;
+    }
+    if (!confirm('🔐 هل تريد توليد كود بورد مشفر سري جديد لحسابك؟\nسيتم نقل جميع إعداداتك وهداياك تلقائياً للكود الجديد، وإبطال الروابط القديمة لحمايتك من أي متطفلين.')) {
+        return;
+    }
+    try {
+        const res = await fetch('/api/auth/regenerate-board', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ oldBoardId: currentUid })
+        });
+        const data = await res.json();
+        if (data.success && data.boardId) {
+            currentUid = data.boardId;
+            if (currentUser) currentUser.boardId = data.boardId;
+            localStorage.setItem('last_board_uid', currentUid);
+            loadAllSectionsForCurrentUid();
+            showToast(`🔐 تم توليد كود بورد مشفر جديد لحسابك بنجاح! انسخ روابط OBS الجديدة الآن.`, 'success', 4500);
+        } else {
+            showToast(data.error || 'تعذر توليد البورد المشفر الجديد', 'error');
+        }
+    } catch (e) {
+        showToast('خطأ في الاتصال بالسيرفر', 'error');
+    }
 }
 
 async function logoutUser() {
@@ -403,6 +458,7 @@ async function logoutUser() {
 function openAuthModal() {
     const modal = document.getElementById('authModal');
     if (modal) modal.classList.add('open');
+    switchAuthModalTab('login');
     const uInput = document.getElementById('loginUsername');
     const pInput = document.getElementById('loginPassword');
     if (uInput && !currentUser) {
@@ -416,11 +472,28 @@ function closeAuthModal() {
     document.getElementById('authModal').classList.remove('open');
 }
 
+function switchAuthModalTab(tab) {
+    const isLogin = tab === 'login';
+    const btnLogin = document.getElementById('authModalTabLogin');
+    const btnReg = document.getElementById('authModalTabRegister');
+    const loginForm = document.getElementById('loginForm');
+    const regForm = document.getElementById('registerModalForm');
+    if (btnLogin) {
+        btnLogin.classList.toggle('active', isLogin);
+        btnLogin.style.background = isLogin ? 'linear-gradient(135deg, #7928ca, #ff0080)' : 'transparent';
+        btnLogin.style.color = isLogin ? '#fff' : '#94a3b8';
+    }
+    if (btnReg) {
+        btnReg.classList.toggle('active', !isLogin);
+        btnReg.style.background = !isLogin ? 'linear-gradient(135deg, #7928ca, #ff0080)' : 'transparent';
+        btnReg.style.color = !isLogin ? '#fff' : '#94a3b8';
+    }
+    if (loginForm) loginForm.style.display = isLogin ? 'block' : 'none';
+    if (regForm) regForm.style.display = !isLogin ? 'block' : 'none';
+}
+
 function switchAuthTab(tab) {
-    document.getElementById('tabLoginBtn').classList.toggle('active', tab === 'login');
-    document.getElementById('tabRegisterBtn').classList.toggle('active', tab === 'register');
-    document.getElementById('loginForm').classList.toggle('active', tab === 'login');
-    document.getElementById('registerForm').classList.toggle('active', tab === 'register');
+    switchAuthModalTab(tab);
 }
 
 // ================= SECTION 1: GIFTS OVERLAY & MC ROYALE CARDS ================= //
@@ -1665,13 +1738,20 @@ function toggleSbSound() {
     }
 }
 
+let lastSbScoreAdjustTs = 0;
+
 async function adjustSbScore(team, delta) {
-    playScoreChime(delta > 0 ? 'up' : 'down');
+    const now = Date.now();
+    if (now - lastSbScoreAdjustTs < 120) return;
+    lastSbScoreAdjustTs = now;
+
+    const cleanDelta = Number(delta) > 0 ? 1 : -1;
+    playScoreChime(cleanDelta > 0 ? 'up' : 'down');
     try {
         const res = await fetch(`/api/scoreboard/${currentUid}/score`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ team, delta })
+            body: JSON.stringify({ team, delta: cleanDelta })
         });
         const data = await res.json();
         if (data.success && data.board) {
@@ -1682,6 +1762,18 @@ async function adjustSbScore(team, delta) {
         }
     } catch (e) {}
 }
+
+window.triggerGlobalHotkeyScore = function(team, delta) {
+    const cleanTeam = team === 'b' ? 'b' : 'a';
+    const cleanDelta = Number(delta) > 0 ? 1 : -1;
+    sbHotkeyTargetTeam = cleanTeam;
+    adjustSbScore(cleanTeam, cleanDelta);
+    const teamName = cleanTeam === 'a'
+        ? (document.getElementById('sbTeamAName')?.value || 'الفريق الأول (الأحمر)')
+        : (document.getElementById('sbTeamBName')?.value || 'الفريق الثاني');
+    const sign = cleanDelta > 0 ? '+1' : '-1';
+    showToast(`🎮 اختصار سريع: ${sign} نقطة لـ (${teamName})`, cleanDelta > 0 ? 'success' : 'info');
+};
 
 async function setSbDirectScore(team) {
     const inputId = team === 'a' ? 'sbScoreACustom' : 'sbScoreBCustom';
@@ -2278,6 +2370,11 @@ function openAllObsModal() {
     const openFollowers = document.getElementById('openFollowersUrl');
     if (openFollowers) openFollowers.href = `${origin}/followers-overlay.html`;
 
+    const linkTarkibat = document.getElementById('linkTarkibatUrl');
+    if (linkTarkibat) linkTarkibat.value = `${origin}/tarkibat-overlay.html?uid=${currentUid}`;
+    const openTarkibat = document.getElementById('openTarkibatUrl');
+    if (openTarkibat) openTarkibat.href = `${origin}/tarkibat-overlay.html?uid=${currentUid}`;
+
     document.getElementById('allObsModal').classList.add('open');
 }
 
@@ -2309,10 +2406,11 @@ function copyCurrentOverlayUrl(type) {
     else if (type === 'scoreboard') url = `${origin}/scoreboard-overlay.html?id=${currentUid}`;
     else if (type === 'race') url = `${origin}/race-overlay.html`;
     else if (type === 'followers') url = `${origin}/followers-overlay.html`;
+    else if (type === 'tarkibat') url = `${origin}/tarkibat-overlay.html?uid=${currentUid}`;
 
     navigator.clipboard.writeText(url);
-    const labelMap = { race: 'صراع الحكام', followers: 'إجمالي المتابعين المباشر', cards: 'بطاقات تيك توك 3', cards4: 'بطاقات تيك توك 4 كلاسيك', fire: 'نص (متغير)', supporterFrame: 'إطار آخر داعم', camera: 'إطار الكاميرا', scoreboard: 'لوحة النتائج' };
-    showToast(`📺 تم نسخ رابط (${labelMap[type] || type}) بنجاح!`, 'copy');
+    const labelMap = { race: 'صراع الحكام', followers: 'إجمالي المتابعين المباشر', tarkibat: 'أوفرلاي التركيبات المباشر', cards: 'بطاقات تيك توك 3', cards4: 'بطاقات تيك توك 4 كلاسيك', fire: 'نص (متغير)', supporterFrame: 'إطار آخر داعم', camera: 'إطار الكاميرا', scoreboard: 'لوحة النتائج' };
+    showToast(`📺 تم نسخ رابط (${labelMap[type] || type}) المشفر بنجاح!`, 'copy');
 }
 
 // ================= SOCKET.IO & EVENT LISTENERS ================= //
@@ -2404,42 +2502,36 @@ function setupSocket() {
         socket.on('followers_gain_celebration', (celeb) => {
             triggerFollowersGainCelebration(celeb);
         });
+
+        socket.on('tarkibat_status_update', (data) => {
+            if (data && data.uid === currentUid && data.state) {
+                currentTarkibatLiveState = { ...currentTarkibatLiveState, ...data.state };
+                renderTarkibatStatusUI();
+            }
+        });
+
+        socket.on('tarkibat_live_event', (data) => {
+            if (data && data.uid === currentUid) {
+                if (data.state) {
+                    currentTarkibatLiveState = { ...currentTarkibatLiveState, ...data.state };
+                    renderTarkibatStatusUI();
+                } else if (data.event) {
+                    currentTarkibatLiveState.events = [data.event, ...(currentTarkibatLiveState.events || [])].slice(0, 35);
+                    renderTarkibatEventsFeed();
+                }
+            }
+        });
+
+        socket.on('tarkibat_config_update', (data) => {
+            if (data && data.uid === currentUid && data.config) {
+                currentTarkibatConfig = { ...currentTarkibatConfig, ...data.config };
+                renderTarkibatItemsList();
+            }
+        });
     } catch (e) {}
 }
 
 function setupEventListeners() {
-    // Board switch
-    const switchBtn = document.getElementById('switchUidBtn');
-    if (switchBtn) {
-        switchBtn.addEventListener('click', () => {
-            const val = document.getElementById('uidInput').value.trim();
-            if (val) {
-                currentUid = val;
-                localStorage.setItem('last_board_uid', currentUid);
-                loadGiftsData();
-                loadTeamGiftsData();
-                loadCardsData();
-                loadCards4Data();
-                loadFireData();
-                loadCameraData();
-                loadScoreboardData();
-                loadRaceState();
-                showToast(`🔄 تم التبديل إلى معرف اللوحة: ${currentUid}`, 'info');
-            }
-        });
-    }
-
-    // UID input enter key
-    const uidInp = document.getElementById('uidInput');
-    if (uidInp) {
-        uidInp.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                switchBtn.click();
-            }
-        });
-    }
-
     // Sliders live badges
     const offsetYSlider = document.getElementById('offsetYSlider');
     if (offsetYSlider) {
@@ -2584,7 +2676,7 @@ function setupEventListeners() {
 
     // Global Keyboard Hotkeys for Scoreboard (Alt 1 / Alt 2 / Alt + / Alt -)
     window.addEventListener('keydown', (e) => {
-        if (!e.altKey) return;
+        if (!e.altKey || e.repeat) return;
         // In desktop app, Electron globalShortcut handles hotkeys natively to prevent double-counting!
         if (window.electronAPI) return;
 
@@ -2596,7 +2688,6 @@ function setupEventListeners() {
                 e.preventDefault();
                 sbHotkeyTargetTeam = 'a';
                 adjustSbScore('a', 1);
-                playScoreChime('up');
                 const teamName = document.getElementById('sbTeamAName')?.value || 'الفريق الأول (الأحمر)';
                 showToast(`🔴 +1 نقطة لـ (${teamName}) [Alt 1]`, 'success');
             }
@@ -2607,7 +2698,6 @@ function setupEventListeners() {
                 e.preventDefault();
                 sbHotkeyTargetTeam = 'b';
                 adjustSbScore('b', 1);
-                playScoreChime('up');
                 const teamName = document.getElementById('sbTeamBName')?.value || 'الفريق الثاني';
                 showToast(`🟢 +1 نقطة لـ (${teamName}) [Alt 2]`, 'success');
             }
@@ -2617,7 +2707,6 @@ function setupEventListeners() {
             if (!isEditing) {
                 e.preventDefault();
                 adjustSbScore('a', -1);
-                playScoreChime('down');
                 const teamName = document.getElementById('sbTeamAName')?.value || 'الفريق الأول (الأحمر)';
                 showToast(`🔴 -1 نقطة لـ (${teamName}) [Alt 3]`, 'info');
             }
@@ -2627,7 +2716,6 @@ function setupEventListeners() {
             if (!isEditing) {
                 e.preventDefault();
                 adjustSbScore('b', -1);
-                playScoreChime('down');
                 const teamName = document.getElementById('sbTeamBName')?.value || 'الفريق الثاني';
                 showToast(`🟢 -1 نقطة لـ (${teamName}) [Alt 4]`, 'info');
             }
@@ -2636,7 +2724,6 @@ function setupEventListeners() {
         else if (e.key === '+' || e.key === '=' || e.code === 'NumpadAdd' || (e.shiftKey && e.code === 'Equal')) {
             e.preventDefault();
             adjustSbScore(sbHotkeyTargetTeam, 1);
-            playScoreChime('up');
             const teamName = sbHotkeyTargetTeam === 'a' 
                 ? (document.getElementById('sbTeamAName')?.value || 'الفريق الأول') 
                 : (document.getElementById('sbTeamBName')?.value || 'الفريق الثاني');
@@ -2646,7 +2733,6 @@ function setupEventListeners() {
         else if (e.key === '-' || e.key === '_' || e.code === 'NumpadSubtract' || e.code === 'Minus') {
             e.preventDefault();
             adjustSbScore(sbHotkeyTargetTeam, -1);
-            playScoreChime('down');
             const teamName = sbHotkeyTargetTeam === 'a' 
                 ? (document.getElementById('sbTeamAName')?.value || 'الفريق الأول') 
                 : (document.getElementById('sbTeamBName')?.value || 'الفريق الثاني');
@@ -3738,6 +3824,34 @@ function selectSpecialTrigger(type) {
 
 function applyGiftToCardSlot(giftName, giftImage, likesCount = null) {
     if (activeCardSlotIndex === null) return;
+
+    if (activeVisualGiftContext === 'tarkibat') {
+        const foundGift = (allTiktokGifts || []).find(g => g.name === giftName || g.image === giftImage);
+        const coins = foundGift ? (foundGift.coins || foundGift.diamonds || 1) : 1;
+
+        if (activeCardSlotIndex === 'new') {
+            newTrkSelectedGift = {
+                name: giftName,
+                image: giftImage,
+                coins: coins
+            };
+            const imgEl = document.getElementById('newTrkGiftPreviewImg');
+            const nameEl = document.getElementById('newTrkGiftPreviewName');
+            if (imgEl) imgEl.src = giftImage;
+            if (nameEl) nameEl.textContent = `${giftName} (${coins} 🪙)`;
+            closeVisualGiftPicker();
+            showToast(`🎁 تم اختيار هدية (${giftName}) للتركيبة الجديدة!`, 'success');
+        } else if (typeof activeCardSlotIndex === 'number' && currentTarkibatConfig.items[activeCardSlotIndex]) {
+            currentTarkibatConfig.items[activeCardSlotIndex].giftName = giftName;
+            currentTarkibatConfig.items[activeCardSlotIndex].giftImage = giftImage;
+            currentTarkibatConfig.items[activeCardSlotIndex].giftCoins = coins;
+            closeVisualGiftPicker();
+            renderTarkibatItemsList();
+            saveTarkibatConfigAction(true);
+            showToast(`✅ تم تحديث الهدية إلى (${giftName}) للتركيبة رقم ${activeCardSlotIndex + 1}!`, 'success');
+        }
+        return;
+    }
 
     if (activeVisualGiftContext === 'cards4') {
         const team = cards4BoardConfig[cardsActiveTargetTeam];
@@ -5062,6 +5176,526 @@ function triggerFollowersGainCelebration(celeb) {
         playRaceVictorySound();
     }
 }
+
+// ================= SECTION 5.8: تركيبات تيك توك لايف (TIKTOK LIVE CONNECTOR & GIFT COMBINATIONS) ================= //
+let currentTarkibatConfig = {
+    tiktokUsername: 'mezo_1st',
+    autoWatchdog: true,
+    overlayStyle: {
+        theme: 'royal_purple',
+        position: 'top-center',
+        alertDuration: 5,
+        soundEnabled: true,
+        showDonorAvatar: true,
+        showGiftCoins: true,
+        scale: 100
+    },
+    items: []
+};
+
+let currentTarkibatLiveState = {
+    username: 'mezo_1st',
+    isLive: false,
+    isConnected: false,
+    isConnecting: false,
+    watchdogActive: false,
+    roomId: null,
+    viewerCount: 0,
+    totalGiftsReceived: 0,
+    totalDiamondsReceived: 0,
+    totalLikesReceived: 0,
+    liveTitle: '',
+    profile: null,
+    lastCheckedAt: null,
+    statusMessage: 'غير متصل حالياً — أدخل يوزر التيك توك واضغط فحص أو Connect',
+    events: []
+};
+
+let newTrkSelectedGift = {
+    name: 'وردة',
+    image: '/images/rose.png',
+    coins: 1
+};
+
+async function loadTarkibatData() {
+    if (!currentUid) return;
+    try {
+        const res = await fetch(`/api/tarkibat/${encodeURIComponent(currentUid)}`);
+        const data = await res.json();
+        if (data && data.success) {
+            if (data.config) {
+                currentTarkibatConfig = { ...currentTarkibatConfig, ...data.config };
+            }
+            if (data.liveState) {
+                currentTarkibatLiveState = { ...currentTarkibatLiveState, ...data.liveState };
+            }
+            const userInp = document.getElementById('trkUsernameInput');
+            if (userInp && document.activeElement !== userInp && currentTarkibatConfig.tiktokUsername) {
+                userInp.value = currentTarkibatConfig.tiktokUsername;
+            }
+            renderTarkibatStatusUI();
+            renderTarkibatItemsList();
+        }
+    } catch (e) {}
+
+    // Update OBS URL & Simulator Iframe with encrypted currentUid
+    const obsInp = document.getElementById('trkObsDirectUrlInput');
+    if (obsInp) {
+        obsInp.value = `${window.location.origin}/tarkibat-overlay.html?uid=${currentUid}`;
+    }
+    const extLink = document.getElementById('trkExternalPreviewLink');
+    if (extLink) {
+        extLink.href = `/tarkibat-overlay.html?uid=${currentUid}&preview=1`;
+    }
+    const sim = document.getElementById('trkSimIframe');
+    if (sim && (!sim.src || !sim.src.includes(`uid=${currentUid}`))) {
+        sim.src = `/tarkibat-overlay.html?uid=${currentUid}&preview=1`;
+    }
+}
+
+function renderTarkibatStatusUI() {
+    const st = currentTarkibatLiveState;
+    if (!st) return;
+
+    const pill = document.getElementById('trkConnectionPill');
+    const isLiveBadge = document.getElementById('trkIsLiveBadge');
+    const msgEl = document.getElementById('trkStatusMessageText');
+    const btnConn = document.getElementById('btnTrkConnect');
+    const btnDisc = document.getElementById('btnTrkDisconnect');
+
+    if (st.isConnected) {
+        if (pill) {
+            pill.textContent = '🟢 متصل باللايف الآن (Connected)';
+            pill.style.background = 'rgba(16, 185, 129, 0.22)';
+            pill.style.borderColor = '#10b981';
+            pill.style.color = '#6ee7b7';
+        }
+        if (btnConn) btnConn.style.display = 'none';
+        if (btnDisc) btnDisc.style.display = 'inline-block';
+    } else if (st.isConnecting) {
+        if (pill) {
+            pill.textContent = '⏳ جاري الاتصال وفحص البث...';
+            pill.style.background = 'rgba(245, 158, 11, 0.22)';
+            pill.style.borderColor = '#f59e0b';
+            pill.style.color = '#fde68a';
+        }
+    } else {
+        if (pill) {
+            pill.textContent = st.watchdogActive ? '🔄 مراقبة اللايف مفعلة (Auto-Watchdog)' : '⚪ غير متصل حالياً';
+            pill.style.background = st.watchdogActive ? 'rgba(56, 189, 248, 0.2)' : 'rgba(239, 68, 68, 0.22)';
+            pill.style.borderColor = st.watchdogActive ? '#38bdf8' : '#ef4444';
+            pill.style.color = st.watchdogActive ? '#7dd3fc' : '#fca5a5';
+        }
+        if (btnConn) btnConn.style.display = 'inline-block';
+        if (btnDisc) btnDisc.style.display = st.watchdogActive ? 'inline-block' : 'none';
+    }
+
+    if (isLiveBadge) {
+        if (st.isLive) {
+            isLiveBadge.textContent = '🟢 فاتح لايف الآن (LIVE ON TIKTOK)';
+            isLiveBadge.style.background = 'rgba(16, 185, 129, 0.25)';
+            isLiveBadge.style.border = '1px solid #10b981';
+            isLiveBadge.style.color = '#34d399';
+        } else if (st.lastCheckedAt) {
+            isLiveBadge.textContent = `🔴 قافل حالياً (Offline - فحص ${st.lastCheckedAt})`;
+            isLiveBadge.style.background = 'rgba(239, 68, 68, 0.22)';
+            isLiveBadge.style.border = '1px solid #ef4444';
+            isLiveBadge.style.color = '#fca5a5';
+        } else {
+            isLiveBadge.textContent = '⏳ لم يتم الفحص بعد';
+            isLiveBadge.style.background = 'rgba(148, 163, 184, 0.2)';
+            isLiveBadge.style.border = 'none';
+            isLiveBadge.style.color = '#cbd5e1';
+        }
+    }
+
+    if (msgEl && st.statusMessage) {
+        msgEl.textContent = st.statusMessage;
+        msgEl.style.color = st.isLive ? '#34d399' : '#cbd5e1';
+    }
+
+    const prof = st.profile;
+    if (prof) {
+        const av = document.getElementById('trkStreamerAvatar');
+        if (av && prof.avatar) av.src = prof.avatar;
+        const nm = document.getElementById('trkStreamerName');
+        if (nm) nm.textContent = prof.nickname || prof.username || st.username;
+        const hnd = document.getElementById('trkStreamerHandle');
+        if (hnd) hnd.textContent = `@${prof.username || st.username}`;
+    } else if (st.username) {
+        const hnd = document.getElementById('trkStreamerHandle');
+        if (hnd) hnd.textContent = `@${st.username}`;
+    }
+
+    const vw = document.getElementById('trkStatViewers');
+    if (vw) vw.textContent = `👁️ المشاهدون: ${(st.viewerCount || 0).toLocaleString()}`;
+    const gf = document.getElementById('trkStatGifts');
+    if (gf) gf.textContent = `🎁 هدايا الجلسة: ${(st.totalGiftsReceived || 0).toLocaleString()}`;
+    const dm = document.getElementById('trkStatDiamonds');
+    if (dm) dm.textContent = `💎 العملات: ${(st.totalDiamondsReceived || 0).toLocaleString()}`;
+    const rm = document.getElementById('trkStatRoomId');
+    if (rm) rm.textContent = `Room: ${st.roomId || '—'}`;
+
+    renderTarkibatEventsFeed();
+}
+
+async function checkTarkibatLiveStatus() {
+    const inp = document.getElementById('trkUsernameInput');
+    const btn = document.getElementById('btnTrkCheckLive');
+    const username = inp ? inp.value.trim() : '';
+    if (!username) {
+        showToast('⚠️ يرجى كتابة يوزر التيك توك أولاً!', 'warning');
+        if (inp) inp.focus();
+        return;
+    }
+
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = '⏳ جاري الفحص...';
+    }
+
+    try {
+        const res = await fetch(`/api/tarkibat/${encodeURIComponent(currentUid)}/check-live`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || 'فشل فحص اللايف');
+
+        if (data.liveState) {
+            currentTarkibatLiveState = { ...currentTarkibatLiveState, ...data.liveState };
+            renderTarkibatStatusUI();
+        }
+
+        if (data.isLive) {
+            playScoreChime('up');
+            showToast(`🟢 الحساب @${data.username} فاتح لايف الآن على تيك توك! اضغط Connect للربط المباشر.`, 'success', 4500);
+        } else {
+            showToast(`🔴 الحساب @${data.username} غير فاتح لايف حالياً على تيك توك (Offline). يمكنك تجهيز وتجربة التركيبات الآن!`, 'info', 4500);
+        }
+    } catch (err) {
+        showToast('خطأ أثناء فحص اللايف: ' + err.message, 'error');
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = '🔍 فحص هل فاتح لايف؟';
+        }
+    }
+}
+
+async function connectTarkibatLive() {
+    const inp = document.getElementById('trkUsernameInput');
+    const btn = document.getElementById('btnTrkConnect');
+    const watchdogCheck = document.getElementById('trkAutoWatchdogCheck');
+    const username = inp ? inp.value.trim() : '';
+    if (!username) {
+        showToast('⚠️ يرجى كتابة يوزر التيك توك أولاً!', 'warning');
+        if (inp) inp.focus();
+        return;
+    }
+
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = '⏳ جاري فحص اللايف والاتصال...';
+    }
+
+    try {
+        const res = await fetch(`/api/tarkibat/${encodeURIComponent(currentUid)}/connect`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                username,
+                autoWatchdog: watchdogCheck ? watchdogCheck.checked : true
+            })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || 'تعذر الاتصال');
+
+        if (data.state) {
+            currentTarkibatLiveState = { ...currentTarkibatLiveState, ...data.state };
+            renderTarkibatStatusUI();
+        }
+
+        if (data.connected && data.isLive) {
+            playRaceVictorySound();
+            showToast(`🟢 تم الاتصال ببث @${currentTarkibatLiveState.username} المباشر بنجاح! جميع التركيبات نشطة الآن.`, 'success', 4500);
+        } else if (!data.isLive) {
+            const wdMsg = (watchdogCheck && watchdogCheck.checked)
+                ? 'تم تفعيل المراقب الذكي وسيتصل تلقائياً فور فتح اللايف!'
+                : 'افتح البث المباشر على تيك توك ثم اضغط Connect.';
+            showToast(`🔴 الحساب @${currentTarkibatLiveState.username} غير فاتح لايف حالياً. ${wdMsg}`, 'warning', 5000);
+        }
+    } catch (err) {
+        showToast('خطأ أثناء الاتصال: ' + err.message, 'error');
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = '🟢 Connect (اتصال باللايف)';
+        }
+    }
+}
+
+async function disconnectTarkibatLive() {
+    try {
+        const res = await fetch(`/api/tarkibat/${encodeURIComponent(currentUid)}/disconnect`, {
+            method: 'POST'
+        });
+        const data = await res.json();
+        if (data && data.liveState) {
+            currentTarkibatLiveState = { ...currentTarkibatLiveState, ...data.liveState };
+            renderTarkibatStatusUI();
+        }
+        showToast('⚪ تم قطع الاتصال باللايف وإيقاف المراقب التلقائي.', 'info');
+    } catch (e) {}
+}
+
+function onNewTrkTriggerTypeChange(val) {
+    const giftBox = document.getElementById('newTrkGiftPickerBox');
+    const chatBox = document.getElementById('newTrkChatKeywordBox');
+    if (giftBox) giftBox.style.display = val === 'gift' ? 'flex' : 'none';
+    if (chatBox) chatBox.style.display = val === 'chat' ? 'block' : 'none';
+}
+
+function openTarkibatGiftPicker(slotTarget = 'new') {
+    openVisualGiftPicker('tarkibat', slotTarget, 'tarkibat');
+}
+
+function selectWildcardGiftForNewTrk() {
+    newTrkSelectedGift = {
+        name: 'أي هدية',
+        image: '/images/rose.png',
+        coins: 1
+    };
+    const imgEl = document.getElementById('newTrkGiftPreviewImg');
+    const nameEl = document.getElementById('newTrkGiftPreviewName');
+    if (imgEl) imgEl.src = '/images/rose.png';
+    if (nameEl) nameEl.textContent = '🌟 أي هدية في البث (Wildcard)';
+    showToast('🌟 تم تحديد (أي هدية) لتشغيل هذه التركيبة مع جميع هدايا البث!', 'info');
+}
+
+function getSbActionLabel(action, points = 1) {
+    if (action === 'team_b_add') return `🟢 +${points} نقطة للفريق 2 (المساعدين)`;
+    if (action === 'team_a_add') return `🔴 +${points} نقطة للفريق 1 (المخربين)`;
+    if (action === 'team_b_sub') return `➖ -${points} من الفريق 2`;
+    if (action === 'team_a_sub') return `➖ -${points} من الفريق 1`;
+    return '📺 تنبيه شاشة فقط (بدون نقاط)';
+}
+
+function renderTarkibatItemsList() {
+    const container = document.getElementById('trkItemsListContainer');
+    const badge = document.getElementById('trkItemsCountBadge');
+    const items = currentTarkibatConfig.items || [];
+    if (badge) badge.textContent = `${items.length} تركيبات`;
+    if (!container) return;
+
+    if (items.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding:24px; color:#94a3b8;">لا توجد تركيبات مضافة حالياً. اختر قالباً جاهزاً أو أضف تركيبتك من الأعلى!</div>`;
+        return;
+    }
+
+    container.innerHTML = items.map((item, idx) => {
+        const isEnabled = item.enabled !== false;
+        const borderCol = item.overlayColor || '#a855f7';
+        const giftImg = item.giftImage || '/images/rose.png';
+        const sbLabel = getSbActionLabel(item.scoreboardAction, item.scoreboardPoints || 1);
+
+        return `
+            <div style="background:rgba(15, 23, 42, 0.85); border:1.5px solid ${isEnabled ? borderCol + '66' : 'rgba(255,255,255,0.08)'}; border-right:4px solid ${borderCol}; border-radius:14px; padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; opacity:${isEnabled ? '1' : '0.55'};">
+                <div style="display:flex; align-items:center; gap:12px; flex:1; min-width:210px;">
+                    <div onclick="openTarkibatGiftPicker(${idx})" title="اضغط لتغيير الهدية من مكتبة تيك توك" style="position:relative; width:50px; height:50px; border-radius:12px; background:rgba(255,255,255,0.06); border:1.5px solid ${borderCol}; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;">
+                        <img src="${escapeHtml(giftImg)}" alt="Gift" style="width:38px; height:38px; object-fit:contain;" onerror="this.src='/images/rose.png'">
+                    </div>
+                    <div style="min-width:0; flex:1;">
+                        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                            <span style="font-size:14.5px; font-weight:900; color:#fff;">${escapeHtml(item.name)}</span>
+                            <span style="font-size:11px; background:rgba(255,215,0,0.15); color:#ffd700; padding:1px 8px; border-radius:999px; font-weight:800;">
+                                🎁 ${escapeHtml(item.giftName || 'هدية')}
+                            </span>
+                        </div>
+                        <div style="font-size:12px; color:#cbd5e1; margin-top:3px; font-weight:700;">
+                            ${escapeHtml(sbLabel)} · 💬 <span style="color:${borderCol};">${escapeHtml(item.overlayCustomText || item.name)}</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="display:flex; align-items:center; gap:6px;">
+                    <button type="button" onclick="testTarkibaItem('${escapeHtml(item.id)}')" style="padding:7px 12px; font-size:12px; font-weight:900; border-radius:9px; border:none; background:linear-gradient(135deg, #0284c7, #10b981); color:#fff; cursor:pointer;" title="تجربة التركيبة على السكوربورد والأوفرلاي الآن">
+                        🧪 تجربة
+                    </button>
+                    <button type="button" onclick="toggleTarkibaItemEnabled(${idx})" style="padding:7px 10px; font-size:11.5px; font-weight:800; border-radius:9px; border:1px solid rgba(255,255,255,0.15); background:${isEnabled ? 'rgba(16,185,129,0.2)' : 'rgba(148,163,184,0.15)'}; color:${isEnabled ? '#34d399' : '#94a3b8'}; cursor:pointer;">
+                        ${isEnabled ? '✅ شغال' : '⏸️ متوقف'}
+                    </button>
+                    <button type="button" onclick="deleteTarkibaItem(${idx})" style="padding:7px 10px; font-size:12px; font-weight:900; border-radius:9px; border:none; background:rgba(239,68,68,0.2); color:#fca5a5; cursor:pointer;" title="حذف التركيبة">
+                        🗑️
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderTarkibatEventsFeed() {
+    const feed = document.getElementById('trkEventsFeedList');
+    if (!feed) return;
+    const events = currentTarkibatLiveState.events || [];
+    if (events.length === 0) {
+        feed.innerHTML = `<div style="text-align:center; color:#64748b; padding:24px; font-size:13px;">لا توجد أحداث حتى الآن — اضغط «🧪 تجربة» على أي تركيبة أو اتصل باللايف لرؤية التفاعلات فوراً!</div>`;
+        return;
+    }
+
+    feed.innerHTML = events.map(ev => {
+        if (ev.type === 'system') {
+            return `
+                <div style="background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.35); border-radius:10px; padding:8px 12px; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:12.5px; font-weight:800; color:#34d399;">${escapeHtml(ev.title)}</span>
+                    <span style="font-size:11px; color:#94a3b8;">${escapeHtml(ev.time || '')}</span>
+                </div>
+            `;
+        }
+        return `
+            <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:11px; padding:9px 12px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                <div style="display:flex; align-items:center; gap:10px; min-width:0;">
+                    <img src="${escapeHtml(ev.avatar || '/images/mezotik-logo.png')}" style="width:36px; height:36px; border-radius:50%; object-fit:cover; border:1.5px solid #ffd700;" onerror="this.src='/images/mezotik-logo.png'">
+                    <div style="min-width:0;">
+                        <div style="font-size:13px; font-weight:900; color:#fff;">
+                            ${escapeHtml(ev.nickname || ev.username || 'مشاهد')}
+                            <span style="font-size:11.5px; color:#ffd700; font-weight:800;">← ${escapeHtml(ev.giftName || 'تفاعل')} ${ev.repeatCount > 1 ? `(x${ev.repeatCount})` : ''}</span>
+                        </div>
+                        <div style="font-size:11.5px; color:#34d399; font-weight:800;">
+                            ${escapeHtml(ev.triggeredText || '')}
+                        </div>
+                    </div>
+                </div>
+                <span style="font-size:10.5px; color:#64748b; direction:ltr; white-space:nowrap;">${escapeHtml(ev.time || '')}</span>
+            </div>
+        `;
+    }).join('');
+}
+
+async function addNewTarkibaItem() {
+    const name = document.getElementById('newTrkNameInput')?.value.trim() || 'تركيبة جديدة';
+    const triggerType = document.getElementById('newTrkTriggerType')?.value || 'gift';
+    const sbAction = document.getElementById('newTrkSbAction')?.value || 'team_b_add';
+    const sbPoints = Math.max(1, parseInt(document.getElementById('newTrkSbPoints')?.value, 10) || 1);
+    const overlayText = document.getElementById('newTrkOverlayText')?.value.trim() || name;
+    const soundEffect = document.getElementById('newTrkSoundEffect')?.value || 'victory';
+    const color = document.getElementById('newTrkColorInput')?.value || '#22ff88';
+    const chatKeyword = document.getElementById('newTrkChatKeyword')?.value.trim() || '';
+
+    let giftName = newTrkSelectedGift.name || 'وردة';
+    let giftImage = newTrkSelectedGift.image || '/images/rose.png';
+    let giftCoins = newTrkSelectedGift.coins || 1;
+
+    if (triggerType === 'follow') {
+        giftName = 'فولو (متابعة)';
+        giftImage = '/images/tiktok_follow.png';
+        giftCoins = 0;
+    } else if (triggerType === 'like') {
+        giftName = 'تكبيس لايكات';
+        giftImage = '/images/tiktok_likes.png';
+        giftCoins = 0;
+    } else if (triggerType === 'share') {
+        giftName = 'مشاركة البث';
+        giftImage = '/images/mezotik-logo.png';
+        giftCoins = 0;
+    } else if (triggerType === 'chat') {
+        giftName = `شات: ${chatKeyword || 'كلمة'}`;
+        giftImage = '/images/mezotik-logo.png';
+        giftCoins = 0;
+    }
+
+    const newItem = {
+        id: 'trk_' + Date.now(),
+        enabled: true,
+        name,
+        triggerType,
+        giftName,
+        giftImage,
+        giftCoins,
+        minRepeat: 1,
+        chatKeyword,
+        scoreboardAction: sbAction,
+        scoreboardPoints: sbPoints,
+        multiplyByRepeat: true,
+        showOverlayAlert: true,
+        overlayCustomText: overlayText,
+        overlayCardImage: giftImage,
+        overlayColor: color,
+        soundEffect,
+        addJudgeWin: false
+    };
+
+    if (!Array.isArray(currentTarkibatConfig.items)) currentTarkibatConfig.items = [];
+    currentTarkibatConfig.items.unshift(newItem);
+    renderTarkibatItemsList();
+    await saveTarkibatConfigAction(false);
+    showToast(`🧩 تمت إضافة التركيبة (${name}) بنجاح! اضغط «🧪 تجربة» لاختبارها.`, 'success');
+}
+
+async function toggleTarkibaItemEnabled(idx) {
+    if (!currentTarkibatConfig.items || !currentTarkibatConfig.items[idx]) return;
+    currentTarkibatConfig.items[idx].enabled = !currentTarkibatConfig.items[idx].enabled;
+    renderTarkibatItemsList();
+    await saveTarkibatConfigAction(true);
+}
+
+async function deleteTarkibaItem(idx) {
+    if (!currentTarkibatConfig.items || !currentTarkibatConfig.items[idx]) return;
+    const removed = currentTarkibatConfig.items.splice(idx, 1);
+    renderTarkibatItemsList();
+    await saveTarkibatConfigAction(true);
+    showToast(`🗑️ تم حذف التركيبة (${removed[0]?.name || ''})`, 'info');
+}
+
+async function saveTarkibatConfigAction(silent = false) {
+    try {
+        const res = await fetch(`/api/tarkibat/${encodeURIComponent(currentUid)}/save`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(currentTarkibatConfig)
+        });
+        const data = await res.json();
+        if (data && data.success && !silent) {
+            showToast('💾 تم حفظ إعدادات التركيبات بنجاح!', 'success');
+        }
+    } catch (e) {}
+}
+
+async function loadTarkibatPreset(presetKey) {
+    try {
+        const res = await fetch(`/api/tarkibat/${encodeURIComponent(currentUid)}/preset`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ preset: presetKey })
+        });
+        const data = await res.json();
+        if (data && data.success && data.config) {
+            currentTarkibatConfig = { ...currentTarkibatConfig, ...data.config };
+            renderTarkibatItemsList();
+            showToast('⚡ تم تحميل قالب التركيبات الجاهز بنجاح!', 'success');
+        }
+    } catch (e) {
+        showToast('تعذر تحميل القالب', 'error');
+    }
+}
+
+async function testTarkibaItem(itemId) {
+    try {
+        const res = await fetch(`/api/tarkibat/${encodeURIComponent(currentUid)}/test-trigger`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ itemId, customRepeat: 1 })
+        });
+        const data = await res.json();
+        if (data && data.success) {
+            playScoreChime('up');
+            showToast(`🧪 تم تشغيل التركيبة بنجاح! ${data.impact ? '(' + data.impact + ')' : ''}`, 'success');
+        }
+    } catch (e) {
+        showToast('تعذر تجربة التركيبة', 'error');
+    }
+}
+
 
 
 

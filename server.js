@@ -449,6 +449,20 @@ app.get('/scoreboard-overlay', (req, res) => {
 });
 
 // ================= AUTHENTICATION & USER DB ================= //
+function ensureEncryptedBoardDataMigrated(boardId) {
+    if (!boardId) return;
+    try {
+        const data = readData();
+        if (!data[boardId]) {
+            const sourceBoard = data['board_1212'] || data['default'] || data['board_XXXX'];
+            if (sourceBoard) {
+                data[boardId] = JSON.parse(JSON.stringify(sourceBoard));
+                writeData(data);
+            }
+        }
+    } catch (e) {}
+}
+
 app.post('/api/auth/register', (req, res) => {
     try {
         const { username, password, displayName } = req.body;
@@ -463,6 +477,9 @@ app.post('/api/auth/login', (req, res) => {
     try {
         const { username, password } = req.body;
         const result = db.loginUser(username, password);
+        if (result.user && result.user.boardId) {
+            ensureEncryptedBoardDataMigrated(result.user.boardId);
+        }
         res.json({ success: true, ...result });
     } catch (e) {
         res.status(400).json({ success: false, error: e.message });
@@ -481,10 +498,32 @@ app.get('/api/auth/me', (req, res) => {
     if (!user) {
         return res.status(401).json({ success: false, error: 'غير مسجل الدخول' });
     }
+    if (user.boardId) {
+        ensureEncryptedBoardDataMigrated(user.boardId);
+    }
     res.json({ success: true, user });
 });
 
+app.post('/api/auth/regenerate-board', (req, res) => {
+    try {
+        const token = req.headers.authorization?.replace('Bearer ', '') || req.body.token;
+        const { oldBoardId, newBoardId, user } = db.regenerateUserBoardId(token);
+        if (oldBoardId && newBoardId) {
+            const data = readData();
+            if (data[oldBoardId]) {
+                data[newBoardId] = JSON.parse(JSON.stringify(data[oldBoardId]));
+                writeData(data);
+            }
+        }
+        res.json({ success: true, oldBoardId, newBoardId, user });
+    } catch (e) {
+        res.status(400).json({ success: false, error: e.message });
+    }
+});
+
 // ================= SCOREBOARD ROUTES ================= //
+const recentScoreFingerprints = new Map();
+
 app.get('/api/scoreboard/:id', (req, res) => {
     const board = db.getScoreboard(req.params.id);
     res.json({ success: true, board });
@@ -492,41 +531,32 @@ app.get('/api/scoreboard/:id', (req, res) => {
 
 app.post('/api/scoreboard/:id/update', (req, res) => {
     const board = db.updateScoreboard(req.params.id, req.body);
-    const mirrorId = req.params.id === 'default' ? 'board_XXXX' : (req.params.id === 'board_XXXX' ? 'default' : null);
-    if (mirrorId) {
-        db.updateScoreboard(mirrorId, req.body);
-    }
     io.emit('scoreboard_update', board);
-    if (mirrorId) {
-        io.emit('scoreboard_update', { ...board, board_id: mirrorId });
-    }
     res.json({ success: true, board });
 });
 
 app.post('/api/scoreboard/:id/score', (req, res) => {
-    const { team, delta, score } = req.body;
+    const { team, delta, score, reqId } = req.body;
+    // Deduplicate identical rapid requests within 120ms to prevent any double-incrementing
+    if (delta !== undefined && delta !== null && score === undefined) {
+        const fpKey = `${req.params.id}:${team}:${delta}`;
+        const now = Date.now();
+        const lastTime = recentScoreFingerprints.get(fpKey) || 0;
+        if (now - lastTime < 120 && !reqId) {
+            const currentBoard = db.getScoreboard(req.params.id);
+            return res.json({ success: true, board: currentBoard, deduplicated: true });
+        }
+        recentScoreFingerprints.set(fpKey, now);
+    }
+
     const board = db.adjustScore(req.params.id, team, delta, score);
-    const mirrorId = req.params.id === 'default' ? 'board_XXXX' : (req.params.id === 'board_XXXX' ? 'default' : null);
-    if (mirrorId) {
-        db.adjustScore(mirrorId, team, null, team === 'a' ? board.team_a_score : board.team_b_score);
-    }
     io.emit('scoreboard_update', board);
-    if (mirrorId) {
-        io.emit('scoreboard_update', { ...board, board_id: mirrorId });
-    }
     res.json({ success: true, board });
 });
 
 app.post('/api/scoreboard/:id/reset', (req, res) => {
     const board = db.resetScoreboard(req.params.id);
-    const mirrorId = req.params.id === 'default' ? 'board_XXXX' : (req.params.id === 'board_XXXX' ? 'default' : null);
-    if (mirrorId) {
-        db.resetScoreboard(mirrorId);
-    }
     io.emit('scoreboard_update', board);
-    if (mirrorId) {
-        io.emit('scoreboard_update', { ...board, board_id: mirrorId });
-    }
     res.json({ success: true, board });
 });
 
@@ -2368,6 +2398,989 @@ app.post('/api/followers/trigger-event', (req, res) => {
     broadcastFollowersState();
     io.emit('followers_special_event', eventData);
     res.json({ success: true, event: eventData, state: buildFollowersPayload() });
+});
+
+// ================= SECTION: تركيبات تيك توك لايف (TikTok Live Connector & Gift Combinations) ================= //
+const { TikTokLiveConnection } = require('tiktok-live-connector');
+const TARKIBAT_FILE = path.join(__dirname, 'tarkibat-data.json');
+
+const DEFAULT_TARKIBAT_ITEMS = [
+    {
+        id: 'trk_1',
+        enabled: true,
+        name: '🚀 تيربو السرعة (وردة)',
+        triggerType: 'gift',
+        giftName: 'وردة',
+        giftNameEn: 'Rose',
+        giftImage: '/images/rose.png',
+        giftCoins: 1,
+        minRepeat: 1,
+        scoreboardAction: 'team_b_add',
+        scoreboardPoints: 1,
+        multiplyByRepeat: true,
+        showOverlayAlert: true,
+        overlayCustomText: '🚀 تيربو سريع للمساعدين!',
+        overlayCardImage: '/images/mcroyale/hog_rider.png',
+        overlayColor: '#22ff88',
+        soundEffect: 'score_up',
+        addJudgeWin: false
+    },
+    {
+        id: 'trk_2',
+        enabled: true,
+        name: '☄️ نيزك التدمير (قلب)',
+        triggerType: 'gift',
+        giftName: 'قلب',
+        giftNameEn: 'Finger Heart',
+        giftImage: '/images/heart.png',
+        giftCoins: 5,
+        minRepeat: 1,
+        scoreboardAction: 'team_a_add',
+        scoreboardPoints: 1,
+        multiplyByRepeat: true,
+        showOverlayAlert: true,
+        overlayCustomText: '☄️ هجوم نيزك للمخربين!',
+        overlayCardImage: '/images/mcroyale/golem_pumpkin.png',
+        overlayColor: '#ff2a4a',
+        soundEffect: 'explosion',
+        addJudgeWin: false
+    },
+    {
+        id: 'trk_3',
+        enabled: true,
+        name: '🛡️ درع الحماية الأسطوري (دونات)',
+        triggerType: 'gift',
+        giftName: 'دونات',
+        giftNameEn: 'Doughnut',
+        giftImage: '/images/donut.png',
+        giftCoins: 30,
+        minRepeat: 1,
+        scoreboardAction: 'team_b_add',
+        scoreboardPoints: 3,
+        multiplyByRepeat: true,
+        showOverlayAlert: true,
+        overlayCustomText: '🛡️ درع حماية +3 نقاط للمساعدين!',
+        overlayCardImage: '/images/mcroyale/evoker_mage.png',
+        overlayColor: '#00f2fe',
+        soundEffect: 'victory',
+        addJudgeWin: false
+    },
+    {
+        id: 'trk_4',
+        enabled: true,
+        name: '💣 صاروخ عاصف (عطر)',
+        triggerType: 'gift',
+        giftName: 'عطر',
+        giftNameEn: 'Perfume',
+        giftImage: '/images/perfume.png',
+        giftCoins: 20,
+        minRepeat: 1,
+        scoreboardAction: 'team_a_add',
+        scoreboardPoints: 2,
+        multiplyByRepeat: true,
+        showOverlayAlert: true,
+        overlayCustomText: '💣 صاروخ هجومي +2 للمخربين!',
+        overlayCardImage: '/images/mcroyale/skeleton_cap.png',
+        overlayColor: '#ff0055',
+        soundEffect: 'explosion',
+        addJudgeWin: false
+    },
+    {
+        id: 'trk_5',
+        enabled: true,
+        name: '➕ متابعة جديدة في البث (Follow)',
+        triggerType: 'follow',
+        giftName: 'فولو (متابعة)',
+        giftNameEn: 'Follow',
+        giftImage: '/images/tiktok_follow.png',
+        giftCoins: 0,
+        minRepeat: 1,
+        scoreboardAction: 'none',
+        scoreboardPoints: 1,
+        multiplyByRepeat: false,
+        showOverlayAlert: true,
+        overlayCustomText: '👑 نورت البث بمتابعتك الأسطورية!',
+        overlayCardImage: '/images/mezotik-logo.png',
+        overlayColor: '#ffd700',
+        soundEffect: 'victory',
+        addJudgeWin: false
+    }
+];
+
+const TARKIBAT_PRESETS = {
+    helpers_vs_saboteurs: DEFAULT_TARKIBAT_ITEMS,
+    mcroyale_cards: [
+        {
+            id: 'trk_mc_1',
+            enabled: true,
+            name: '💀 إنزال سكلتون بعصابة (وردة)',
+            triggerType: 'gift',
+            giftName: 'وردة',
+            giftNameEn: 'Rose',
+            giftImage: '/images/rose.png',
+            giftCoins: 1,
+            minRepeat: 1,
+            scoreboardAction: 'team_a_add',
+            scoreboardPoints: 1,
+            multiplyByRepeat: true,
+            showOverlayAlert: true,
+            overlayCustomText: '💀 تم إنزال جندي سكلتون (X1)!',
+            overlayCardImage: '/images/mcroyale/skeleton_bandana.png',
+            overlayColor: '#ff2a4a',
+            soundEffect: 'score_up',
+            addJudgeWin: false
+        },
+        {
+            id: 'trk_mc_2',
+            enabled: true,
+            name: '🧙‍♂️ استدعاء ساحر إيفوكر (قلب)',
+            triggerType: 'gift',
+            giftName: 'قلب',
+            giftNameEn: 'Finger Heart',
+            giftImage: '/images/heart.png',
+            giftCoins: 5,
+            minRepeat: 1,
+            scoreboardAction: 'team_b_add',
+            scoreboardPoints: 1,
+            multiplyByRepeat: true,
+            showOverlayAlert: true,
+            overlayCustomText: '🧙‍♂️ ساحر إيفوكر دخل المعركة (X1)!',
+            overlayCardImage: '/images/mcroyale/evoker_mage.png',
+            overlayColor: '#00f2fe',
+            soundEffect: 'victory',
+            addJudgeWin: false
+        },
+        {
+            id: 'trk_mc_3',
+            enabled: true,
+            name: '🐗 هجوم راكب الخنزير (عطر)',
+            triggerType: 'gift',
+            giftName: 'عطر',
+            giftNameEn: 'Perfume',
+            giftImage: '/images/perfume.png',
+            giftCoins: 20,
+            minRepeat: 1,
+            scoreboardAction: 'team_a_add',
+            scoreboardPoints: 2,
+            multiplyByRepeat: true,
+            showOverlayAlert: true,
+            overlayCustomText: '🐗 هجوم راكب الخنزير بالمطرقة (X2)!',
+            overlayCardImage: '/images/mcroyale/hog_rider.png',
+            overlayColor: '#ff9900',
+            soundEffect: 'explosion',
+            addJudgeWin: false
+        },
+        {
+            id: 'trk_mc_4',
+            enabled: true,
+            name: '🎃 وحش الغولم العملاق (دونات)',
+            triggerType: 'gift',
+            giftName: 'دونات',
+            giftNameEn: 'Doughnut',
+            giftImage: '/images/donut.png',
+            giftCoins: 30,
+            minRepeat: 1,
+            scoreboardAction: 'team_b_add',
+            scoreboardPoints: 3,
+            multiplyByRepeat: true,
+            showOverlayAlert: true,
+            overlayCustomText: '🎃 وحش الغولم برأس اليقطين (X3)!',
+            overlayCardImage: '/images/mcroyale/golem_pumpkin.png',
+            overlayColor: '#a855f7',
+            soundEffect: 'victory',
+            addJudgeWin: false
+        }
+    ],
+    interactive_stream: [
+        {
+            id: 'trk_int_1',
+            enabled: true,
+            name: '🎁 أي هدية في البث (Wildcard)',
+            triggerType: 'gift',
+            giftName: 'أي هدية',
+            giftNameEn: 'Any Gift',
+            giftImage: '/images/rose.png',
+            giftCoins: 1,
+            minRepeat: 1,
+            scoreboardAction: 'team_b_add',
+            scoreboardPoints: 1,
+            multiplyByRepeat: true,
+            showOverlayAlert: true,
+            overlayCustomText: '🎁 شكراً على الهدية والدعم الأسطوري!',
+            overlayCardImage: '/images/mezotik-logo.png',
+            overlayColor: '#ffd700',
+            soundEffect: 'victory',
+            addJudgeWin: false
+        },
+        {
+            id: 'trk_int_2',
+            enabled: true,
+            name: '➕ متابع جديد للبث',
+            triggerType: 'follow',
+            giftName: 'فولو (متابعة)',
+            giftNameEn: 'Follow',
+            giftImage: '/images/tiktok_follow.png',
+            giftCoins: 0,
+            minRepeat: 1,
+            scoreboardAction: 'none',
+            scoreboardPoints: 1,
+            multiplyByRepeat: false,
+            showOverlayAlert: true,
+            overlayCustomText: '👑 أهلاً بك في جيش الأساطير!',
+            overlayCardImage: '/images/mezotik-logo.png',
+            overlayColor: '#22ff88',
+            soundEffect: 'score_up',
+            addJudgeWin: false
+        },
+        {
+            id: 'trk_int_3',
+            enabled: true,
+            name: '❤️ تكبيس لايكات البث',
+            triggerType: 'like',
+            giftName: 'تكبيس لايكات',
+            giftNameEn: 'Likes',
+            giftImage: '/images/tiktok_likes.png',
+            giftCoins: 0,
+            minRepeat: 50,
+            scoreboardAction: 'none',
+            scoreboardPoints: 1,
+            multiplyByRepeat: false,
+            showOverlayAlert: true,
+            overlayCustomText: '❤️ وحش التكبيس فجر الشاشة!',
+            overlayCardImage: '/images/tiktok_likes.png',
+            overlayColor: '#ff0055',
+            soundEffect: 'score_up',
+            addJudgeWin: false
+        }
+    ]
+};
+
+// Bilingual Arabic <-> English TikTok Gift Name Dictionary for 100% accurate live matching
+const GIFT_AR_EN_ALIASES = {
+    'وردة': ['rose', 'rosa', 'تيربو'],
+    'تيربو': ['rose', 'وردة'],
+    'قلب': ['finger heart', 'heart', 'heart me', 'hand heart', 'love'],
+    'دونات': ['doughnut', 'donut', 'بوابه', 'بوابة'],
+    'بوابه': ['doughnut', 'donut', 'دونات'],
+    'عطر': ['perfume', 'صاروخ'],
+    'صاروخ': ['perfume', 'rocket', 'عطر'],
+    'آيس كريم': ['ice cream', 'ice cream cone'],
+    'تيك توك': ['tiktok'],
+    'جلاكسي': ['galaxy'],
+    'أسد': ['lion'],
+    'مكوك فضائي': ['space shuttle', 'spaceship', 'interstellar', 'eb77ead5c3abb6da6034d3cf6cfeb438'],
+    'حمايه': ['shield', 'protection', 'e033c3f28632e233bebac1668ff66a2f'],
+    'نيزك': ['meteor', 'meteor shower', '81cb495abfe066981b9c135cfff21c7a'],
+    'تبطئ الاعبين': ['374dfe46d5b09ce1db19be06202d34f5'],
+    'اسرع لاعب': ['9f8bd92363c400c284179f6719b6ba9c'],
+    'نقل اسطوري': ['79a02148079526539f7599150da9fd28'],
+    'فوز': ['1d067d13988e8754ed6adbebd89b9ee8', 'gg', 'win']
+};
+
+function readTarkibatData() {
+    try {
+        if (fs.existsSync(TARKIBAT_FILE)) {
+            return JSON.parse(fs.readFileSync(TARKIBAT_FILE, 'utf8'));
+        }
+    } catch (e) {}
+    return {};
+}
+
+function writeTarkibatData(data) {
+    try {
+        fs.writeFileSync(TARKIBAT_FILE, JSON.stringify(data, null, 2), 'utf8');
+    } catch (e) {}
+}
+
+let tarkibatStore = readTarkibatData();
+const activeLiveConnections = new Map(); // uid -> { conn, state, watchdogTimer, events }
+
+function getTarkibatConfig(uid) {
+    const cleanUid = uid || 'default';
+    if (!tarkibatStore[cleanUid]) {
+        tarkibatStore[cleanUid] = {
+            tiktokUsername: 'mezo_1st',
+            autoWatchdog: false,
+            overlayStyle: {
+                theme: 'royal_purple',
+                position: 'top-center',
+                alertDuration: 5,
+                soundEnabled: true,
+                showDonorAvatar: true,
+                showGiftCoins: true,
+                scale: 100
+            },
+            items: JSON.parse(JSON.stringify(DEFAULT_TARKIBAT_ITEMS))
+        };
+        writeTarkibatData(tarkibatStore);
+    }
+    return tarkibatStore[cleanUid];
+}
+
+function normalizeTikTokUsername(input) {
+    if (!input) return '';
+    let str = String(input).trim();
+    const urlMatch = str.match(/tiktok\.com\/@([a-zA-Z0-9_.-]+)/i);
+    if (urlMatch && urlMatch[1]) {
+        return urlMatch[1].toLowerCase();
+    }
+    return str.replace(/^@+/, '').split('/')[0].split('?')[0].trim().toLowerCase();
+}
+
+function getLiveSessionRecord(uid) {
+    const cleanUid = uid || 'default';
+    if (!activeLiveConnections.has(cleanUid)) {
+        activeLiveConnections.set(cleanUid, {
+            conn: null,
+            watchdogTimer: null,
+            state: {
+                username: getTarkibatConfig(cleanUid).tiktokUsername || 'mezo_1st',
+                isLive: false,
+                isConnected: false,
+                isConnecting: false,
+                watchdogActive: false,
+                roomId: null,
+                viewerCount: 0,
+                totalGiftsReceived: 0,
+                totalDiamondsReceived: 0,
+                totalLikesReceived: 0,
+                liveTitle: '',
+                profile: null,
+                lastCheckedAt: null,
+                statusMessage: 'غير متصل حالياً — أدخل يوزر التيك توك واضغط فحص أو Connect'
+            },
+            events: []
+        });
+    }
+    return activeLiveConnections.get(cleanUid);
+}
+
+function buildPublicLiveState(uid) {
+    const rec = getLiveSessionRecord(uid);
+    return {
+        ...rec.state,
+        events: rec.events.slice(0, 35)
+    };
+}
+
+function pushLiveEventLog(uid, evt) {
+    const rec = getLiveSessionRecord(uid);
+    const entry = {
+        id: 'evt_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+        time: new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+        ...evt
+    };
+    rec.events.unshift(entry);
+    if (rec.events.length > 50) rec.events.length = 50;
+    io.emit('tarkibat_live_event', { uid, event: entry, state: buildPublicLiveState(uid) });
+    return entry;
+}
+
+async function checkTikTokUserLiveStatus(rawUsername) {
+    const username = normalizeTikTokUsername(rawUsername);
+    if (!username) {
+        throw new Error('يرجى إدخال يوزر تيك توك صحيح');
+    }
+
+    const conn = new TikTokLiveConnection(username, {
+        processInitialData: true,
+        fetchRoomInfoOnConnect: true,
+        enableExtendedGiftInfo: true
+    });
+
+    const [isLiveResult, profileResult] = await Promise.allSettled([
+        conn.fetchIsLive(),
+        fetchTikTokUserProfile(username)
+    ]);
+
+    const isLive = isLiveResult.status === 'fulfilled' ? Boolean(isLiveResult.value) : false;
+    const profile = profileResult.status === 'fulfilled' && profileResult.value
+        ? profileResult.value
+        : {
+            username,
+            nickname: username,
+            avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(username)}`,
+            followers: 0,
+            likes: 0
+        };
+
+    let roomId = conn.roomId || null;
+    let viewerCount = 0;
+    let liveTitle = '';
+
+    if (isLive) {
+        try {
+            if (!roomId) roomId = await conn.fetchRoomId();
+            const roomInfo = await conn.fetchRoomInfo(roomId);
+            const rData = roomInfo?.data || roomInfo || {};
+            viewerCount = Number(rData.user_count || rData.stats?.total_user || 0);
+            liveTitle = rData.title || '';
+        } catch (e) {}
+    }
+
+    return {
+        username,
+        isLive,
+        roomId: roomId ? String(roomId) : null,
+        viewerCount,
+        liveTitle,
+        profile,
+        checkedAt: new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+    };
+}
+
+function doesItemMatchGift(item, giftData) {
+    if (!item || !item.enabled || item.triggerType !== 'gift') return false;
+    const targetName = String(item.giftName || '').trim().toLowerCase();
+    const targetNameEn = String(item.giftNameEn || '').trim().toLowerCase();
+    const incomingName = String(giftData.giftName || '').trim().toLowerCase();
+    const incomingImg = String(giftData.giftImage || '').toLowerCase();
+    const itemImg = String(item.giftImage || '').toLowerCase();
+
+    if ((giftData.repeatCount || 1) < (parseInt(item.minRepeat, 10) || 1)) return false;
+
+    // 1. Wildcard: "أي هدية" / "Any Gift"
+    if (targetName === 'أي هدية' || targetName === 'اي هدية' || targetName === 'any gift' || targetName === '*') {
+        return (giftData.diamondCount || 1) >= (parseInt(item.giftCoins, 10) || 1);
+    }
+
+    // 2. Direct name match (Arabic or English)
+    if (targetName && incomingName && (incomingName === targetName || incomingName.includes(targetName) || targetName.includes(incomingName))) {
+        return true;
+    }
+    if (targetNameEn && incomingName && (incomingName === targetNameEn || incomingName.includes(targetNameEn))) {
+        return true;
+    }
+
+    // 3. Alias dictionary match
+    const aliases = GIFT_AR_EN_ALIASES[item.giftName?.trim()] || [];
+    for (const al of aliases) {
+        const cleanAl = al.toLowerCase();
+        if (incomingName === cleanAl || incomingName.includes(cleanAl) || incomingImg.includes(cleanAl)) {
+            return true;
+        }
+    }
+
+    // 4. Image filename/hash match (e.g. tplv-obj hash or rose.png)
+    const hashMatch = itemImg.match(/([a-f0-9]{24,36})/i);
+    if (hashMatch && incomingImg.includes(hashMatch[1].toLowerCase())) {
+        return true;
+    }
+
+    return false;
+}
+
+function executeTarkibaItemActions(uid, item, eventMeta) {
+    let scoreImpactText = '';
+    const repeatCount = Math.max(1, parseInt(eventMeta.repeatCount, 10) || 1);
+    const basePoints = Math.max(1, parseInt(item.scoreboardPoints, 10) || 1);
+    const totalPoints = item.multiplyByRepeat !== false ? (basePoints * repeatCount) : basePoints;
+
+    // 1. Scoreboard Action
+    if (item.scoreboardAction && item.scoreboardAction !== 'none') {
+        let team = 'a';
+        let delta = totalPoints;
+        if (item.scoreboardAction === 'team_a_add') { team = 'a'; delta = totalPoints; }
+        else if (item.scoreboardAction === 'team_b_add') { team = 'b'; delta = totalPoints; }
+        else if (item.scoreboardAction === 'team_a_sub') { team = 'a'; delta = -totalPoints; }
+        else if (item.scoreboardAction === 'team_b_sub') { team = 'b'; delta = -totalPoints; }
+
+        const updatedBoard = db.adjustScore(uid, team, delta);
+        io.emit('scoreboard_update', updatedBoard);
+        const teamLabel = team === 'a' ? (updatedBoard.team_a_name || 'الفريق 1') : (updatedBoard.team_b_name || 'الفريق 2');
+        scoreImpactText = `${delta > 0 ? '+' + delta : delta} لـ ${teamLabel}`;
+    }
+
+    // 2. Judges Challenge Win Action
+    if (item.addJudgeWin) {
+        const activeJ = getRaceActiveJudge();
+        if (activeJ) {
+            activeJ.wins = (activeJ.wins || 0) + 1;
+            saveRaceState();
+            io.emit('race_state_update', {
+                title: raceState.title || 'صراع الحكام',
+                activeJudge: getRaceActiveJudge(),
+                leaderboard: getRaceLeaderboard(),
+                settings: raceState.settings,
+                history: (raceState.history || []).slice(0, 30)
+            });
+        }
+    }
+
+    // 3. Emit Overlay Alert to tarkibat-overlay.html
+    if (item.showOverlayAlert !== false) {
+        io.emit('tarkibat_alert', {
+            uid,
+            tarkibaId: item.id,
+            tarkibaName: item.name,
+            username: eventMeta.username || 'viewer',
+            nickname: eventMeta.nickname || eventMeta.username || 'داعم البث',
+            avatar: eventMeta.avatar || '/images/mezotik-logo.png',
+            giftName: eventMeta.giftName || item.giftName || 'هدية',
+            giftImage: eventMeta.giftImage || item.giftImage || '/images/rose.png',
+            overlayCardImage: item.overlayCardImage || eventMeta.giftImage || item.giftImage || '/images/rose.png',
+            actionText: item.overlayCustomText || item.name,
+            scoreImpactText,
+            repeatCount,
+            color: item.overlayColor || '#a855f7',
+            soundEffect: item.soundEffect || 'victory'
+        });
+    }
+
+    return scoreImpactText;
+}
+
+function extractEventUser(data) {
+    const u = data?.user || data || {};
+    const username = u.uniqueId || u.displayId || data?.uniqueId || 'viewer';
+    const nickname = u.nickname || data?.nickname || username;
+    const avatar =
+        u.profilePicture?.url?.[0] ||
+        u.profilePicture?.urls?.[0] ||
+        u.avatarThumb?.urlList?.[0] ||
+        data?.profilePictureUrl ||
+        `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(username)}`;
+    return { username, nickname, avatar };
+}
+
+async function connectTarkibatToTikTokLive(uid, rawUsername, autoWatchdog = false) {
+    const cleanUid = uid || 'default';
+    const rec = getLiveSessionRecord(cleanUid);
+    const config = getTarkibatConfig(cleanUid);
+    const username = normalizeTikTokUsername(rawUsername || config.tiktokUsername || 'mezo_1st');
+
+    config.tiktokUsername = username;
+    config.autoWatchdog = Boolean(autoWatchdog);
+    writeTarkibatData(tarkibatStore);
+
+    // Disconnect previous connection if any
+    if (rec.conn) {
+        try { await rec.conn.disconnect(); } catch (e) {}
+        rec.conn = null;
+    }
+    if (rec.watchdogTimer) {
+        clearInterval(rec.watchdogTimer);
+        rec.watchdogTimer = null;
+    }
+
+    rec.state.username = username;
+    rec.state.isConnecting = true;
+    rec.state.watchdogActive = Boolean(autoWatchdog);
+    rec.state.statusMessage = `⏳ جاري فحص حالة البث المباشر لحساب @${username}...`;
+    io.emit('tarkibat_status_update', { uid: cleanUid, state: buildPublicLiveState(cleanUid) });
+
+    const checkResult = await checkTikTokUserLiveStatus(username);
+    rec.state.profile = checkResult.profile;
+    rec.state.isLive = checkResult.isLive;
+    rec.state.roomId = checkResult.roomId;
+    rec.state.viewerCount = checkResult.viewerCount;
+    rec.state.liveTitle = checkResult.liveTitle;
+    rec.state.lastCheckedAt = checkResult.checkedAt;
+
+    if (!checkResult.isLive) {
+        rec.state.isConnecting = false;
+        rec.state.isConnected = false;
+        rec.state.statusMessage = autoWatchdog
+            ? `🔴 الحساب @${username} غير فاتح لايف حالياً — المراقب التلقائي مفعل وسيتصل فور فتح اللايف!`
+            : `🔴 الحساب @${username} غير فاتح لايف حالياً على تيك توك (Offline)`;
+
+        if (autoWatchdog) {
+            rec.watchdogTimer = setInterval(async () => {
+                try {
+                    const st = await checkTikTokUserLiveStatus(username);
+                    rec.state.lastCheckedAt = st.checkedAt;
+                    if (st.isLive && !rec.state.isConnected && !rec.state.isConnecting) {
+                        clearInterval(rec.watchdogTimer);
+                        rec.watchdogTimer = null;
+                        await connectTarkibatToTikTokLive(cleanUid, username, true);
+                    }
+                } catch (e) {}
+            }, 20000);
+        }
+
+        io.emit('tarkibat_status_update', { uid: cleanUid, state: buildPublicLiveState(cleanUid) });
+        return {
+            isLive: false,
+            connected: false,
+            state: buildPublicLiveState(cleanUid)
+        };
+    }
+
+    // Streamer IS LIVE! Establish real-time WebSocket connection
+    const liveConn = new TikTokLiveConnection(username, {
+        processInitialData: true,
+        fetchRoomInfoOnConnect: true,
+        enableExtendedGiftInfo: true
+    });
+    rec.conn = liveConn;
+
+    try {
+        const connState = await liveConn.connect();
+        rec.state.isConnecting = false;
+        rec.state.isConnected = true;
+        rec.state.isLive = true;
+        rec.state.roomId = String(connState?.roomId || liveConn.roomId || checkResult.roomId || '');
+        rec.state.statusMessage = `🟢 متصل الآن باللايف المباشر لحساب @${username} (Room: ${rec.state.roomId})`;
+
+        pushLiveEventLog(cleanUid, {
+            type: 'system',
+            title: `🟢 تم الاتصال ببث @${username} المباشر بنجاح!`,
+            subtitle: `رقم غرفة اللايف: ${rec.state.roomId}`
+        });
+
+        // 1. GIFT EVENT
+        liveConn.on('gift', (data) => {
+            try {
+                const giftType = Number(data?.giftDetails?.giftType ?? data?.gift?.giftType ?? data?.giftType ?? 0);
+                const repeatEnd = Boolean(data?.repeatEnd);
+                // Wait for combo streak end on streakable gifts (giftType === 1) so we don't double-count
+                if (giftType === 1 && !repeatEnd) return;
+
+                const user = extractEventUser(data);
+                const giftName =
+                    data?.giftDetails?.giftName ||
+                    data?.extendedGiftInfo?.name ||
+                    data?.gift?.name ||
+                    data?.giftName ||
+                    data?.describe ||
+                    'Gift';
+                const repeatCount = Math.max(1, Number(data?.repeatCount || data?.comboCount || 1));
+                const diamondCount = Math.max(1, Number(
+                    data?.giftDetails?.diamondCount ||
+                    data?.extendedGiftInfo?.diamond_count ||
+                    data?.gift?.diamondCount ||
+                    data?.diamondCount ||
+                    1
+                ));
+                const giftImage =
+                    data?.giftDetails?.giftImage?.url?.[0] ||
+                    data?.extendedGiftInfo?.image?.url_list?.[0] ||
+                    data?.gift?.icon?.urlList?.[0] ||
+                    data?.giftPictureUrl ||
+                    '/images/rose.png';
+
+                rec.state.totalGiftsReceived += repeatCount;
+                rec.state.totalDiamondsReceived += (diamondCount * repeatCount);
+
+                const cfg = getTarkibatConfig(cleanUid);
+                const matchedNames = [];
+                (cfg.items || []).forEach(item => {
+                    if (doesItemMatchGift(item, { giftName, giftImage, repeatCount, diamondCount })) {
+                        const impact = executeTarkibaItemActions(cleanUid, item, {
+                            ...user,
+                            giftName,
+                            giftImage,
+                            repeatCount,
+                            diamondCount
+                        });
+                        matchedNames.push(`${item.name}${impact ? ' (' + impact + ')' : ''}`);
+                    }
+                });
+
+                pushLiveEventLog(cleanUid, {
+                    type: 'gift',
+                    username: user.username,
+                    nickname: user.nickname,
+                    avatar: user.avatar,
+                    giftName,
+                    giftImage,
+                    repeatCount,
+                    diamondCount,
+                    triggeredText: matchedNames.length > 0 ? `⚡ تفعيل: ${matchedNames.join(' + ')}` : 'بدون تركيبة مربوطة'
+                });
+            } catch (e) {}
+        });
+
+        // 2. FOLLOW EVENT
+        liveConn.on('follow', (data) => {
+            try {
+                const user = extractEventUser(data);
+                const cfg = getTarkibatConfig(cleanUid);
+                const matchedNames = [];
+                (cfg.items || []).forEach(item => {
+                    if (item.enabled && item.triggerType === 'follow') {
+                        const impact = executeTarkibaItemActions(cleanUid, item, {
+                            ...user,
+                            giftName: 'متابعة جديدة (Follow)',
+                            giftImage: '/images/tiktok_follow.png',
+                            repeatCount: 1
+                        });
+                        matchedNames.push(`${item.name}${impact ? ' (' + impact + ')' : ''}`);
+                    }
+                });
+                pushLiveEventLog(cleanUid, {
+                    type: 'follow',
+                    username: user.username,
+                    nickname: user.nickname,
+                    avatar: user.avatar,
+                    giftName: 'متابعة جديدة ➕',
+                    giftImage: '/images/tiktok_follow.png',
+                    repeatCount: 1,
+                    triggeredText: matchedNames.length > 0 ? `⚡ تفعيل: ${matchedNames.join(' + ')}` : ''
+                });
+            } catch (e) {}
+        });
+
+        // 3. LIKE EVENT
+        liveConn.on('like', (data) => {
+            try {
+                const user = extractEventUser(data);
+                const likeCount = Math.max(1, Number(data?.likeCount || 15));
+                rec.state.totalLikesReceived += likeCount;
+                const cfg = getTarkibatConfig(cleanUid);
+                (cfg.items || []).forEach(item => {
+                    if (item.enabled && item.triggerType === 'like' && likeCount >= (parseInt(item.minRepeat, 10) || 1)) {
+                        executeTarkibaItemActions(cleanUid, item, {
+                            ...user,
+                            giftName: `تكبيس (${likeCount} ❤️)`,
+                            giftImage: '/images/tiktok_likes.png',
+                            repeatCount: likeCount
+                        });
+                    }
+                });
+            } catch (e) {}
+        });
+
+        // 4. SHARE EVENT
+        liveConn.on('share', (data) => {
+            try {
+                const user = extractEventUser(data);
+                const cfg = getTarkibatConfig(cleanUid);
+                (cfg.items || []).forEach(item => {
+                    if (item.enabled && item.triggerType === 'share') {
+                        executeTarkibaItemActions(cleanUid, item, {
+                            ...user,
+                            giftName: 'مشاركة البث 🔄',
+                            giftImage: '/images/mezotik-logo.png',
+                            repeatCount: 1
+                        });
+                    }
+                });
+            } catch (e) {}
+        });
+
+        // 5. CHAT EVENT
+        liveConn.on('chat', (data) => {
+            try {
+                const user = extractEventUser(data);
+                const comment = String(data?.comment || '').trim();
+                if (!comment) return;
+                const cfg = getTarkibatConfig(cleanUid);
+                (cfg.items || []).forEach(item => {
+                    if (item.enabled && item.triggerType === 'chat' && item.chatKeyword) {
+                        if (comment.toLowerCase().includes(String(item.chatKeyword).trim().toLowerCase())) {
+                            executeTarkibaItemActions(cleanUid, item, {
+                                ...user,
+                                giftName: `تعليق: ${comment}`,
+                                giftImage: '/images/mezotik-logo.png',
+                                repeatCount: 1
+                            });
+                        }
+                    }
+                });
+            } catch (e) {}
+        });
+
+        // 6. ROOM VIEWER COUNT
+        liveConn.on('roomUser', (data) => {
+            if (data && data.viewerCount !== undefined) {
+                rec.state.viewerCount = Number(data.viewerCount) || 0;
+                io.emit('tarkibat_status_update', { uid: cleanUid, state: buildPublicLiveState(cleanUid) });
+            }
+        });
+
+        // 7. STREAM END / DISCONNECT
+        liveConn.on('streamEnd', () => {
+            rec.state.isLive = false;
+            rec.state.isConnected = false;
+            rec.state.statusMessage = `🔴 انتهى البث المباشر لحساب @${username}`;
+            io.emit('tarkibat_status_update', { uid: cleanUid, state: buildPublicLiveState(cleanUid) });
+        });
+
+        liveConn.on('disconnected', () => {
+            rec.state.isConnected = false;
+            rec.state.statusMessage = `⚠️ انقطع الاتصال باللايف لحساب @${username}`;
+            io.emit('tarkibat_status_update', { uid: cleanUid, state: buildPublicLiveState(cleanUid) });
+        });
+
+        liveConn.on('error', () => {});
+
+        io.emit('tarkibat_status_update', { uid: cleanUid, state: buildPublicLiveState(cleanUid) });
+        return {
+            isLive: true,
+            connected: true,
+            state: buildPublicLiveState(cleanUid)
+        };
+    } catch (err) {
+        rec.state.isConnecting = false;
+        rec.state.isConnected = false;
+        rec.state.statusMessage = `⚠️ تعذر الاتصال بغرفة اللايف: ${err.message || 'الحساب غير فاتح لايف'}`;
+        io.emit('tarkibat_status_update', { uid: cleanUid, state: buildPublicLiveState(cleanUid) });
+        return {
+            isLive: checkResult.isLive,
+            connected: false,
+            error: err.message,
+            state: buildPublicLiveState(cleanUid)
+        };
+    }
+}
+
+// 1. Get Tarkibat Config & Live State
+app.get('/api/tarkibat/:uid', (req, res) => {
+    const uid = req.params.uid || 'default';
+    ensureEncryptedBoardDataMigrated(uid);
+    const config = getTarkibatConfig(uid);
+    const liveState = buildPublicLiveState(uid);
+    res.json({
+        success: true,
+        config,
+        liveState
+    });
+});
+
+// 2. Check if TikTok User is LIVE right now (using tiktok-live-connector fetchIsLive)
+app.post('/api/tarkibat/:uid/check-live', async (req, res) => {
+    const uid = req.params.uid || 'default';
+    const rawUsername = req.body.username || getTarkibatConfig(uid).tiktokUsername || 'mezo_1st';
+    try {
+        const result = await checkTikTokUserLiveStatus(rawUsername);
+        const rec = getLiveSessionRecord(uid);
+        const cfg = getTarkibatConfig(uid);
+        cfg.tiktokUsername = result.username;
+        writeTarkibatData(tarkibatStore);
+
+        rec.state.username = result.username;
+        rec.state.isLive = result.isLive;
+        rec.state.roomId = result.roomId;
+        rec.state.viewerCount = result.viewerCount;
+        rec.state.liveTitle = result.liveTitle;
+        rec.state.profile = result.profile;
+        rec.state.lastCheckedAt = result.checkedAt;
+        rec.state.statusMessage = result.isLive
+            ? `🟢 الحساب @${result.username} فاتح لايف الآن على تيك توك! (Room ID: ${result.roomId || 'نشط'})`
+            : `🔴 الحساب @${result.username} قافل (غير فاتح لايف حالياً على تيك توك)`;
+
+        io.emit('tarkibat_status_update', { uid, state: buildPublicLiveState(uid) });
+        res.json({
+            success: true,
+            ...result,
+            liveState: buildPublicLiveState(uid)
+        });
+    } catch (err) {
+        res.status(400).json({ success: false, error: err.message || 'فشل فحص حالة اللايف' });
+    }
+});
+
+// 3. Connect to TikTok Live Stream (checks isLive first + connects WebSocket)
+app.post('/api/tarkibat/:uid/connect', async (req, res) => {
+    const uid = req.params.uid || 'default';
+    const { username, autoWatchdog } = req.body;
+    try {
+        const outcome = await connectTarkibatToTikTokLive(uid, username, autoWatchdog);
+        res.json({
+            success: true,
+            ...outcome
+        });
+    } catch (err) {
+        res.status(400).json({ success: false, error: err.message || 'تعذر الاتصال باللايف' });
+    }
+});
+
+// 4. Disconnect from TikTok Live Stream
+app.post('/api/tarkibat/:uid/disconnect', async (req, res) => {
+    const uid = req.params.uid || 'default';
+    const rec = getLiveSessionRecord(uid);
+    if (rec.watchdogTimer) {
+        clearInterval(rec.watchdogTimer);
+        rec.watchdogTimer = null;
+    }
+    if (rec.conn) {
+        try { await rec.conn.disconnect(); } catch (e) {}
+        rec.conn = null;
+    }
+    rec.state.isConnected = false;
+    rec.state.isConnecting = false;
+    rec.state.watchdogActive = false;
+    rec.state.statusMessage = '⚪ تم قطع الاتصال باللايف يدوياً';
+    io.emit('tarkibat_status_update', { uid, state: buildPublicLiveState(uid) });
+    res.json({ success: true, liveState: buildPublicLiveState(uid) });
+});
+
+// 5. Save Tarkibat Config (items & overlayStyle)
+app.post('/api/tarkibat/:uid/save', (req, res) => {
+    const uid = req.params.uid || 'default';
+    const cfg = getTarkibatConfig(uid);
+    if (req.body.tiktokUsername !== undefined) {
+        cfg.tiktokUsername = normalizeTikTokUsername(req.body.tiktokUsername) || cfg.tiktokUsername;
+    }
+    if (req.body.overlayStyle) {
+        cfg.overlayStyle = { ...cfg.overlayStyle, ...req.body.overlayStyle };
+    }
+    if (Array.isArray(req.body.items)) {
+        cfg.items = req.body.items;
+    }
+    writeTarkibatData(tarkibatStore);
+    io.emit('tarkibat_config_update', { uid, config: cfg });
+    res.json({ success: true, config: cfg });
+});
+
+// 6. Load Ready-Made Tarkibat Preset
+app.post('/api/tarkibat/:uid/preset', (req, res) => {
+    const uid = req.params.uid || 'default';
+    const presetKey = req.body.preset || 'helpers_vs_saboteurs';
+    const presetItems = TARKIBAT_PRESETS[presetKey] || DEFAULT_TARKIBAT_ITEMS;
+    const cfg = getTarkibatConfig(uid);
+    cfg.items = JSON.parse(JSON.stringify(presetItems));
+    writeTarkibatData(tarkibatStore);
+    io.emit('tarkibat_config_update', { uid, config: cfg });
+    res.json({ success: true, config: cfg });
+});
+
+// 7. Test / Simulate a Tarkiba Item Immediately (Works Online or Offline)
+app.post('/api/tarkibat/:uid/test-trigger', (req, res) => {
+    const uid = req.params.uid || 'default';
+    const cfg = getTarkibatConfig(uid);
+    const { itemId, customRepeat } = req.body;
+    const item = (cfg.items || []).find(x => x.id === itemId) || (cfg.items || [])[0];
+    if (!item) {
+        return res.status(404).json({ success: false, error: 'لم يتم العثور على التركيبة' });
+    }
+
+    const repeatCount = Math.max(1, parseInt(customRepeat, 10) || 1);
+    const rec = getLiveSessionRecord(uid);
+    const donorProfile = rec.state.profile || {
+        username: cfg.tiktokUsername || 'mezo_1st',
+        nickname: 'MEZO 1ST (تجربة) 🔥',
+        avatar: '/images/mezotik-logo.png'
+    };
+
+    const impact = executeTarkibaItemActions(uid, item, {
+        username: donorProfile.username,
+        nickname: donorProfile.nickname,
+        avatar: donorProfile.avatar,
+        giftName: item.giftName || 'هدية تجريبية',
+        giftImage: item.giftImage || '/images/rose.png',
+        repeatCount,
+        diamondCount: item.giftCoins || 1
+    });
+
+    const evt = pushLiveEventLog(uid, {
+        type: 'test',
+        username: donorProfile.username,
+        nickname: donorProfile.nickname,
+        avatar: donorProfile.avatar,
+        giftName: `${item.giftName} (تجربة 🧪)`,
+        giftImage: item.giftImage || '/images/rose.png',
+        repeatCount,
+        diamondCount: item.giftCoins || 1,
+        triggeredText: `⚡ تم تنفيذ: ${item.name}${impact ? ' (' + impact + ')' : ''}`
+    });
+
+    res.json({
+        success: true,
+        impact,
+        event: evt
+    });
 });
 
 // Socket.io Connection & Event Forwarding

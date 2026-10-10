@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEZO TIK - أوفرلاي التركيبات المباشر (Tarkibat Live Overlay)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Tajawal:wght@700;800;900&family=Changa:wght@800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: transparent !important;
+            font-family: 'Cairo', 'Tajawal', sans-serif;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #stageWrapper {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 36px;
+            z-index: 100;
+        }
+
+        #stageWrapper.pos-top-center { justify-content: flex-start; align-items: center; }
+        #stageWrapper.pos-center { justify-content: center; align-items: center; }
+        #stageWrapper.pos-bottom-center { justify-content: flex-end; align-items: center; }
+        #stageWrapper.pos-top-right { justify-content: flex-start; align-items: flex-end; }
+        #stageWrapper.pos-top-left { justify-content: flex-start; align-items: flex-start; }
+
+        /* Main Alert Banner */
+        .tarkiba-alert-card {
+            position: relative;
+            min-width: 440px;
+            max-width: 680px;
+            background: linear-gradient(135deg, rgba(15, 10, 30, 0.95), rgba(8, 12, 26, 0.96));
+            border: 2.5px solid var(--accent-color, #a855f7);
+            border-radius: 26px;
+            padding: 18px 26px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow:
+                0 20px 50px rgba(0, 0, 0, 0.92),
+                0 0 38px var(--accent-glow, rgba(168, 85, 247, 0.65)),
+                inset 0 0 24px rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(18px);
+            transform: scale(0.5) translateY(-40px);
+            opacity: 0;
+            transition: all 0.42s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+            overflow: hidden;
+        }
+
+        .tarkiba-alert-card.show {
+            transform: scale(var(--overlay-scale, 1)) translateY(0);
+            opacity: 1;
+        }
+
+        .tarkiba-alert-card.hide {
+            transform: scale(0.8) translateY(30px);
+            opacity: 0;
+        }
+
+        /* Animated scanning shine bar */
+        .tarkiba-alert-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -120%;
+            width: 80%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.14), transparent);
+            transform: skewX(-25deg);
+            animation: shineSweep 2.6s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes shineSweep {
+            0% { left: -120%; }
+            65%, 100% { left: 160%; }
+        }
+
+        /* Donor Avatar + Gift Visual Stack */
+        .visual-stack {
+            position: relative;
+            width: 88px;
+            height: 88px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .donor-avatar {
+            width: 82px;
+            height: 82px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--accent-color, #ffd700);
+            box-shadow: 0 0 22px var(--accent-glow, rgba(255, 215, 0, 0.7));
+            background: #121024;
+        }
+
+        .gift-floating-badge {
+            position: absolute;
+            bottom: -6px;
+            left: -8px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #1e1538, #090614);
+            border: 2px solid #ffd700;
+            box-shadow: 0 0 14px rgba(255, 215, 0, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulseBounce 1.2s infinite alternate ease-in-out;
+        }
+
+        .gift-floating-badge img {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+        }
+
+        @keyframes pulseBounce {
+            0% { transform: scale(0.95) rotate(-5deg); }
+            100% { transform: scale(1.12) rotate(5deg); }
+        }
+
+        .alert-body {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .alert-top-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .donor-name {
+            font-size: 20px;
+            font-weight: 900;
+            color: #ffffff;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 280px;
+        }
+
+        .repeat-pill {
+            font-family: 'Changa', sans-serif;
+            font-size: 16px;
+            font-weight: 900;
+            padding: 2px 11px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #ffd700, #ff8800);
+            color: #000;
+            box-shadow: 0 0 14px rgba(255, 215, 0, 0.8);
+            direction: ltr;
+        }
+
+        .tarkiba-action-title {
+            font-size: 25px;
+            font-weight: 900;
+            color: var(--accent-color, #22ff88);
+            text-shadow:
+                0 0 16px var(--accent-glow, rgba(34, 255, 136, 0.8)),
+                0 3px 6px #000;
+            line-height: 1.25;
+        }
+
+        .tarkiba-sub-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            font-weight: 800;
+            color: #cbd5e1;
+        }
+
+        .score-impact-tag {
+            padding: 2px 10px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--accent-color, #22ff88);
+            color: #fff;
+            font-weight: 900;
+        }
+
+        .big-gift-showcase {
+            width: 78px;
+            height: 78px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.12), transparent 70%);
+            border-radius: 18px;
+        }
+
+        .big-gift-showcase img {
+            width: 68px;
+            height: 68px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 14px var(--accent-color, #a855f7));
+            animation: floatGift 1.8s ease-in-out infinite alternate;
+        }
+
+        @keyframes floatGift {
+            0% { transform: translateY(-4px) scale(0.96); }
+            100% { transform: translateY(4px) scale(1.06); }
+        }
+    </style>
+</head>
+<body>
+    <div id="stageWrapper" class="pos-top-center">
+        <div id="alertContainer"></div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const currentUid = params.get('uid') || params.get('id') || 'default';
+        const isPreview = params.get('preview') === '1';
+
+        let overlayConfig = {
+            theme: 'royal_purple',
+            position: 'top-center',
+            alertDuration: 5,
+            soundEnabled: true,
+            showDonorAvatar: true,
+            showGiftCoins: true,
+            scale: 100
+        };
+
+        const alertQueue = [];
+        let isShowingAlert = false;
+        let audioCtx = null;
+
+        function applyOverlayStyle(style = {}) {
+            overlayConfig = { ...overlayConfig, ...style };
+            const stage = document.getElementById('stageWrapper');
+            if (stage) {
+                stage.className = `pos-${overlayConfig.position || 'top-center'}`;
+            }
+            const scaleNum = (parseInt(overlayConfig.scale, 10) || 100) / 100;
+            document.documentElement.style.setProperty('--overlay-scale', scaleNum);
+        }
+
+        function playAlertSound(soundType = 'victory') {
+            if (overlayConfig.soundEnabled === false || soundType === 'none') return;
+            try {
+                if (soundType === 'score_up' || soundType === 'score_down') {
+                    const snd = new Audio(soundType === 'score_up' ? '/sounds/score_up.wav' : '/sounds/score_down.wav');
+                    snd.volume = 0.85;
+                    snd.play().catch(() => playSynthAlert(soundType));
+                    return;
+                }
+            } catch (e) {}
+            playSynthAlert(soundType);
+        }
+
+        function playSynthAlert(type = 'victory') {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                if (!audioCtx) audioCtx = new AudioContext();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+
+                const notes = type === 'explosion'
+                    ? [220, 196, 146.83, 110]
+                    : [523.25, 659.25, 783.99, 1046.50];
+
+                notes.forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = type === 'explosion' ? 'sawtooth' : 'triangle';
+                    osc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.09);
+                    gain.gain.setValueAtTime(0, audioCtx.currentTime + idx * 0.09);
+                    gain.gain.linearRampToValueAtTime(0.28, audioCtx.currentTime + idx * 0.09 + 0.04);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + idx * 0.09 + 0.48);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(audioCtx.currentTime + idx * 0.09);
+                    osc.stop(audioCtx.currentTime + idx * 0.09 + 0.5);
+                });
+            } catch (e) {}
+        }
+
+        function enqueueAlert(payload) {
+            if (!payload) return;
+            alertQueue.push(payload);
+            processQueue();
+        }
+
+        function processQueue() {
+            if (isShowingAlert || alertQueue.length === 0) return;
+            isShowingAlert = true;
+            const item = alertQueue.shift();
+            renderAlertCard(item);
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function renderAlertCard(alertData) {
+            const container = document.getElementById('alertContainer');
+            if (!container) {
+                isShowingAlert = false;
+                return;
+            }
+
+            const accent = alertData.color || '#a855f7';
+            const donorName = alertData.nickname || alertData.username || 'داعم البث';
+            const donorAvatar = alertData.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(donorName)}`;
+            const giftImg = alertData.giftImage || '/images/rose.png';
+            const cardImg = alertData.overlayCardImage || giftImg;
+            const actionText = alertData.actionText || alertData.tarkibaName || `🎁 ${alertData.giftName || 'هدية تيك توك'}`;
+            const repeatCount = parseInt(alertData.repeatCount, 10) || 1;
+            const scoreBadge = alertData.scoreImpactText || '';
+
+            playAlertSound(alertData.soundEffect || 'victory');
+
+            const card = document.createElement('div');
+            card.className = 'tarkiba-alert-card';
+            card.style.setProperty('--accent-color', accent);
+            card.style.setProperty('--accent-glow', `${accent}99`);
+
+            card.innerHTML = `
+                ${overlayConfig.showDonorAvatar !== false ? `
+                <div class="visual-stack">
+                    <img class="donor-avatar" src="${escapeHtml(donorAvatar)}" alt="Donor" onerror="this.src='/images/mezotik-logo.png'">
+                    <div class="gift-floating-badge">
+                        <img src="${escapeHtml(giftImg)}" alt="Gift" onerror="this.src='/images/rose.png'">
+                    </div>
+                </div>
+                ` : ''}
+                <div class="alert-body">
+                    <div class="alert-top-row">
+                        <span class="donor-name">👑 ${escapeHtml(donorName)}</span>
+                        ${repeatCount > 1 ? `<span class="repeat-pill">x${repeatCount} COMBO</span>` : ''}
+                    </div>
+                    <div class="tarkiba-action-title">${escapeHtml(actionText)}</div>
+                    <div class="tarkiba-sub-meta">
+                        <span>🎁 ${escapeHtml(alertData.giftName || 'تفاعل مباشر')}</span>
+                        ${scoreBadge ? `<span class="score-impact-tag">${escapeHtml(scoreBadge)}</span>` : ''}
+                    </div>
+                </div>
+                <div class="big-gift-showcase">
+                    <img src="${escapeHtml(cardImg)}" alt="Showcase" onerror="this.src='/images/rose.png'">
+                </div>
+            `;
+
+            container.innerHTML = '';
+            container.appendChild(card);
+
+            requestAnimationFrame(() => {
+                setTimeout(() => card.classList.add('show'), 25);
+            });
+
+            const durationMs = Math.max(2000, (parseInt(overlayConfig.alertDuration, 10) || 5) * 1000);
+            setTimeout(() => {
+                card.classList.remove('show');
+                card.classList.add('hide');
+                setTimeout(() => {
+                    if (card.parentElement) card.remove();
+                    isShowingAlert = false;
+                    processQueue();
+                }, 420);
+            }, durationMs);
+        }
+
+        async function loadInitialConfig() {
+            try {
+                const res = await fetch(`/api/tarkibat/${encodeURIComponent(currentUid)}`);
+                const data = await res.json();
+                if (data && data.success && data.config && data.config.overlayStyle) {
+                    applyOverlayStyle(data.config.overlayStyle);
+                }
+            } catch (e) {}
+
+            if (isPreview) {
+                setTimeout(() => {
+                    enqueueAlert({
+                        nickname: 'MEZO 1ST 🔥',
+                        username: 'mezo_1st',
+                        avatar: '/images/mezotik-logo.png',
+                        giftName: 'تيربو (Rose)',
+                        giftImage: '/images/rose.png',
+                        overlayCardImage: '/images/mcroyale/hog_rider.png',
+                        actionText: '🚀 انطلاق تيربو للمساعدين!',
+                        scoreImpactText: '⚡ +1 نقطة للمساعدين',
+                        repeatCount: 3,
+                        color: '#22ff88',
+                        soundEffect: 'none'
+                    });
+                }, 500);
+            }
+        }
+
+        loadInitialConfig();
+
+        try {
+            const socket = io();
+            socket.on('tarkibat_alert', (data) => {
+                if (data && (data.uid === currentUid || currentUid === 'default')) {
+                    enqueueAlert(data);
+                }
+            });
+            socket.on('tarkibat_config_update', (data) => {
+                if (data && data.uid === currentUid && data.config && data.config.overlayStyle) {
+                    applyOverlayStyle(data.config.overlayStyle);
+                }
+            });
+        } catch (e) {}
+    </script>
+</body>
+</html>
