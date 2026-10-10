@@ -1,10 +1,15 @@
 {
-  "name": "gifts-overlay",
+  "name": "mezo-tik-overlay",
+  "productName": "MEZO TIK Live Overlay",
   "version": "1.0.0",
-  "description": "Overlay هدايا للتيك توك",
-  "main": "server.js",
+  "description": "برنامج لوحة التحكم وأوفرلاي البث المباشر والألعاب لـ تيك توك",
+  "main": "main.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "app": "electron .",
+    "electron": "electron .",
+    "server": "node server.js",
+    "package": "electron-packager . \"MEZO TIK\" --platform=win32 --arch=x64 --icon=mezotik.ico --out=dist --overwrite"
   },
   "dependencies": {
     "cloudinary": "^2.11.0",
@@ -15,5 +20,10 @@
     "multer": "^1.4.5-lts.1",
     "socket.io": "^4.8.4",
     "tiktok-live-connector": "^2.5.0"
+  },
+  "devDependencies": {
+    "electron": "^44.7.0",
+    "electron-packager": "^17.1.2",
+    "png-to-ico": "^3.0.2"
   }
 }

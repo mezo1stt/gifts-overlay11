@@ -13,6 +13,24 @@ let db = {
 
 let scoreboards = {};
 
+// Generate a long, cryptographically encrypted Board ID per user (31 chars: mz_ + 28 hex chars)
+// Impossible for other users to guess or fabricate in overlay URLs
+function generateEncryptedBoardId(username, customSalt = '') {
+    const clean = String(username || 'user').trim().toLowerCase();
+    const hmac = crypto.createHmac('sha256', 'MEZO_TIK_ENCRYPTED_BOARD_SECRET_2026_V2')
+        .update(`mezotik_board:${clean}:${customSalt}`)
+        .digest('hex')
+        .slice(0, 28);
+    return `mz_${hmac}`;
+}
+
+function isLegacyShortBoardId(boardId) {
+    if (!boardId || typeof boardId !== 'string') return true;
+    if (boardId === 'default' || boardId === 'board_XXXX' || boardId === 'board_1212') return true;
+    if (!boardId.startsWith('mz_') || boardId.length < 24) return true;
+    return false;
+}
+
 // Load database
 function loadDatabase() {
     try {
@@ -20,13 +38,15 @@ function loadDatabase() {
             const raw = fs.readFileSync(DB_FILE, 'utf8');
             db = JSON.parse(raw);
         } else {
-            // Initialize default admin user: mezo / 123456
             saveDatabase();
         }
     } catch (e) {
         console.error('Error loading users-data.json:', e);
         db = { users: {}, sessions: {} };
     }
+
+    if (!db.users) db.users = {};
+    if (!db.sessions) db.sessions = {};
 
     // Ensure default user exists
     if (Object.keys(db.users).length === 0) {
@@ -40,6 +60,27 @@ function loadDatabase() {
         }
     } catch (e) {
         scoreboards = {};
+    }
+
+    // Upgrade any user with a short/predictable boardId to a long encrypted boardId
+    let upgraded = false;
+    for (const user of Object.values(db.users)) {
+        if (isLegacyShortBoardId(user.boardId)) {
+            const oldBoardId = user.boardId;
+            const newEncryptedId = generateEncryptedBoardId(user.username);
+            user.boardId = newEncryptedId;
+            if (oldBoardId && scoreboards[oldBoardId] && !scoreboards[newEncryptedId]) {
+                scoreboards[newEncryptedId] = {
+                    ...scoreboards[oldBoardId],
+                    board_id: newEncryptedId
+                };
+            }
+            upgraded = true;
+        }
+    }
+    if (upgraded) {
+        saveDatabase();
+        saveScoreboards();
     }
 }
 
@@ -71,22 +112,23 @@ function verifyPassword(password, salt, expectedHash) {
     return hash === expectedHash;
 }
 
-// Create default user (1212 / 1212)
+// Create default user (1212 / 1212) with long encrypted Board ID
 function createDefaultUser() {
     const { salt, hash } = hashPassword('1212');
     const userId = 'user_1212_admin';
+    const encryptedBoardId = generateEncryptedBoardId('1212');
     db.users[userId] = {
         id: userId,
         username: '1212',
-        displayName: '1212',
+        displayName: 'MEZO',
         salt,
         hash,
-        boardId: 'board_1212',
+        boardId: encryptedBoardId,
         role: 'admin',
         createdAt: Date.now()
     };
     saveDatabase();
-    console.log('👑 Default admin created: 1212 / 1212 (board_1212)');
+    console.log(`👑 Default user ready with encrypted board ID: ${encryptedBoardId}`);
 }
 
 // ================= USER CRUD ================= //
@@ -108,7 +150,8 @@ function registerUser(username, password, displayName = '') {
 
     const userId = 'usr_' + Date.now() + '_' + crypto.randomBytes(4).toString('hex');
     const { salt, hash } = hashPassword(password);
-    const boardId = 'board_' + cleanUser.replace(/[^a-z0-9]/gi, '') + '_' + crypto.randomBytes(3).toString('hex');
+    // Long 31-character encrypted board ID unique to this user
+    const boardId = generateEncryptedBoardId(cleanUser, crypto.randomBytes(8).toString('hex'));
 
     const newUser = {
         id: userId,
@@ -149,8 +192,41 @@ function loginUser(username, password) {
         throw new Error('كلمة المرور غير صحيحة');
     }
 
+    // Ensure user has an encrypted long boardId
+    if (isLegacyShortBoardId(foundUser.boardId)) {
+        foundUser.boardId = generateEncryptedBoardId(foundUser.username);
+        saveDatabase();
+    }
+
     const token = createSession(foundUser.id);
     return { user: sanitizeUser(foundUser), token };
+}
+
+function regenerateUserBoardId(token) {
+    if (!token || !db.sessions[token]) {
+        throw new Error('يرجى تسجيل الدخول أولاً');
+    }
+    const session = db.sessions[token];
+    const user = db.users[session.userId];
+    if (!user) {
+        throw new Error('المستخدم غير موجود');
+    }
+
+    const oldBoardId = user.boardId;
+    const newBoardId = generateEncryptedBoardId(user.username, crypto.randomBytes(16).toString('hex'));
+    user.boardId = newBoardId;
+
+    if (oldBoardId && scoreboards[oldBoardId]) {
+        scoreboards[newBoardId] = {
+            ...scoreboards[oldBoardId],
+            board_id: newBoardId,
+            updated_at: Date.now()
+        };
+        saveScoreboards();
+    }
+
+    saveDatabase();
+    return { oldBoardId, newBoardId, user: sanitizeUser(user) };
 }
 
 function createSession(userId) {
@@ -175,6 +251,10 @@ function getUserByToken(token) {
         return null;
     }
     const user = db.users[session.userId];
+    if (user && isLegacyShortBoardId(user.boardId)) {
+        user.boardId = generateEncryptedBoardId(user.username);
+        saveDatabase();
+    }
     return user ? sanitizeUser(user) : null;
 }
 
@@ -260,9 +340,10 @@ loadDatabase();
 module.exports = {
     registerUser,
     loginUser,
-    createSession,
     getUserByToken,
     destroySession,
+    regenerateUserBoardId,
+    generateEncryptedBoardId,
     getScoreboard,
     updateScoreboard,
     adjustScore,

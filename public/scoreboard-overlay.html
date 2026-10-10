@@ -340,7 +340,7 @@
         try {
             const socket = io();
             socket.on('scoreboard_update', (data) => {
-                if (data && (data.board_id === boardId || boardId === 'default')) {
+                if (data && data.board_id === boardId) {
                     updateUI(data);
                 }
             });
