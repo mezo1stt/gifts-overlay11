@@ -3738,6 +3738,10 @@ app.post('/api/luckyspin/:id/disconnect', (req, res) => {
     res.json({ ok: true, status: 'disconnected' });
 });
 
+app.get(['/luckyspin', '/spin', '/games/luckyspin', '/games/luckyspin/'], (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'games', 'luckyspin', 'index.html'));
+});
+
 // Socket.io Connection & Event Forwarding
 io.on('connection', (socket) => {
     socket.emit('race_state_update', {

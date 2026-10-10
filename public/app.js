@@ -1571,6 +1571,7 @@ function pickGiftFromLauncher(i,j,k){
         return;
         
       }if(eA["data"]?.["type"]==="SPIN_DATA"){
+        if(!o&&!r&&!v)return;
         var eB=eA["data"]["data"];
         if(eB["eventId"]){
           if(dK["current"]["has"](eB["eventId"]))return;
@@ -1628,7 +1629,7 @@ function pickGiftFromLauncher(i,j,k){
           streakTrackerRef["current"]["delete"](stKey);
         }
       }if(eA["data"]?.["type"]==="LIKE_DATA"){
-        if(!![]){
+        if(o||r||v){
           var {
             likes:eI,roomLikes:eJ,userName:eD,userId:eF,pictureProfil:eE
           }=eA["data"]["data"],eK=typeof eJ==="number"?eJ:eI;
@@ -1647,7 +1648,7 @@ function pickGiftFromLauncher(i,j,k){
           }
         }
       }if(eA["data"]?.["type"]==="EVENT_DATA"){
-        if(cZ["current"]||bm){
+        if((o||r||v)&&(cZ["current"]||bm)){
           var {
             type:eS,nickname:eT,uniqueId:eH,userId:eF,profilePictureUrl:eU
           }=eA["data"]["data"];
@@ -1990,9 +1991,6 @@ function pickGiftFromLauncher(i,j,k){
         var eZ=Math["floor"](eO/eH),f0=Math["floor"](eP/eH),f1=f0-eZ;
         if(f1<0x1&&eF)f1=0x1;
         if(f1<0x1)return eX;
-        var f2=0xc8;
-        f1>f2&&(console["warn"]("LuckySpin: Capping slots addition from "+f1+" to "+f2+" (System Stability)"),f1=f2);
-        if(eX["length"]+f1>0x3e8)return console["warn"]("LuckySpin: GLOBAL SLOT LIMIT (1000) reached. Cannot add more slices."),eX;
         var f3=[];
         for(var f4=0x0;
         f4<f1;
@@ -2085,12 +2083,18 @@ function pickGiftFromLauncher(i,j,k){
     }
   },getOverlayUrl=(mode="cloud")=>{
     try{
-      if(mode==="local"){
-        return "http://localhost:2137/games/luckyspin/index.html?stream=true&scale=1.15&cid="+OVERLAY_BOARD_ID;
+      if(mode==="short"||mode==="cloud"){
+        return "https://gifts-overlay11.onrender.com/games/luckyspin";
       }
-      return CLOUD_OVERLAY_BASE+"/games/luckyspin/index.html?stream=true&scale=1.15&cid="+OVERLAY_BOARD_ID;
+      if(mode==="full"){
+        return "https://gifts-overlay11.onrender.com/games/luckyspin/index.html?stream=true&scale=1.15&cid="+OVERLAY_BOARD_ID;
+      }
+      if(mode==="local"){
+        return "http://localhost:2137/games/luckyspin";
+      }
+      return "https://gifts-overlay11.onrender.com/games/luckyspin";
     }catch(e){}
-    return "https://gifts-overlay11.onrender.com/games/luckyspin/index.html?stream=true&scale=1.15&cid="+OVERLAY_BOARD_ID;
+    return "https://gifts-overlay11.onrender.com/games/luckyspin";
   },copyOverlayUrl=(mode="cloud")=>{
     var url=getOverlayUrl(mode);
     if(navigator["clipboard"]&&navigator["clipboard"]["writeText"]){
@@ -2100,7 +2104,7 @@ function pickGiftFromLauncher(i,j,k){
       ta["value"]=url,document["body"]["appendChild"](ta),ta["select"](),document["execCommand"]("copy"),document["body"]["removeChild"](ta);
     }
     setOverlayCopied(mode);
-    ct(mode==="cloud"?"✓ تم نسخ رابط الأوفرلاي السحابي (Render)!":"✓ تم نسخ رابط الأوفرلاي المحلي (Localhost)!");
+    ct(mode==="full"?"✓ تم نسخ الرابط الكامل!":mode==="local"?"✓ تم نسخ الرابط المحلي!":"✓ تم نسخ رابط الأوفرلاي السحابي!");
     setTimeout(()=>{
       setOverlayCopied(null);
       ct(null);
@@ -3574,12 +3578,17 @@ function pickGiftFromLauncher(i,j,k){
     'onClick':()=>copyOverlayUrl("cloud"),
     'className':"flex items-center gap-1.5 px-3 py-1 rounded-lg font-black text-xs uppercase tracking-wider transition-all cursor-pointer "+(overlayCopied==="cloud"?"bg-emerald-600 text-white":"bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-lg shadow-cyan-600/25"),
     'title':getOverlayUrl("cloud")
-  },React["createElement"](LinkIcon,null),React["createElement"]("span",null,overlayCopied==="cloud"?"✓ تم نسخ السحابي!":"رابط سحابي (Render)")),React["createElement"]("button",{
+  },React["createElement"](LinkIcon,null),React["createElement"]("span",null,overlayCopied==="cloud"?"✓ تم النسخ!":"رابط الأوفرلاي (سحابي)")),React["createElement"]("button",{
+    'id':"overlay-full-btn",
+    'onClick':()=>copyOverlayUrl("full"),
+    'className':"hidden sm:flex items-center gap-1.5 px-2 py-1 rounded-lg font-black text-xs uppercase tracking-wider transition-all cursor-pointer "+(overlayCopied==="full"?"bg-emerald-600 text-white":"bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-600"),
+    'title':getOverlayUrl("full")
+  },React["createElement"]("span",null,overlayCopied==="full"?"✓ تم النسخ!":"الرابط الكامل")),React["createElement"]("button",{
     'id':"overlay-local-btn",
     'onClick':()=>copyOverlayUrl("local"),
-    'className':"flex items-center gap-1.5 px-3 py-1 rounded-lg font-black text-xs uppercase tracking-wider transition-all cursor-pointer "+(overlayCopied==="local"?"bg-emerald-600 text-white":"bg-gray-800 hover:bg-gray-700 text-cyan-300 border border-cyan-500/30"),
+    'className':"flex items-center gap-1.5 px-2 py-1 rounded-lg font-black text-xs uppercase tracking-wider transition-all cursor-pointer "+(overlayCopied==="local"?"bg-emerald-600 text-white":"bg-gray-800 hover:bg-gray-700 text-cyan-300 border border-cyan-500/30"),
     'title':getOverlayUrl("local")
-  },React["createElement"]("span",null,overlayCopied==="local"?"✓ تم نسخ المحلي!":"رابط محلي (Localhost)")),React["createElement"]("span",{
+  },React["createElement"]("span",null,overlayCopied==="local"?"✓ تم النسخ!":"محلي (Local)")),React["createElement"]("span",{
     'className':"hidden lg:inline-block text-[10px] font-mono text-cyan-300 bg-black/60 px-2 py-1 rounded border border-white/10 select-all max-w-[280px] truncate"
   },getOverlayUrl("cloud")),React["createElement"]("a",{
     'href':getOverlayUrl("cloud"),
