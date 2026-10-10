@@ -3420,7 +3420,14 @@ function broadcastLuckySpinSSE(board, payload) {
     }
 }
 
-app.get(['/luckyspin-overlay.html', '/luckyspin-overlay'], (req, res) => {
+app.get(['/overlay.html', '/overlay'], (req, res, next) => {
+    if (req.query.game === 'luckyspin' || req.query.type === 'luckyspin' || req.query.spin === 'true' || req.query.spin === '1') {
+        return res.sendFile(path.join(__dirname, 'public', 'luckyspin-overlay.html'));
+    }
+    next();
+});
+
+app.get(['/luckyspin.html', '/luckyspin-overlay.html', '/luckyspin-overlay'], (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'luckyspin-overlay.html'));
 });
 

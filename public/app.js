@@ -1889,6 +1889,22 @@ function pickGiftFromLauncher(i,j,k){
       try{
         if(__lsBroadcastChannel)__lsBroadcastChannel["addEventListener"]("message",onBcMsg);
       }catch(e){}
+      var socketClient=null;
+      try{
+        if(typeof io!=="undefined"){
+          socketClient=io();
+          socketClient["on"]("luckyspin_update",msg=>{
+            try{
+              if(msg&&msg["type"]&&(!msg["board_id"]||msg["board_id"]===OVERLAY_BOARD_ID)){
+                handleOverlayEvent(msg);
+              }
+            }catch(e){}
+          });
+          socketClient["on"]("connect",()=>{
+            pollState();
+          });
+        }
+      }catch(e){}
       var pollState=async()=>{
         try{
           var r=await fetch(API_BASE+"/api/luckyspin/"+OVERLAY_BOARD_ID+"/state?t="+Date["now"]());
@@ -1919,6 +1935,7 @@ function pickGiftFromLauncher(i,j,k){
         clearInterval(pollTimer);
         if(localEs)localEs["close"]();
         if(cloudEs)cloudEs["close"]();
+        if(socketClient)try{socketClient["disconnect"]();}catch(e){}
         try{ if(__lsBroadcastChannel)__lsBroadcastChannel["removeEventListener"]("message",onBcMsg); }catch(e){}
       };
       
@@ -2017,14 +2034,13 @@ function pickGiftFromLauncher(i,j,k){
         if(f1<0x1&&eF)f1=0x1;
         if(f1<0x1)return eX;
         var f3=[];
-        var visualSlots=Math["min"](f1,0xfa);
-        var slotWeight=f1/visualSlots;
+        var maxSlots=Math["min"](f1,0x186a0);
         for(var f4=0x0;
-        f4<visualSlots;
+        f4<maxSlots;
         f4++){
           f3["push"]({
             'id':"ticket-"+ez+'-'+Date["now"]()+'-'+f4+'-'+Math["random"]()["toString"](0x24)["substr"](0x2,0x9),
-            'userId':ez,'name':eA,'coins':eH,'tickets':slotWeight,'pic':eY,'color':dq[(eX["length"]+f4)%dq["length"]],'sortKey':Math["random"](),'joinedViaLike':eE
+            'userId':ez,'name':eA,'coins':eH,'pic':eY,'color':dq[(eX["length"]+f4)%dq["length"]],'sortKey':Math["random"](),'joinedViaLike':eE
           });
         }return[...eX,...f3];
         
@@ -2111,7 +2127,7 @@ function pickGiftFromLauncher(i,j,k){
   },getOverlayUrl=(mode="cloud")=>{
     try{
       if(mode==="local"){
-        return "http://localhost:2137/luckyspin-overlay.html?uid=default";
+        return "http://localhost:2137/overlay.html?uid=default";
       }
       if(mode==="cloud"||mode==="short"){
         return "https://gifts-overlay11.onrender.com/luckyspin-overlay.html?uid=default";
@@ -2119,9 +2135,9 @@ function pickGiftFromLauncher(i,j,k){
       if(mode==="full"){
         return "https://gifts-overlay11.onrender.com/games/luckyspin/index.html?stream=true&scale=1.15&cid=mz_6e60223656d3863d21bb918dc1dc";
       }
-      return "https://gifts-overlay11.onrender.com/luckyspin-overlay.html?uid=default";
+      return "http://localhost:2137/overlay.html?uid=default";
     }catch(e){}
-    return "https://gifts-overlay11.onrender.com/luckyspin-overlay.html?uid=default";
+    return "http://localhost:2137/overlay.html?uid=default";
   },copyOverlayUrl=(mode="cloud")=>{
     var url=getOverlayUrl(mode);
     if(navigator["clipboard"]&&navigator["clipboard"]["writeText"]){

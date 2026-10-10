@@ -3383,7 +3383,7 @@ function renderTeamCardsDeck(teamKey, listContainerId, countDisplayId) {
                         </button>
                         <label class="btn-mini-upload" title="رفع صورة أو GIF مباشرة من جهازك لهذا العنصر" style="background:linear-gradient(135deg, #10b981, #059669); color:#fff; border-radius:8px; padding:7px 11px; font-size:12px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:5px; border:1px solid rgba(255,255,255,0.18); white-space:nowrap; box-shadow:0 2px 8px rgba(16,185,129,0.3); transition:transform 0.15s ease;">
                             <span>📤 جهازك</span>
-                            <input type="file" accept="image/*" style="display:none;" onchange="uploadDirectCardImage('${teamKey}', ${idx}, this.files[0])">
+                            <input type="file" accept="image/*" style="display:none;" onchange="uploadDirectCardImage('${teamKey}', ${idx}, this.files[0]); this.value='';">
                         </label>
                         ${hasCustomImg ? `
                         <button type="button" class="btn-mini-reset" onclick="resetCardCustomImage('${teamKey}', ${idx})" title="إلغاء الصورة المخصصة والرجوع للشكل الافتراضي" style="background:rgba(239,68,68,0.15); border:1px solid #ef4444; color:#ef4444; border-radius:8px; padding:7px 9px; font-size:11.5px; font-weight:800; cursor:pointer; white-space:nowrap;">
@@ -3663,8 +3663,9 @@ function selectVisualCharacter(itemId, itemName, itemImg) {
 async function uploadDirectCardImage(teamKey, idx, file) {
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-        showToast('يرجى اختيار ملف صورة صالح (PNG, GIF, JPG, WEBP)', 'error');
+    const isImage = (file.type && file.type.startsWith('image/')) || /\.(png|jpe?g|gif|webp|svg|bmp)$/i.test(file.name || '');
+    if (!isImage) {
+        showToast('يرجى اختيار ملف صورة أو GIF صالح (PNG, GIF, JPG, WEBP)', 'error');
         return;
     }
 
@@ -4025,54 +4026,6 @@ function selectVisualGift(giftName, giftImage) {
     applyGiftToCardSlot(giftName, giftImage, null);
 }
 
-// Upload Custom Gift Image from Device (Cards 3, Cards 4, Tarkibat)
-async function uploadCustomGiftImage(file) {
-    if (!file) return;
-    if (!file.type.startsWith('image/')) {
-        showToast('يرجى اختيار ملف صورة صالح (PNG, GIF, JPG, WEBP)', 'error');
-        return;
-    }
-
-    try {
-        showToast('جاري رفع صورة الهدية من جهازك... ⏳', 'info');
-        let giftUrl = '';
-
-        try {
-            const formData = new FormData();
-            formData.append('cardImage', file);
-            const res = await fetch('/api/upload-card-image', {
-                method: 'POST',
-                body: formData
-            });
-            if (res.ok) {
-                const data = await res.json();
-                if (data && data.success && data.url) {
-                    giftUrl = data.url;
-                }
-            }
-        } catch (netErr) {
-            console.warn('Server upload failed, falling back to data URL:', netErr);
-        }
-
-        if (!giftUrl) {
-            giftUrl = await new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
-        }
-
-        const giftName = file.name ? file.name.replace(/\.[^/.]+$/, '') : 'هدية مخصصة';
-        applyGiftToCardSlot(giftName, giftUrl, null);
-        closeVisualGiftPicker();
-        showToast(`تم تعيين صورة الهدية (${giftName}) بنجاح! 🎁✨`, 'success');
-    } catch (e) {
-        console.error('Upload custom gift image error:', e);
-        showToast('حدث خطأ أثناء رفع صورة الهدية', 'error');
-    }
-}
-
 // ================= SECTION: TIKTOK GIFTS 4 (بطاقات كلاسيك رويال MC Royale) ================= //
 const CARD4_MC_ITEMS = [
     {
@@ -4394,7 +4347,7 @@ function renderTeam4CardsDeck(teamKey, containerId, countId) {
                         </button>
                         <label class="btn-mini-upload" title="رفع صورة مباشرة من جهازك لهذه البطاقة" style="background:linear-gradient(135deg, #7928ca, #ff0080); color:#fff; border-radius:8px; padding:7px 11px; font-size:12px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:5px; border:1px solid rgba(255,255,255,0.18); white-space:nowrap; box-shadow:0 2px 8px rgba(121,40,202,0.3); transition:transform 0.15s ease;">
                             <span>📤 جهازك</span>
-                            <input type="file" accept="image/*" style="display:none;" onchange="uploadDirectCard4Image('${teamKey}', ${idx}, this.files[0])">
+                            <input type="file" accept="image/*" style="display:none;" onchange="uploadDirectCard4Image('${teamKey}', ${idx}, this.files[0]); this.value='';">
                         </label>
                         ${hasCustomImg ? `
                         <button type="button" class="btn-mini-reset" onclick="resetCard4CustomImage('${teamKey}', ${idx})" title="إلغاء الصورة المخصصة والرجوع للبطاقة الافتراضية" style="background:rgba(239,68,68,0.15); border:1px solid #ef4444; color:#ef4444; border-radius:8px; padding:7px 9px; font-size:11.5px; font-weight:800; cursor:pointer; white-space:nowrap;">
@@ -4691,8 +4644,9 @@ function selectVisualCard4(cardTypeId, cardTypeName) {
 // Upload Direct Card Image (Cards 4)
 async function uploadDirectCard4Image(teamKey, idx, file) {
     if (!file) return;
-    if (!file.type.startsWith('image/')) {
-        showToast('يرجى اختيار ملف صورة صالح (PNG, GIF, JPG, WEBP)', 'error');
+    const isImage = (file.type && file.type.startsWith('image/')) || /\.(png|jpe?g|gif|webp|svg|bmp)$/i.test(file.name || '');
+    if (!isImage) {
+        showToast('يرجى اختيار ملف صورة أو GIF صالح (PNG, GIF, JPG, WEBP)', 'error');
         return;
     }
 

@@ -1,6 +1,16 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+    <script>
+        (function(){
+            try {
+                var p = new URLSearchParams(window.location.search);
+                if (p.get('game') === 'luckyspin' || p.get('type') === 'luckyspin' || p.get('spin') === 'true' || p.get('spin') === '1') {
+                    window.location.replace('/luckyspin-overlay.html' + window.location.search);
+                }
+            } catch(e) {}
+        })();
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TikTok Gifts Live Overlay</title>
