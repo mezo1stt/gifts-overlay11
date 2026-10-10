@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEZO TIK - إجمالي المتابعين المباشر (3D Cyber HUD)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&family=Tajawal:wght@700;800;900&family=Orbitron:wght@700;800;900&family=Chakra+Petch:wght@700;800&display=swap" rel="stylesheet">
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        :root {
+            /* Default Theme: Cyber TikTok (Cyan + TikTok Crimson/Magenta + Gold) */
+            --c-primary: #00f2fe;
+            --c-secondary: #ff0050;
+            --c-accent: #fbbf24;
+            --c-glow: rgba(0, 242, 254, 0.55);
+            --c-glow-sec: rgba(255, 0, 80, 0.5);
+            --c-bg-deep: rgba(7, 10, 22, 0.92);
+            --c-bg-glass: rgba(14, 20, 40, 0.82);
+            --c-digit-bg: linear-gradient(180deg, rgba(20, 30, 58, 0.95) 0%, rgba(8, 12, 26, 0.98) 100%);
+            --c-digit-border: rgba(0, 242, 254, 0.45);
+            --c-text-num: #ffffff;
+            --hud-scale: 1;
+        }
+
+        body[data-theme="royal_gold"] {
+            --c-primary: #fbbf24;
+            --c-secondary: #f59e0b;
+            --c-accent: #fef08a;
+            --c-glow: rgba(251, 191, 36, 0.6);
+            --c-glow-sec: rgba(217, 119, 6, 0.55);
+            --c-bg-deep: rgba(18, 12, 4, 0.94);
+            --c-bg-glass: rgba(34, 23, 7, 0.86);
+            --c-digit-bg: linear-gradient(180deg, rgba(48, 32, 8, 0.96) 0%, rgba(18, 11, 2, 0.98) 100%);
+            --c-digit-border: rgba(251, 191, 36, 0.55);
+            --c-text-num: #fef3c7;
+        }
+
+        body[data-theme="hyper_violet"] {
+            --c-primary: #c084fc;
+            --c-secondary: #ec4899;
+            --c-accent: #38bdf8;
+            --c-glow: rgba(192, 132, 252, 0.6);
+            --c-glow-sec: rgba(236, 72, 153, 0.55);
+            --c-bg-deep: rgba(14, 6, 28, 0.94);
+            --c-bg-glass: rgba(28, 12, 54, 0.85);
+            --c-digit-bg: linear-gradient(180deg, rgba(44, 18, 82, 0.95) 0%, rgba(16, 6, 34, 0.98) 100%);
+            --c-digit-border: rgba(192, 132, 252, 0.5);
+            --c-text-num: #f5d0fe;
+        }
+
+        body[data-theme="emerald_matrix"] {
+            --c-primary: #10b981;
+            --c-secondary: #06b6d4;
+            --c-accent: #a7f3d0;
+            --c-glow: rgba(16, 185, 129, 0.6);
+            --c-glow-sec: rgba(6, 182, 212, 0.5);
+            --c-bg-deep: rgba(4, 18, 14, 0.94);
+            --c-bg-glass: rgba(8, 34, 26, 0.85);
+            --c-digit-bg: linear-gradient(180deg, rgba(12, 48, 36, 0.95) 0%, rgba(4, 18, 14, 0.98) 100%);
+            --c-digit-border: rgba(16, 185, 129, 0.5);
+            --c-text-num: #ecfdf5;
+        }
+
+        body[data-theme="magma_fire"] {
+            --c-primary: #ff334f;
+            --c-secondary: #ff7b00;
+            --c-accent: #fde047;
+            --c-glow: rgba(255, 51, 79, 0.65);
+            --c-glow-sec: rgba(255, 123, 0, 0.55);
+            --c-bg-deep: rgba(22, 5, 8, 0.94);
+            --c-bg-glass: rgba(42, 10, 15, 0.86);
+            --c-digit-bg: linear-gradient(180deg, rgba(60, 12, 18, 0.96) 0%, rgba(22, 4, 7, 0.98) 100%);
+            --c-digit-border: rgba(255, 51, 79, 0.55);
+            --c-text-num: #ffe4e6;
+        }
+
+        body[data-theme="diamond_ice"] {
+            --c-primary: #38bdf8;
+            --c-secondary: #818cf8;
+            --c-accent: #ffffff;
+            --c-glow: rgba(56, 189, 248, 0.6);
+            --c-glow-sec: rgba(129, 140, 248, 0.5);
+            --c-bg-deep: rgba(6, 14, 26, 0.93);
+            --c-bg-glass: rgba(14, 28, 50, 0.85);
+            --c-digit-bg: linear-gradient(180deg, rgba(22, 44, 78, 0.95) 0%, rgba(8, 18, 34, 0.98) 100%);
+            --c-digit-border: rgba(125, 211, 252, 0.55);
+            --c-text-num: #f0f9ff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        html, body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: transparent !important;
+            font-family: 'Cairo', 'Tajawal', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Canvas for Floating Particles & Fireworks */
+        #fxCanvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        /* Main Stage Wrapper */
+        .stage-wrap {
+            position: relative;
+            z-index: 10;
+            transform: scale(var(--hud-scale));
+            transform-origin: center center;
+            transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 28px;
+        }
+
+        /* Ambient Backlight Aura */
+        .ambient-aura {
+            position: absolute;
+            inset: 10px;
+            background: radial-gradient(circle at 75% 50%, var(--c-glow) 0%, var(--c-glow-sec) 45%, transparent 74%);
+            filter: blur(28px);
+            opacity: 0.72;
+            z-index: -1;
+            pointer-events: none;
+            animation: auraBreathe 4.2s ease-in-out infinite alternate;
+        }
+
+        @keyframes auraBreathe {
+            0% { transform: scale(0.95); opacity: 0.55; }
+            100% { transform: scale(1.06); opacity: 0.88; }
+        }
+
+        /* ==============================================================
+           CORE WIDGET CONTAINER (Supports 4 Distinct Layout Styles)
+           ============================================================== */
+        .cyber-hud {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            background: var(--c-bg-deep);
+            border-radius: 26px;
+            padding: 18px 22px 18px 24px;
+            min-width: 470px;
+            max-width: 94vw;
+            box-shadow:
+                0 22px 55px rgba(0, 0, 0, 0.82),
+                0 0 32px var(--c-glow),
+                inset 0 1px 2px rgba(255, 255, 255, 0.22);
+            border: 1.5px solid rgba(255, 255, 255, 0.12);
+            overflow: visible;
+            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        /* Animated Dual Neon Border Frame */
+        .cyber-hud::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: inherit;
+            padding: 2.5px;
+            background: linear-gradient(135deg, var(--c-primary), transparent 35%, var(--c-accent) 50%, transparent 65%, var(--c-secondary));
+            background-size: 250% 250%;
+            animation: borderFlow 4.5s linear infinite;
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        @keyframes borderFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Subtle Cyber Grid + Laser Scanline Overlay inside Card */
+        .hud-interior-fx {
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .hud-interior-fx::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 18px 18px;
+            mask-image: radial-gradient(ellipse at center, black 30%, transparent 85%);
+        }
+
+        .hud-laser-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--c-primary), var(--c-accent), var(--c-secondary), transparent);
+            box-shadow: 0 0 12px var(--c-primary);
+            opacity: 0.45;
+            animation: laserSweep 3.8s ease-in-out infinite;
+        }
+
+        @keyframes laserSweep {
+            0% { top: -5%; opacity: 0; }
+            20% { opacity: 0.55; }
+            80% { opacity: 0.55; }
+            100% { top: 105%; opacity: 0; }
+        }
+
+        /* Corner Mecha Accents */
+        .corner-bracket {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            pointer-events: none;
+            z-index: 4;
+        }
+        .corner-bracket.tl {
+            top: -4px; left: -4px;
+            border-top: 3px solid var(--c-primary);
+            border-left: 3px solid var(--c-primary);
+            border-top-left-radius: 10px;
+            filter: drop-shadow(0 0 6px var(--c-primary));
+        }
+        .corner-bracket.tr {
+            top: -4px; right: -4px;
+            border-top: 3px solid var(--c-secondary);
+            border-right: 3px solid var(--c-secondary);
+            border-top-right-radius: 10px;
+            filter: drop-shadow(0 0 6px var(--c-secondary));
+        }
+        .corner-bracket.bl {
+            bottom: -4px; left: -4px;
+            border-bottom: 3px solid var(--c-secondary);
+            border-left: 3px solid var(--c-secondary);
+            border-bottom-left-radius: 10px;
+            filter: drop-shadow(0 0 6px var(--c-secondary));
+        }
+        .corner-bracket.br {
+            bottom: -4px; right: -4px;
+            border-bottom: 3px solid var(--c-primary);
+            border-right: 3px solid var(--c-primary);
+            border-bottom-right-radius: 10px;
+            filter: drop-shadow(0 0 6px var(--c-primary));
+        }
+
+        /* ==============================================================
+           AVATAR REACTOR CORE (Right/Top Section)
+           ============================================================== */
+        .avatar-reactor {
+            position: relative;
+            z-index: 3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        /* Floating 3D Crown Above Avatar */
+        .reactor-crown {
+            position: absolute;
+            top: -24px;
+            z-index: 8;
+            font-size: 24px;
+            filter: drop-shadow(0 4px 10px rgba(251, 191, 36, 0.85));
+            animation: crownFloat 2.4s ease-in-out infinite alternate;
+        }
+
+        @keyframes crownFloat {
+            0% { transform: translateY(0) rotate(-4deg) scale(0.96); }
+            100% { transform: translateY(-5px) rotate(4deg) scale(1.06); }
+        }
+
+        .reactor-ring-box {
+            position: relative;
+            width: 106px;
+            height: 106px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Outer Rotating Plasma Ring */
+        .reactor-orbit-outer {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: conic-gradient(
+                from 0deg,
+                var(--c-primary) 0deg,
+                transparent 70deg,
+                var(--c-secondary) 140deg,
+                var(--c-accent) 210deg,
+                transparent 280deg,
+                var(--c-primary) 360deg
+            );
+            animation: spinCW 3.4s linear infinite;
+            box-shadow: 0 0 22px var(--c-glow);
+        }
+
+        /* Inner Counter-Rotating Dashed Ring */
+        .reactor-orbit-inner {
+            position: absolute;
+            inset: 5px;
+            border-radius: 50%;
+            border: 2px dashed rgba(255, 255, 255, 0.45);
+            background: var(--c-bg-deep);
+            animation: spinCCW 7s linear infinite;
+        }
+
+        /* Pulse Shockwave Ring when Follower Increases */
+        .reactor-shockwave {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 3px solid var(--c-accent);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .cyber-hud.is-pulsing .reactor-shockwave {
+            animation: shockwaveExpand 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes shockwaveExpand {
+            0% { transform: scale(0.95); opacity: 1; border-width: 5px; }
+            100% { transform: scale(1.55); opacity: 0; border-width: 1px; }
+        }
+
+        @keyframes spinCW {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes spinCCW {
+            from { transform: rotate(360deg); }
+            to { transform: rotate(0deg); }
+        }
+
+        .reactor-avatar-img {
+            position: relative;
+            z-index: 4;
+            width: 88px;
+            height: 88px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2.5px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.75);
+            background: #0f172a;
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .cyber-hud.is-pulsing .reactor-avatar-img {
+            transform: scale(1.1);
+            border-color: var(--c-accent);
+        }
+
+        /* Handle Pill under Avatar */
+        .reactor-handle-pill {
+            margin-top: -11px;
+            position: relative;
+            z-index: 6;
+            background: linear-gradient(90deg, var(--c-secondary), #1e1b4b, var(--c-primary));
+            background-size: 200% 100%;
+            padding: 3px 12px;
+            border-radius: 999px;
+            border: 1.5px solid rgba(255, 255, 255, 0.35);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            direction: ltr;
+        }
+
+        .live-radar-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #22c55e;
+            box-shadow: 0 0 8px #22c55e;
+            animation: dotBlink 1s infinite alternate;
+        }
+
+        @keyframes dotBlink {
+            0% { opacity: 0.4; transform: scale(0.85); }
+            100% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .reactor-handle-text {
+            font-family: 'Chakra Petch', sans-serif;
+            font-size: 11.5px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: 0.4px;
+            max-width: 115px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* ==============================================================
+           TELEMETRY DATA WING (Left/Main Section)
+           ============================================================== */
+        .telemetry-wing {
+            position: relative;
+            z-index: 3;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 0;
+        }
+
+        /* Row 1: Top Badges (Role Badge + Session Gain Pill) */
+        .wing-top-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .role-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            padding: 2px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--c-accent);
+            text-shadow: 0 0 8px rgba(251, 191, 36, 0.4);
+            white-space: nowrap;
+        }
+
+        .session-gain-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(16, 185, 129, 0.16);
+            border: 1px solid rgba(16, 185, 129, 0.5);
+            color: #34d399;
+            padding: 2px 10px;
+            border-radius: 999px;
+            font-size: 11.5px;
+            font-weight: 900;
+            direction: ltr;
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.25);
+            transition: transform 0.3s ease;
+        }
+
+        .cyber-hud.is-pulsing .session-gain-chip {
+            transform: scale(1.14);
+            background: rgba(16, 185, 129, 0.35);
+            color: #ffffff;
+        }
+
+        /* Row 2: Streamer Display Name + Likes Mini Badge */
+        .wing-identity-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .streamer-name-wrap {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-width: 0;
+        }
+
+        .streamer-name {
+            font-size: 22px;
+            font-weight: 900;
+            line-height: 1.15;
+            background: linear-gradient(90deg, #ffffff 0%, var(--c-primary) 55%, var(--c-accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.6));
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .verified-icon {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #38bdf8, #0284c7);
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 900;
+            flex-shrink: 0;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+        }
+
+        .likes-mini-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(255, 0, 80, 0.14);
+            border: 1px solid rgba(255, 0, 80, 0.38);
+            color: #fda4af;
+            padding: 2px 9px;
+            border-radius: 8px;
+            font-size: 11.5px;
+            font-weight: 800;
+            direction: ltr;
+            white-space: nowrap;
+        }
+
+        /* Row 3: Label + 3D Segmented Follower Counter */
+        .counter-vault {
+            position: relative;
+            background: rgba(5, 8, 18, 0.72);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 8px 12px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            box-shadow: inset 0 3px 12px rgba(0, 0, 0, 0.75);
+        }
+
+        .counter-header-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .counter-title-label {
+            font-size: 12.5px;
+            font-weight: 800;
+            color: #cbd5e1;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .counter-title-label::before {
+            content: '👥';
+            font-size: 13px;
+        }
+
+        /* 3D Digit Keycaps Container */
+        .digits-stage {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            direction: ltr;
+            min-height: 44px;
+        }
+
+        .digit-cell {
+            position: relative;
+            min-width: 32px;
+            height: 42px;
+            padding: 0 6px;
+            border-radius: 10px;
+            background: var(--c-digit-bg);
+            border: 1px solid var(--c-digit-border);
+            box-shadow:
+                0 4px 10px rgba(0, 0, 0, 0.65),
+                inset 0 1px 0 rgba(255, 255, 255, 0.25),
+                0 0 12px rgba(0, 242, 254, 0.12);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', 'Chakra Petch', monospace;
+            font-size: 25px;
+            font-weight: 900;
+            color: var(--c-text-num);
+            text-shadow: 0 0 12px var(--c-glow);
+            overflow: hidden;
+            transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.28s ease;
+        }
+
+        /* Glossy top half reflection on each 3D digit keycap */
+        .digit-cell::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 48%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.01));
+            pointer-events: none;
+        }
+
+        .digit-cell.digit-changed {
+            animation: digitFlipPop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border-color: var(--c-accent);
+            color: var(--c-accent);
+            box-shadow: 0 0 20px var(--c-glow), inset 0 0 10px rgba(251, 191, 36, 0.35);
+        }
+
+        @keyframes digitFlipPop {
+            0% { transform: translateY(10px) scale(0.85); opacity: 0.4; }
+            55% { transform: translateY(-4px) scale(1.12); opacity: 1; }
+            100% { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        .digit-sep {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--c-primary);
+            padding: 0 1px;
+            transform: translateY(4px);
+            text-shadow: 0 0 8px var(--c-glow);
+        }
+
+        /* Alternative Plain Neon Number Mode (when digitBoxes = false) */
+        body[data-digit-boxes="false"] .digit-cell {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            min-width: auto;
+            height: auto;
+            padding: 0 1px;
+            font-size: 34px;
+        }
+        body[data-digit-boxes="false"] .digit-cell::after {
+            display: none;
+        }
+
+        /* Row 4: Smart Goal Progress Bar */
+        .goal-module {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-top: 2px;
+        }
+
+        .goal-meta-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .goal-target-text {
+            color: #e2e8f0;
+        }
+
+        .goal-remain-text {
+            color: var(--c-accent);
+            text-shadow: 0 0 8px rgba(251, 191, 36, 0.4);
+        }
+
+        .goal-track {
+            position: relative;
+            width: 100%;
+            height: 8px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.09);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .goal-fill {
+            position: relative;
+            height: 100%;
+            width: 75%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--c-secondary), var(--c-primary), var(--c-accent));
+            background-size: 200% 100%;
+            animation: borderFlow 3s linear infinite;
+            box-shadow: 0 0 12px var(--c-primary);
+            transition: width 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        /* ==============================================================
+           FLOATING CELEBRATION / HYPE TOAST BANNER
+           ============================================================== */
+        .event-toast-banner {
+            position: absolute;
+            bottom: -48px;
+            left: 50%;
+            transform: translateX(-50%) translateY(15px) scale(0.9);
+            background: linear-gradient(90deg, rgba(15, 23, 42, 0.96), rgba(30, 15, 45, 0.96));
+            border: 1.5px solid var(--c-accent);
+            border-radius: 999px;
+            padding: 6px 20px;
+            color: #ffffff;
+            font-size: 13.5px;
+            font-weight: 900;
+            white-space: nowrap;
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.8), 0 0 22px var(--c-glow);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 15;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .event-toast-banner.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0) scale(1);
+        }
+
+        /* ==============================================================
+           LAYOUT 2: DIAMOND TOTEM (💎 الدرع الهولوجرامي العمودي)
+           ============================================================== */
+        body[data-layout="diamond_totem"] .cyber-hud {
+            flex-direction: column;
+            min-width: 300px;
+            max-width: 330px;
+            padding: 26px 22px 20px;
+            border-radius: 32px;
+            text-align: center;
+            gap: 12px;
+        }
+        body[data-layout="diamond_totem"] .wing-top-row,
+        body[data-layout="diamond_totem"] .wing-identity-row {
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        body[data-layout="diamond_totem"] .reactor-ring-box {
+            width: 118px;
+            height: 118px;
+        }
+        body[data-layout="diamond_totem"] .reactor-avatar-img {
+            width: 98px;
+            height: 98px;
+        }
+
+        /* ==============================================================
+           LAYOUT 3: NITRO BLADE (🏎️ شريط النيترو الرياضي المدمج)
+           ============================================================== */
+        body[data-layout="nitro_blade"] .cyber-hud {
+            min-width: 540px;
+            padding: 12px 24px;
+            border-radius: 16px;
+            clip-path: polygon(18px 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%, 0 18px);
+        }
+        body[data-layout="nitro_blade"] .reactor-ring-box {
+            width: 84px;
+            height: 84px;
+        }
+        body[data-layout="nitro_blade"] .reactor-avatar-img {
+            width: 68px;
+            height: 68px;
+        }
+        body[data-layout="nitro_blade"] .reactor-crown {
+            top: -18px;
+            font-size: 19px;
+        }
+
+        /* ==============================================================
+           LAYOUT 4: DYNAMIC ISLAND (💊 الجزيرة التفاعلية العصرية)
+           ============================================================== */
+        body[data-layout="dynamic_island"] .cyber-hud {
+            min-width: 410px;
+            padding: 12px 20px;
+            border-radius: 999px;
+            gap: 14px;
+        }
+        body[data-layout="dynamic_island"] .corner-bracket {
+            display: none;
+        }
+        body[data-layout="dynamic_island"] .reactor-ring-box {
+            width: 78px;
+            height: 78px;
+        }
+        body[data-layout="dynamic_island"] .reactor-avatar-img {
+            width: 64px;
+            height: 64px;
+        }
+        body[data-layout="dynamic_island"] .reactor-crown,
+        body[data-layout="dynamic_island"] .wing-top-row {
+            display: none !important;
+        }
+        body[data-layout="dynamic_island"] .counter-vault {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            padding: 2px 0;
+        }
+
+        /* Visibility Toggles Controlled from Dashboard */
+        body[data-show-goal="false"] .goal-module { display: none !important; }
+        body[data-show-likes="false"] .likes-mini-pill { display: none !important; }
+        body[data-show-gain="false"] .session-gain-chip { display: none !important; }
+        body[data-show-likes="false"][data-show-gain="false"] .wing-badges-cluster { display: none !important; }
+        body[data-show-particles="false"] #fxCanvas,
+        body[data-show-particles="false"] .hud-laser-line { display: none !important; }
+    </style>
+</head>
+<body data-layout="royal_hud" data-theme="cyber_tiktok" data-digit-boxes="true" data-show-goal="true" data-show-likes="true" data-show-gain="true" data-show-particles="true">
+
+    <canvas id="fxCanvas"></canvas>
+
+    <div class="stage-wrap" id="stageWrap">
+        <div class="ambient-aura"></div>
+
+        <div class="cyber-hud" id="cyberHudCard">
+            <div class="hud-interior-fx">
+                <div class="hud-laser-line"></div>
+            </div>
+
+            <div class="corner-bracket tl"></div>
+            <div class="corner-bracket tr"></div>
+            <div class="corner-bracket bl"></div>
+            <div class="corner-bracket br"></div>
+
+            <!-- 1. Avatar Reactor Core -->
+            <div class="avatar-reactor">
+                <div class="reactor-crown">👑</div>
+                <div class="reactor-ring-box">
+                    <div class="reactor-orbit-outer"></div>
+                    <div class="reactor-orbit-inner"></div>
+                    <div class="reactor-shockwave"></div>
+                    <img id="hudAvatar" class="reactor-avatar-img" src="https://api.dicebear.com/7.x/bottts/svg?seed=mezo_1st" alt="Avatar">
+                </div>
+                <div class="reactor-handle-pill">
+                    <span class="live-radar-dot"></span>
+                    <span id="hudHandle" class="reactor-handle-text">@mezo_1st</span>
+                </div>
+            </div>
+
+            <!-- 2. Main Telemetry & 3D Counter Wing -->
+            <div class="telemetry-wing">
+                <div class="wing-identity-row">
+                    <div class="streamer-name-wrap">
+                        <span id="hudNickname" class="streamer-name">M E Z O</span>
+                        <span class="verified-icon" title="حساب موثق">✓</span>
+                    </div>
+                    <div class="wing-badges-cluster" style="display:flex; align-items:center; gap:6px;">
+                        <span id="hudSessionGain" class="session-gain-chip">+0 اليوم ⚡</span>
+                        <span id="hudLikesPill" class="likes-mini-pill">❤️ 3,840</span>
+                    </div>
+                </div>
+
+                <div class="counter-vault">
+                    <div class="counter-header-bar">
+                        <span id="hudCustomLabel" class="counter-title-label">إجمالي المتابعين</span>
+                    </div>
+                    <div class="digits-stage" id="hudDigitsStage" aria-live="polite">
+                        <!-- Rendered as 3D keycap cells -->
+                    </div>
+                </div>
+
+                <div class="goal-module" id="hudGoalModule">
+                    <div class="goal-meta-row">
+                        <span id="hudGoalTarget" class="goal-target-text">🎯 الهدف القادم: 105,000</span>
+                        <span id="hudGoalRemain" class="goal-remain-text">متبقي 607 🔥</span>
+                    </div>
+                    <div class="goal-track">
+                        <div id="hudGoalFill" class="goal-fill" style="width: 65%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Floating Toast Banner for Gain / Hype / Goal Events -->
+            <div id="eventToastBanner" class="event-toast-banner">🔥 متابع جديد انضم للبث!</div>
+        </div>
+    </div>
+
+    <script>
+        const isPreviewIframe = new URLSearchParams(window.location.search).get('preview') === '1';
+        if (isPreviewIframe) {
+            document.documentElement.style.setProperty('--hud-scale', '0.84');
+        }
+
+        const socket = io();
+        let lastFollowerCount = null;
+        let lastDigitsStr = '';
+        let pulseTimer = null;
+        let toastTimer = null;
+        let soundEnabled = true;
+
+        const hudCard = document.getElementById('cyberHudCard');
+        const elAvatar = document.getElementById('hudAvatar');
+        const elHandle = document.getElementById('hudHandle');
+        const elNickname = document.getElementById('hudNickname');
+        const elSessionGain = document.getElementById('hudSessionGain');
+        const elLikesPill = document.getElementById('hudLikesPill');
+        const elCustomLabel = document.getElementById('hudCustomLabel');
+        const elDigitsStage = document.getElementById('hudDigitsStage');
+        const elGoalTarget = document.getElementById('hudGoalTarget');
+        const elGoalRemain = document.getElementById('hudGoalRemain');
+        const elGoalFill = document.getElementById('hudGoalFill');
+        const elToastBanner = document.getElementById('eventToastBanner');
+
+        function formatCompactLikes(num) {
+            const n = parseInt(num, 10) || 0;
+            if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+            if (n >= 10000) return (n / 1000).toFixed(1) + 'K';
+            return n.toLocaleString('en-US');
+        }
+
+        // Render 3D Segmented Digit Keycaps with individual digit diffing
+        function renderSegmentedDigits(numValue) {
+            const formatted = (Math.max(0, parseInt(numValue, 10) || 0)).toLocaleString('en-US');
+            if (formatted === lastDigitsStr && elDigitsStage.children.length > 0) return;
+
+            const prevChars = lastDigitsStr.split('');
+            const nextChars = formatted.split('');
+            lastDigitsStr = formatted;
+
+            elDigitsStage.innerHTML = '';
+            nextChars.forEach((ch, idx) => {
+                if (ch === ',') {
+                    const sep = document.createElement('span');
+                    sep.className = 'digit-sep';
+                    sep.textContent = ',';
+                    elDigitsStage.appendChild(sep);
+                } else {
+                    const cell = document.createElement('span');
+                    const prevCh = prevChars[idx];
+                    const changed = prevChars.length > 0 && prevCh !== ch;
+                    cell.className = 'digit-cell' + (changed ? ' digit-changed' : '');
+                    cell.textContent = ch;
+                    elDigitsStage.appendChild(cell);
+                }
+            });
+        }
+
+        // WebAudio API Futuristic Chime (Zero external files needed)
+        function playCyberAudio(type = 'gain') {
+            if (!soundEnabled || isPreviewIframe) return;
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const notes = type === 'goal' ? [523.25, 659.25, 783.99, 1046.5] : [587.33, 880];
+                notes.forEach((freq, i) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.09);
+                    gain.gain.setValueAtTime(0.14, ctx.currentTime + i * 0.09);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.09 + 0.38);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(ctx.currentTime + i * 0.09);
+                    osc.stop(ctx.currentTime + i * 0.09 + 0.4);
+                });
+            } catch (e) {}
+        }
+
+        function showOverlayBanner(text, duration = 3800) {
+            if (!elToastBanner) return;
+            elToastBanner.textContent = text;
+            elToastBanner.classList.add('show');
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                elToastBanner.classList.remove('show');
+            }, duration);
+        }
+
+        function triggerVisualPulse(bannerText = null, burstCount = 36) {
+            hudCard.classList.remove('is-pulsing');
+            void hudCard.offsetWidth;
+            hudCard.classList.add('is-pulsing');
+
+            spawnFireworkBurst(burstCount);
+
+            if (bannerText) {
+                showOverlayBanner(bannerText, 3600);
+            }
+
+            if (pulseTimer) clearTimeout(pulseTimer);
+            pulseTimer = setTimeout(() => {
+                hudCard.classList.remove('is-pulsing');
+            }, 950);
+        }
+
+        function applyOverlayState(state) {
+            if (!state) return;
+
+            const cfg = state.settings || {};
+            soundEnabled = cfg.soundEnabled !== false;
+
+            document.body.setAttribute('data-layout', cfg.layoutStyle || 'royal_hud');
+            document.body.setAttribute('data-theme', cfg.theme || 'cyber_tiktok');
+            document.body.setAttribute('data-digit-boxes', String(cfg.digitBoxes !== false));
+            document.body.setAttribute('data-show-goal', String(cfg.showGoalBar !== false));
+            document.body.setAttribute('data-show-likes', String(cfg.showLikesBadge !== false));
+            document.body.setAttribute('data-show-gain', String(cfg.showSessionGain !== false));
+            document.body.setAttribute('data-show-particles', String(cfg.showParticles !== false));
+
+            if (!isPreviewIframe && cfg.overlayScale) {
+                const scaleVal = Math.max(0.6, Math.min(1.6, (parseInt(cfg.overlayScale, 10) || 100) / 100));
+                document.documentElement.style.setProperty('--hud-scale', String(scaleVal));
+            }
+
+            elCustomLabel.textContent = (cfg.customLabel && cfg.customLabel.trim())
+                ? cfg.customLabel.trim()
+                : 'إجمالي المتابعين';
+
+            const user = state.featuredUser || (state.usersList && state.usersList[0]);
+            if (!user) return;
+
+            const displayName = user.nickname || user.username || 'M E Z O';
+            if (elNickname.textContent !== displayName) {
+                elNickname.textContent = displayName;
+            }
+
+            const handleStr = `@${user.username || 'mezo_1st'}`;
+            if (elHandle.textContent !== handleStr) {
+                elHandle.textContent = handleStr;
+            }
+
+            const fallbackAvatar = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(user.username || 'mezo_1st')}`;
+            const nextAvatar = user.avatar || fallbackAvatar;
+            if (elAvatar.getAttribute('data-src') !== nextAvatar) {
+                elAvatar.setAttribute('data-src', nextAvatar);
+                elAvatar.src = nextAvatar;
+                elAvatar.onerror = () => { elAvatar.src = fallbackAvatar; };
+            }
+
+            elSessionGain.textContent = `+${(parseInt(user.sessionGain, 10) || 0).toLocaleString('en-US')} اليوم ⚡`;
+            elLikesPill.textContent = `❤️ ${formatCompactLikes(user.likes || 0)}`;
+
+            const nextFollowers = Math.max(0, parseInt(user.followers, 10) || 0);
+            if (lastFollowerCount !== null && nextFollowers !== lastFollowerCount) {
+                const diff = nextFollowers - lastFollowerCount;
+                if (diff > 0) {
+                    triggerVisualPulse(`🔥 +${diff} متابع جديد انضم إلى ${displayName}!`, 42);
+                    playCyberAudio('gain');
+                } else {
+                    triggerVisualPulse(null, 18);
+                }
+            }
+            lastFollowerCount = nextFollowers;
+            renderSegmentedDigits(nextFollowers);
+
+            // Update Smart Goal Bar
+            const nextGoal = parseInt(user.nextGoal, 10) || 105000;
+            const remain = Math.max(0, parseInt(user.remainingToGoal, 10) || 0);
+            const pct = Math.min(100, Math.max(5, parseInt(user.goalProgressPct, 10) || 50));
+
+            elGoalTarget.textContent = `🎯 الهدف: ${nextGoal.toLocaleString('en-US')}`;
+            elGoalRemain.textContent = remain === 0 ? `🏆 تم تحقيق الهدف!` : `متبقي ${remain.toLocaleString('en-US')} 🔥`;
+            elGoalFill.style.width = `${pct}%`;
+        }
+
+        // Socket.IO Real-Time Listeners
+        socket.on('followers_state_update', (state) => {
+            applyOverlayState(state);
+        });
+
+        socket.on('followers_gain_celebration', (celeb) => {
+            if (celeb && celeb.followers !== undefined) {
+                const diff = celeb.delta || 1;
+                lastFollowerCount = celeb.followers;
+                renderSegmentedDigits(celeb.followers);
+                triggerVisualPulse(`🎉 +${diff} متابع جديد! الإجمالي: ${celeb.followers.toLocaleString('en-US')}`, 55);
+                playCyberAudio('gain');
+            }
+        });
+
+        socket.on('followers_special_event', (evt) => {
+            if (!evt) return;
+            if (evt.type === 'goal_reached') {
+                triggerVisualPulse(evt.message || '🏆 مبروووك! تم الوصول للهدف بنجاح 🎉', 90);
+                playCyberAudio('goal');
+            } else if (evt.type === 'hype_goal') {
+                const rem = evt.user ? (evt.user.remainingToGoal || 0).toLocaleString('en-US') : '';
+                triggerVisualPulse(evt.message || `🔥 باقي ${rem} متابع فقط على الهدف! اكبس متابعة الآن ⚡`, 45);
+                playCyberAudio('gain');
+            } else if (evt.message) {
+                triggerVisualPulse(`📢 ${evt.message}`, 40);
+                playCyberAudio('gain');
+            }
+        });
+
+        // 1-Second Direct Poll Fallback
+        async function pollFollowersState() {
+            try {
+                const res = await fetch('/api/followers/state', { cache: 'no-store' });
+                const data = await res.json();
+                if (data && data.success) {
+                    applyOverlayState(data);
+                }
+            } catch (e) {}
+        }
+
+        pollFollowersState();
+        setInterval(pollFollowersState, 1000);
+
+        // ==============================================================
+        // HTML5 CANVAS AMBIENT SPARKS & CELEBRATION FIREWORKS
+        // ==============================================================
+        const canvas = document.getElementById('fxCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let sparks = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        for (let i = 0; i < 24; i++) {
+            particles.push({
+                x: Math.random() * window.innerWidth,
+                y: Math.random() * window.innerHeight,
+                r: Math.random() * 2.2 + 0.8,
+                vx: (Math.random() - 0.5) * 0.4,
+                vy: -Math.random() * 0.7 - 0.2,
+                alpha: Math.random() * 0.65 + 0.2,
+                hue: Math.random() > 0.5 ? '#00f2fe' : '#fbbf24'
+            });
+        }
+
+        function spawnFireworkBurst(count = 40) {
+            const cx = window.innerWidth / 2;
+            const cy = window.innerHeight / 2;
+            const colors = ['#00f2fe', '#ff0050', '#fbbf24', '#34d399', '#c084fc', '#ffffff'];
+            for (let i = 0; i < count; i++) {
+                const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.3;
+                const speed = Math.random() * 6.5 + 2.2;
+                sparks.push({
+                    x: cx,
+                    y: cy,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed - 1.2,
+                    r: Math.random() * 3.2 + 1.5,
+                    alpha: 1,
+                    color: colors[Math.floor(Math.random() * colors.length)]
+                });
+            }
+        }
+
+        function animateCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (document.body.getAttribute('data-show-particles') !== 'false') {
+                for (const p of particles) {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    if (p.y < 0) {
+                        p.y = canvas.height;
+                        p.x = Math.random() * canvas.width;
+                    }
+                    ctx.save();
+                    ctx.globalAlpha = p.alpha;
+                    ctx.fillStyle = p.hue;
+                    ctx.shadowBlur = 8;
+                    ctx.shadowColor = p.hue;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+            }
+
+            for (let i = sparks.length - 1; i >= 0; i--) {
+                const s = sparks[i];
+                s.x += s.vx;
+                s.y += s.vy;
+                s.vy += 0.14; // gravity
+                s.alpha -= 0.022;
+                if (s.alpha <= 0) {
+                    sparks.splice(i, 1);
+                    continue;
+                }
+                ctx.save();
+                ctx.globalAlpha = s.alpha;
+                ctx.fillStyle = s.color;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = s.color;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            requestAnimationFrame(animateCanvas);
+        }
+        animateCanvas();
+    </script>
+</body>
+</html>

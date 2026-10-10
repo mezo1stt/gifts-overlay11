@@ -96,6 +96,13 @@
                     <span class="nav-badge hot">جديد 👑</span>
                 </button>
 
+                <!-- 5.5 إجمالي المتابعين (يتجدد كل ثانية) -->
+                <button class="nav-item" data-tab="followersSection">
+                    <span class="nav-icon">📈</span>
+                    <span class="nav-label">إجمالي المتابعين</span>
+                    <span class="nav-badge hot">كل ثانية ⚡</span>
+                </button>
+
                 <!-- 6. إدارة الحساب والمستخدمين -->
                 <button class="nav-item" data-tab="accountSection">
                     <span class="nav-icon">👤</span>
@@ -1015,6 +1022,31 @@
                                     </div>
                                 </div>
 
+                                <!-- Animation Style Selector ("وخلي ن متتغير كذا انميشن") -->
+                                <div class="form-group mt-3">
+                                    <label style="font-weight:900; font-size:13.5px; color:#fff;">🎭 نمط وأنيميشن ظهور وتغيير النص (Entrance Animations):</label>
+                                    <div class="style-cards-grid mt-1" id="fireAnimationChipsGrid">
+                                        <div class="style-chip active" data-animstyle="slide_up" onclick="setFireAnimationStyle('slide_up')">
+                                            <span>🚀 انزلاق انسيابي (Slide-In)</span>
+                                        </div>
+                                        <div class="style-chip" data-animstyle="bounce_pop" onclick="setFireAnimationStyle('bounce_pop')">
+                                            <span>💥 قفز وتكبير مطاطي (Bounce Pop)</span>
+                                        </div>
+                                        <div class="style-chip" data-animstyle="flip_3d" onclick="setFireAnimationStyle('flip_3d')">
+                                            <span>🌀 دوران ثلاثي الأبعاد (3D Flip)</span>
+                                        </div>
+                                        <div class="style-chip" data-animstyle="neon_pulse" onclick="setFireAnimationStyle('neon_pulse')">
+                                            <span>⚡ وميض نيون وجليتش (Neon Pulse)</span>
+                                        </div>
+                                        <div class="style-chip" data-animstyle="smoke_dissolve" onclick="setFireAnimationStyle('smoke_dissolve')">
+                                            <span>🌪️ تمويه وضباب دخاني (Smoke Dissolve)</span>
+                                        </div>
+                                        <div class="style-chip" data-animstyle="zoom_drop" onclick="setFireAnimationStyle('zoom_drop')">
+                                            <span>🎯 هبوط صاعق (Zoom Drop)</span>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <!-- Display Mode: Static vs Smoke Cycle (خيار يا ثابت يا متحرك وبس) -->
                                 <div class="form-group mt-3">
                                     <label>⏱️ وضع الظهور على شاشة البث (OBS):</label>
@@ -1157,7 +1189,32 @@
                                         <div class="frame-preset-card" data-framestyle="stream_banner" onclick="selectSupporterFrameStyle('stream_banner')">
                                             <div class="frame-preset-badge">شريط عريض ⚡</div>
                                             <img src="/images/frames/thumb_stream_banner.jpg" alt="شريط الدعم العريض" class="frame-preset-thumb">
-                                            <span class="frame-preset-name">شريط الدعم العريض (Stream Supporter)</span>
+                                            <span class="frame-preset-name">شريط الدعم السيبراني (Cyber Stream Banner)</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Supporter Entrance Animation Selector ("وخلي ن متتغير كذا انميشن") -->
+                                    <div class="form-group mt-3" style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:12px 14px;">
+                                        <label style="font-weight:900; font-size:13px; color:#f1f5f9; display:block; margin-bottom:8px;">🎭 أنيميشن ظهور ودجت آخر داعم (Entrance Animations):</label>
+                                        <div class="style-cards-grid mt-1" id="supporterAnimChipsGrid">
+                                            <div class="style-chip active" data-animstyle="slide_up" onclick="setSupporterAnimationStyle('slide_up')">
+                                                <span>🚀 انزلاق سلس (Slide-In)</span>
+                                            </div>
+                                            <div class="style-chip" data-animstyle="bounce_pop" onclick="setSupporterAnimationStyle('bounce_pop')">
+                                                <span>💥 قفز مطاطي (Bounce Pop)</span>
+                                            </div>
+                                            <div class="style-chip" data-animstyle="flip_3d" onclick="setSupporterAnimationStyle('flip_3d')">
+                                                <span>🌀 دوران 3D (3D Flip)</span>
+                                            </div>
+                                            <div class="style-chip" data-animstyle="neon_pulse" onclick="setSupporterAnimationStyle('neon_pulse')">
+                                                <span>⚡ توهج نيون (Neon Pulse)</span>
+                                            </div>
+                                            <div class="style-chip" data-animstyle="smoke_dissolve" onclick="setSupporterAnimationStyle('smoke_dissolve')">
+                                                <span>🌪️ ضباب دخاني (Smoke Dissolve)</span>
+                                            </div>
+                                            <div class="style-chip" data-animstyle="zoom_drop" onclick="setSupporterAnimationStyle('zoom_drop')">
+                                                <span>🎯 هبوط علوي (Zoom Drop)</span>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -1847,6 +1904,208 @@
                     </div>
                 </section>
 
+                <!-- ================= SECTION 5.5: إجمالي المتابعين (3D CYBER HUD + STREAMER EXTRAS) ================= -->
+                <section class="tab-section" id="followersSection">
+                    <div class="dashboard-grid">
+
+                        <!-- Right Column in RTL: User, Styles, Smart Goal & Extra Toggles -->
+                        <div class="panel-section control-panel">
+
+                            <!-- 1. Target TikTok User Card -->
+                            <div class="panel-card">
+                                <div class="card-header-flex">
+                                    <h3 class="card-title"><span>👤 حساب التيك توك المباشر (يتجدد كل ثانية ⚡)</span></h3>
+                                    <div class="followers-live-status-pill" style="padding:4px 12px; font-size:11.5px;">
+                                        <span class="followers-pulse-dot" id="followersLiveDot"></span>
+                                        <span id="followersLastTickText">يتجدد كل ثانية ⚡</span>
+                                    </div>
+                                </div>
+
+                                <form id="addFollowerUserForm" onsubmit="handleAddFollowerUser(event)" class="add-form mt-2">
+                                    <div class="form-group">
+                                        <label for="folUsernameInput">📱 يوزر التيك توك (@Username):</label>
+                                        <div class="user-input-group">
+                                            <span class="at-tag">@</span>
+                                            <input type="text" id="folUsernameInput" class="form-input" value="mezo_1st" placeholder="مثال: mezo_1st" required autocomplete="off">
+                                            <button type="button" class="btn-fetch" id="btnFolLookup" onclick="handleLookupFollowerUser()">🔍 فحص الحساب</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Live Fetched Preview Box -->
+                                    <div class="fetched-preview-box mt-2" id="folFetchedPreviewBox" style="display:none;">
+                                        <img id="folFetchedAvatar" src="" alt="Avatar" class="fetched-avatar">
+                                        <div class="fetched-info">
+                                            <span class="fetched-label">✓ تم العثور على الحساب في تيك توك:</span>
+                                            <div class="fetched-name" id="folFetchedName">M E Z O</div>
+                                            <div class="fetched-handle" id="folFetchedHandle">@mezo_1st</div>
+                                            <div id="folFetchedFollowersBadge" style="margin-top:4px; font-size:12.5px; font-weight:900; color:#00ff88;">👥 0 متابع</div>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn-primary mt-3" id="btnFolSubmit" style="width:100%;">
+                                        ⚡ تفعيل الحساب وتحديثه كل ثانية
+                                    </button>
+                                </form>
+
+                                <!-- Active User Summary Box -->
+                                <div class="panel-card followers-spotlight-panel mt-3" id="folSpotlightPanel" style="padding:16px; border:1px solid rgba(0,242,254,0.3); background:linear-gradient(135deg, rgba(8,14,30,0.92), rgba(20,12,38,0.92));">
+                                    <div class="fol-spot-body" id="folSpotBody" style="margin-top:0;">
+                                        <div class="fol-spot-avatar-wrap" style="width:74px; height:74px;">
+                                            <div class="fol-spot-ring" style="background:conic-gradient(#00f2fe,#ff0050,#fbbf24,#00f2fe);"></div>
+                                            <img id="folSpotAvatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=mezo_1st" alt="Avatar" class="fol-spot-avatar">
+                                        </div>
+
+                                        <div class="fol-spot-info">
+                                            <span class="fol-spot-role" style="color:#00f2fe; border-color:rgba(0,242,254,0.45); background:rgba(0,242,254,0.12);">🟢 متصل بالرادار المباشر</span>
+                                            <h3 class="fol-spot-name" id="folSpotName" style="color:#ffffff;">M E Z O</h3>
+                                            <span class="fol-spot-handle" id="folSpotHandle">@mezo_1st</span>
+                                            <div class="fol-spot-substats">
+                                                <span id="folSpotLikes">❤️ 0 لايك</span>
+                                                <span>•</span>
+                                                <span id="folSpotFollowing">👥 0 يتابع</span>
+                                                <span>•</span>
+                                                <span id="folSpotGoalInfo" style="color:#fbbf24; font-weight:800;">🎯 الهدف: 105,000</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="fol-spot-counter-box" style="border-color:rgba(0,242,254,0.45);">
+                                            <span class="fol-spot-caption">إجمالي المتابعين</span>
+                                            <div class="fol-spot-digits" id="folSpotDigits" style="color:#00f2fe; text-shadow:0 0 16px rgba(0,242,254,0.6);">0</div>
+                                            <span class="fol-spot-gain" id="folSpotGain">+0 اليوم ⚡</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 2. 4 Distinct 3D Layouts & 6 Neon Color Themes -->
+                            <div class="panel-card mt-3">
+                                <div class="card-header-flex">
+                                    <h3 class="card-title"><span>🎨 استايل الأوفرلاي والألوان (4 تصميمات 3D جديدة)</span></h3>
+                                    <span class="badge-tag" style="background:linear-gradient(135deg,#00c6ff,#ff0050);">حصري 🔥</span>
+                                </div>
+
+                                <!-- 4 Layout Shapes -->
+                                <div class="form-group mt-2">
+                                    <label>📐 شكل وتصميم الأوفرلاي (Layout Style):</label>
+                                    <div class="fol-theme-chips" id="folLayoutStyleChips">
+                                        <button type="button" class="style-chip active" data-layout="royal_hud" onclick="setFollowersLayoutStyle('royal_hud')">👑 الكبسولة الملكية 3D</button>
+                                        <button type="button" class="style-chip" data-layout="diamond_totem" onclick="setFollowersLayoutStyle('diamond_totem')">💎 الدرع الهولوجرامي</button>
+                                        <button type="button" class="style-chip" data-layout="nitro_blade" onclick="setFollowersLayoutStyle('nitro_blade')">🏎️ شريط النيترو الرياضي</button>
+                                        <button type="button" class="style-chip" data-layout="dynamic_island" onclick="setFollowersLayoutStyle('dynamic_island')">💊 الجزيرة التفاعلية</button>
+                                    </div>
+                                </div>
+
+                                <!-- 6 Color Themes -->
+                                <div class="form-group mt-3">
+                                    <label>🌈 ثيم الإضاءة والنيون (Color Theme):</label>
+                                    <div class="fol-theme-chips" id="folThemeChips">
+                                        <button type="button" class="style-chip active" data-theme="cyber_tiktok" onclick="setFollowersTheme('cyber_tiktok')">🌌 سايبر تيك توك (سماوي×وردي)</button>
+                                        <button type="button" class="style-chip" data-theme="royal_gold" onclick="setFollowersTheme('royal_gold')">👑 إمبراطوري ذهبي VIP</button>
+                                        <button type="button" class="style-chip" data-theme="hyper_violet" onclick="setFollowersTheme('hyper_violet')">🔮 المجرة البنفسجية</button>
+                                        <button type="button" class="style-chip" data-theme="emerald_matrix" onclick="setFollowersTheme('emerald_matrix')">💚 الزمرد النيون</button>
+                                        <button type="button" class="style-chip" data-theme="magma_fire" onclick="setFollowersTheme('magma_fire')">🔥 اللهب البركاني</button>
+                                        <button type="button" class="style-chip" data-theme="diamond_ice" onclick="setFollowersTheme('diamond_ice')">❄️ الجليد الألماسي</button>
+                                    </div>
+                                </div>
+
+                                <!-- Smart Widget Element Toggles ("إضافات من عندك") -->
+                                <div class="form-group mt-3">
+                                    <label>🎛️ إضافات وعناصر حية داخل الأوفرلاي (اضغط للتفعيل أو الإخفاء):</label>
+                                    <div class="fol-theme-chips" id="folFeatureToggles">
+                                        <button type="button" class="style-chip active" id="togFolDigitBoxes" onclick="toggleFollowersFeature('digitBoxes')">🔢 كبسولات أرقام 3D</button>
+                                        <button type="button" class="style-chip active" id="togFolGoalBar" onclick="toggleFollowersFeature('showGoalBar')">🎯 شريط الهدف والمتبقي</button>
+                                        <button type="button" class="style-chip active" id="togFolLikes" onclick="toggleFollowersFeature('showLikesBadge')">❤️ عداد اللايكات</button>
+                                        <button type="button" class="style-chip active" id="togFolGain" onclick="toggleFollowersFeature('showSessionGain')">⚡ زيادة البث (+اليوم)</button>
+                                        <button type="button" class="style-chip active" id="togFolParticles" onclick="toggleFollowersFeature('showParticles')">✨ جزيئات نيون وليزر</button>
+                                        <button type="button" class="style-chip active" id="togFolSound" onclick="toggleFollowersFeature('soundEnabled')">🔊 صوت المتابع الجديد</button>
+                                    </div>
+                                </div>
+
+                                <!-- Custom Goal & Custom Texts -->
+                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;" class="mt-3">
+                                    <div class="form-group" style="margin:0;">
+                                        <label for="folCustomGoalInput">🎯 هدف المتابعين (0 = تلقائي ذكي):</label>
+                                        <div class="user-input-group">
+                                            <input type="number" id="folCustomGoalInput" class="form-input" style="padding-right:12px !important;" value="0" min="0" placeholder="مثال: 105000">
+                                            <button type="button" class="btn-fetch" onclick="saveFollowersCustomGoal()">تحديد</button>
+                                        </div>
+                                    </div>
+                                    <div class="form-group" style="margin:0;">
+                                        <label for="folCustomLabelInput">🏷️ عنوان العداد:</label>
+                                        <div class="user-input-group">
+                                            <input type="text" id="folCustomLabelInput" class="form-input" style="padding-right:12px !important;" value="إجمالي المتابعين" placeholder="إجمالي المتابعين">
+                                            <button type="button" class="btn-fetch" onclick="saveFollowersCustomLabel()">حفظ</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Left Column in RTL: Live 3D Preview, Interactive Hype Triggers & OBS Link -->
+                        <div class="panel-section gifts-panel">
+
+                            <div class="panel-card">
+                                <div class="card-header-flex">
+                                    <h3 class="card-title"><span>👁️ المعاينة الحية للأوفرلاي ثلاثي الأبعاد (Live 3D HUD)</span></h3>
+                                    <a href="/followers-overlay.html" target="_blank" class="preview-external-btn">فتح بشاشة كاملة ↗</a>
+                                </div>
+
+                                <!-- Live Preview Stage -->
+                                <div class="race-sim-container mt-2" style="height:310px; border-radius:18px; overflow:hidden; position:relative; background:radial-gradient(circle at center, #0f172a 0%, #050811 85%); border:1.5px solid rgba(0,242,254,0.4); box-shadow:inset 0 0 40px rgba(0,0,0,0.85);">
+                                    <iframe id="followersSimIframe" src="/followers-overlay.html?preview=1&v=clean3" style="width:100%; height:100%; border:none; background:transparent;"></iframe>
+                                </div>
+
+                                <!-- Streamer Live Interactive Triggers ("إضافات تفاعلية للبث") -->
+                                <div class="form-group mt-3" style="background:rgba(0,242,254,0.05); border:1px solid rgba(0,242,254,0.22); border-radius:14px; padding:12px;">
+                                    <label style="color:#00f2fe; font-weight:900; margin-bottom:8px; display:block;">🎆 مؤثرات تفاعلية مباشرة تظهر على الأوفرلاي في البث:</label>
+                                    <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:8px;">
+                                        <button type="button" class="btn-fol-action gold" style="justify-content:center;" onclick="simulateFollowerGain(null, 1)">
+                                            ⚡ تجربة متابع جديد (+1)
+                                        </button>
+                                        <button type="button" class="btn-fol-action primary" style="justify-content:center;" onclick="simulateFollowerGain(null, 10)">
+                                            🚀 دفعة متابعين (+10 انفجار)
+                                        </button>
+                                        <button type="button" class="btn-fol-action" style="justify-content:center; background:rgba(251,191,36,0.16); border-color:rgba(251,191,36,0.5); color:#fde047;" onclick="triggerFollowersOverlayEvent('hype_goal')">
+                                            🔥 نداء حماسي: "قربنا على الهدف!"
+                                        </button>
+                                        <button type="button" class="btn-fol-action" style="justify-content:center; background:rgba(16,185,129,0.18); border-color:rgba(16,185,129,0.55); color:#6ee7b7;" onclick="triggerFollowersOverlayEvent('goal_reached')">
+                                            🏆 احتفالية: "وصلنا للهدف!"
+                                        </button>
+                                    </div>
+
+                                    <!-- Custom Live Shoutout Banner Input -->
+                                    <div class="user-input-group mt-2">
+                                        <input type="text" id="folLiveShoutoutInput" class="form-input" style="padding-right:12px !important;" placeholder="📢 اكتب رسالة حماسية تظهر الآن على الأوفرلاي (مثال: اكبسوا متابعة يا أساطير 🔥)">
+                                        <button type="button" class="btn-fetch" onclick="sendFollowersCustomShoutout()">إرسال للشاشة 🚀</button>
+                                    </div>
+
+                                    <div style="display:flex; gap:8px; margin-top:8px;">
+                                        <button type="button" class="btn-fol-action" style="flex:1; justify-content:center;" onclick="forceRefreshAllFollowers()" id="btnForceRefreshAllFol">
+                                            🔄 مزامنة حقيقية مع تيك توك الآن
+                                        </button>
+                                        <button type="button" class="btn-fol-action" style="justify-content:center;" onclick="resetFollowersSessionGains()">
+                                            ↺ تصفير (+اليوم)
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Direct OBS URL Copy Row -->
+                                <div class="form-group mt-3">
+                                    <label>🔗 رابط الـ Browser Source المباشر لـ OBS و TikTok Live Studio:</label>
+                                    <div class="obs-copy-row mt-1">
+                                        <input type="text" id="folObsDirectUrlInput" readonly value="http://localhost:3000/followers-overlay.html" style="direction:ltr; text-align:left; font-family:monospace;">
+                                        <button type="button" class="btn-copy" onclick="copyCurrentOverlayUrl('followers')">📋 نسخ الرابط</button>
+                                        <a href="/followers-overlay.html" target="_blank" class="btn-open-preview">👁️ فتح</a>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </section>
+
                 <!-- ================= SECTION 6: الحساب والمستخدمين ================= -->
                 <section class="tab-section" id="accountSection">
                     <div class="dashboard-grid">
@@ -2090,6 +2349,22 @@
                     </div>
                 </div>
 
+                <!-- 8. إجمالي المتابعين المباشر (Total Followers Live) -->
+                <div class="obs-link-card">
+                    <div class="obs-link-meta">
+                        <span class="obs-icon">📈</span>
+                        <div>
+                            <h4>شاشة إجمالي المتابعين المباشر (يتجدد كل ثانية)</h4>
+                            <p>يعرض توتال الفولو للكل مع صورة واسم كل حساب في تيك توك بتحديث حي كل ثانية</p>
+                        </div>
+                    </div>
+                    <div class="obs-copy-row">
+                        <input type="text" id="linkFollowersUrl" readonly>
+                        <button class="btn-copy" onclick="copyInput('linkFollowersUrl')">📋 نسخ</button>
+                        <a id="openFollowersUrl" href="/followers-overlay.html" target="_blank" class="btn-open-preview">👁️ فتح</a>
+                    </div>
+                </div>
+
             </div>
 
             <div class="modal-footer">
@@ -2235,29 +2510,35 @@
     </div>
 
     <!-- ================= MODAL: AUTHENTICATION (تسجيل الدخول) ================= -->
-    <!-- ================= AUTH MODAL (ADMIN ONLY) ================= -->
     <div class="modal-backdrop" id="authModal">
-        <div class="modal-box modal-auth">
-            <button class="modal-close" onclick="closeAuthModal()">✕</button>
+        <div class="modal-box modal-auth" style="background: radial-gradient(circle at top, #1a102f 0%, #0c0817 100%); border: 1.5px solid rgba(255, 42, 74, 0.4); box-shadow: 0 20px 60px rgba(0,0,0,0.85), 0 0 30px rgba(255,42,74,0.25); border-radius: 24px; padding: 28px; max-width: 440px;">
+            <button class="modal-close" onclick="closeAuthModal()" style="font-size:18px; color:#94a3b8; background:rgba(255,255,255,0.06); border:none; width:34px; height:34px; border-radius:50%; cursor:pointer;">✕</button>
             
-            <div class="auth-header">
-                <img src="/images/mezotik-logo.png" alt="MEZO TIK" style="width:68px; height:68px; border-radius:16px; margin-bottom:10px; filter:drop-shadow(0 0 18px #ff2a4a);">
-                <h3 style="color:#fff; font-size:22px; font-weight:900;">تسجيل دخول مدير المنصة</h3>
-                <p style="color:#aaa; font-size:13px; margin-top:4px;">حساب المدير العام لـ MEZO TIK للتحكم بجميع أوفرلاي البث</p>
+            <div class="auth-header" style="text-align: center; margin-bottom: 20px;">
+                <img src="/images/mezotik-logo.png" alt="MEZO TIK" style="width:72px; height:72px; border-radius:18px; margin-bottom:12px; filter:drop-shadow(0 0 20px #ff2a4a); border: 2px solid rgba(255,255,255,0.15);">
+                <h3 style="color:#ffffff; font-size:22px; font-weight:900; letter-spacing:0.3px; margin:0;">تسجيل الدخول | MEZO TIK</h3>
+                <p style="color:#94a3b8; font-size:12.5px; margin-top:6px; line-height:1.5;">لوحة تحكم أوفرلاي البث المباشر — مرحباً بك، سجّل دخولك للمتابعة</p>
+                
+                <div style="margin-top:10px; display:inline-flex; align-items:center; gap:6px; background:rgba(56, 189, 248, 0.1); border:1px solid rgba(56, 189, 248, 0.25); border-radius:20px; padding:4px 14px; font-size:11.5px; color:#38bdf8; font-weight:700;">
+                    <span>💡 بيانات الدخول:</span>
+                    <span style="color:#ffd700; font-family:monospace; font-size:13px; font-weight:900;">1212</span>
+                    <span>/</span>
+                    <span style="color:#ffd700; font-family:monospace; font-size:13px; font-weight:900;">1212</span>
+                </div>
             </div>
 
-            <!-- Single Admin Login Form -->
-            <form id="loginForm" onsubmit="handleLoginSubmit(event)" class="auth-form active mt-3">
+            <!-- Modern Guest Login Form -->
+            <form id="loginForm" onsubmit="handleLoginSubmit(event)" class="auth-form active">
                 <div class="form-group">
-                    <label style="color:#ddd; font-weight:700;">اسم المستخدم (Admin):</label>
-                    <input type="text" id="loginUsername" required class="form-input" value="MEZO" placeholder="MEZO">
+                    <label style="color:#e2e8f0; font-weight:800; font-size:13px; margin-bottom:6px; display:block;">👤 اسم المستخدم:</label>
+                    <input type="text" id="loginUsername" required class="form-input" placeholder="اسم المستخدم (1212)" autocomplete="off" style="font-size:14px; padding:12px 14px; border-radius:12px; background:rgba(15, 23, 42, 0.8); border:1.5px solid rgba(255,255,255,0.12); color:#fff; width:100%;">
                 </div>
-                <div class="form-group mt-2">
-                    <label style="color:#ddd; font-weight:700;">كلمة المرور:</label>
-                    <input type="password" id="loginPassword" required class="form-input" placeholder="أدخل كلمة المرور (MOAZ1234)">
+                <div class="form-group mt-3">
+                    <label style="color:#e2e8f0; font-weight:800; font-size:13px; margin-bottom:6px; display:block;">🔑 كلمة المرور:</label>
+                    <input type="password" id="loginPassword" required class="form-input" placeholder="كلمة المرور (1212)" autocomplete="off" style="font-size:14px; padding:12px 14px; border-radius:12px; background:rgba(15, 23, 42, 0.8); border:1.5px solid rgba(255,255,255,0.12); color:#fff; width:100%;">
                 </div>
-                <button type="submit" class="btn-primary mt-3 btn-full" style="padding:14px; font-size:16px; font-weight:900; background:linear-gradient(135deg, #ff0044, #990022); box-shadow:0 0 20px rgba(255,0,68,0.5);">
-                    👑 دخول لوحة التحكم (MEZO)
+                <button type="submit" class="btn-primary mt-4 btn-full" style="padding:14px; font-size:15.5px; font-weight:900; border-radius:14px; background:linear-gradient(135deg, #ff0055, #9333ea); box-shadow:0 0 25px rgba(255,0,85,0.45); border:none; cursor:pointer; width:100%; color:#fff; transition:transform 0.15s ease, box-shadow 0.15s ease;">
+                    🚀 دخول لوحة التحكم
                 </button>
             </form>
         </div>

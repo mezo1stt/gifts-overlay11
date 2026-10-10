@@ -6,7 +6,9 @@
     "team_b_name": "المساعدين",
     "team_a_score": 0,
     "team_b_score": 0,
-    "updated_at": 1791485383452
+    "updated_at": 1791485879618,
+    "team_a_color": "#ff2a4a",
+    "team_b_color": "#22ff88"
   },
   "board_XXXX": {
     "board_id": "board_XXXX",
@@ -15,6 +17,8 @@
     "team_b_name": "المساعدين",
     "team_a_score": 0,
     "team_b_score": 0,
-    "updated_at": 1791485383452
+    "updated_at": 1791485879619,
+    "team_a_color": "#ff2a4a",
+    "team_b_color": "#22ff88"
   }
 }

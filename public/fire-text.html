@@ -386,28 +386,49 @@
             transition: opacity 0.38s ease-out, transform 0.38s ease-out, filter 0.38s ease-out !important;
         }
 
-        /* 3. Smooth Slide In (ظهور انسيابي ناعم SLIDE IN) */
-        .banner-slide-in {
-            animation: animNeonSlideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+        /* ================= MULTIPLE ENTRANCE & TRANSITION ANIMATIONS ================= */
+        @keyframes animNeonSlideIn {
+            0% { opacity: 0; transform: translateY(40px) scale(0.92); filter: blur(5px); }
+            65% { opacity: 1; transform: translateY(-3px) scale(1.02); filter: blur(0px); }
+            100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0px); }
+        }
+        @keyframes animNeonBouncePop {
+            0% { opacity: 0; transform: scale(0.4) translateY(20px); filter: blur(6px); }
+            60% { opacity: 1; transform: scale(1.08) translateY(-4px); filter: blur(0px); }
+            82% { transform: scale(0.96) translateY(2px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        @keyframes animNeonFlip3D {
+            0% { opacity: 0; transform: perspective(800px) rotateX(75deg) translateY(30px) scale(0.85); filter: blur(8px); }
+            70% { opacity: 1; transform: perspective(800px) rotateX(-8deg) scale(1.02); filter: blur(0px); }
+            100% { opacity: 1; transform: perspective(800px) rotateX(0deg) scale(1); }
+        }
+        @keyframes animNeonPulseGlitch {
+            0% { opacity: 0; transform: scale(0.95); filter: brightness(3) drop-shadow(0 0 35px var(--fire-c, #ff1e00)); }
+            25% { opacity: 0.3; transform: scale(1.02); filter: brightness(1); }
+            45% { opacity: 0.9; transform: scale(0.98); filter: brightness(3.2) drop-shadow(0 0 50px var(--shine-c, #ffd700)); }
+            70% { opacity: 0.7; }
+            100% { opacity: 1; transform: scale(1); filter: none; }
+        }
+        @keyframes animNeonSmokeDissolve {
+            0% { opacity: 0; transform: scale(0.88); filter: blur(18px) brightness(1.8); }
+            55% { opacity: 0.8; filter: blur(4px) brightness(1.2); }
+            100% { opacity: 1; transform: scale(1); filter: blur(0px) brightness(1); }
+        }
+        @keyframes animNeonZoomDrop {
+            0% { opacity: 0; transform: translateY(-70px) scale(1.25); filter: blur(8px); }
+            65% { opacity: 1; transform: translateY(6px) scale(0.98); filter: blur(0px); }
+            85% { transform: translateY(-2px) scale(1.01); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        @keyframes animNeonSlideIn {
-            0% {
-                opacity: 0;
-                transform: translateY(40px) scale(0.92);
-                filter: blur(5px);
-            }
-            65% {
-                opacity: 1;
-                transform: translateY(-3px) scale(1.02);
-                filter: blur(0px);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-                filter: blur(0px);
-            }
-        }
+        .banner-anim-slide_up { animation: animNeonSlideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards !important; }
+        .banner-anim-bounce_pop { animation: animNeonBouncePop 0.85s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important; }
+        .banner-anim-flip_3d { animation: animNeonFlip3D 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards !important; }
+        .banner-anim-neon_pulse { animation: animNeonPulseGlitch 0.75s ease-out forwards !important; }
+        .banner-anim-smoke_dissolve { animation: animNeonSmokeDissolve 0.9s ease-out forwards !important; }
+        .banner-anim-zoom_drop { animation: animNeonZoomDrop 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards !important; }
+        .banner-slide-in { animation: animNeonSlideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards !important; }
     </style>
 </head>
 <body>
@@ -458,6 +479,7 @@
             neon_enabled: true,
             neon_strength: 95,
             banner_style: 'transparent',
+            animation_style: 'slide_up',
             display_mode: 'cycle',
             smoke_enabled: true,
             hold_duration: 6,
@@ -503,7 +525,8 @@
                 return cardPos === 'edge-left' ? 'card-slide-in-left' : 'card-slide-in-right';
             }
             const frame = settings.banner_style || 'transparent';
-            return `frame-${frame} banner-slide-in`;
+            const anim = settings.animation_style || 'slide_up';
+            return `frame-${frame} banner-anim-${anim}`;
         }
 
         function getHoldingClass() {

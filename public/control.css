@@ -3595,3 +3595,654 @@ input[type="range"] {
     border-radius: 16px;
     overflow: hidden;
 }
+
+/* ================= SECTION 5.5: إجمالي المتابعين (LIVE TIKTOK FOLLOWERS) ================= */
+.followers-hero-banner {
+    position: relative;
+    background: linear-gradient(135deg, rgba(12, 16, 36, 0.96) 0%, rgba(22, 12, 38, 0.96) 60%, rgba(16, 20, 42, 0.96) 100%);
+    border: 2px solid rgba(0, 242, 254, 0.45);
+    border-radius: 22px;
+    padding: 22px 26px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55), 0 0 35px rgba(0, 242, 254, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+    overflow: hidden;
+}
+
+.followers-hero-sweep {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 200%;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, #00f2fe, #ff0050, #ffd700, #00f2fe, transparent);
+    animation: folHeroSweep 2.2s linear infinite;
+}
+
+@keyframes folHeroSweep {
+    0% { transform: translateX(-50%); }
+    100% { transform: translateX(50%); }
+}
+
+.followers-hero-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.followers-hero-title-group {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.followers-hero-icon {
+    font-size: 36px;
+    filter: drop-shadow(0 0 14px rgba(0, 242, 254, 0.7));
+}
+
+.followers-hero-title {
+    font-size: 21px;
+    font-weight: 900;
+    background: linear-gradient(135deg, #ffffff 0%, #00f2fe 55%, #ffd700 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
+}
+
+.followers-hero-sub {
+    font-size: 12.5px;
+    color: #94a3b8;
+    margin-top: 3px;
+}
+
+.followers-live-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0, 255, 136, 0.12);
+    border: 1.5px solid rgba(0, 255, 136, 0.45);
+    padding: 7px 16px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 900;
+    color: #00ff88;
+    box-shadow: 0 0 18px rgba(0, 255, 136, 0.25);
+}
+
+.followers-pulse-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #00ff88;
+    box-shadow: 0 0 12px #00ff88;
+    animation: folPulse 1s ease-in-out infinite;
+}
+
+@keyframes folPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.45); opacity: 0.4; }
+}
+
+.followers-hero-stats-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 0.85fr;
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.followers-hero-stat-card {
+    background: rgba(8, 11, 24, 0.78);
+    border: 1.5px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 14px 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: transform 0.25s ease, border-color 0.25s ease;
+}
+
+.followers-hero-stat-card.primary-stat {
+    background: linear-gradient(135deg, rgba(0, 242, 254, 0.14), rgba(255, 0, 80, 0.12));
+    border-color: rgba(0, 242, 254, 0.55);
+    box-shadow: 0 0 24px rgba(0, 242, 254, 0.18);
+}
+
+.followers-hero-stat-card .stat-label {
+    font-size: 12px;
+    font-weight: 800;
+    color: #cbd5e1;
+    margin-bottom: 4px;
+}
+
+.followers-hero-stat-card .stat-big-value {
+    font-family: 'Changa', 'Cairo', sans-serif;
+    font-size: 32px;
+    font-weight: 900;
+    color: #ffffff;
+    line-height: 1.1;
+    direction: ltr;
+    text-align: right;
+    text-shadow: 0 0 18px rgba(0, 242, 254, 0.5);
+    transition: transform 0.25s ease, color 0.25s ease;
+}
+
+.followers-hero-stat-card.primary-stat .stat-big-value {
+    font-size: 38px;
+    color: #00f2fe;
+}
+
+.followers-hero-stat-card .stat-big-value.gain-color {
+    color: #00ff88;
+    text-shadow: 0 0 16px rgba(0, 255, 136, 0.45);
+}
+
+.followers-hero-stat-card .stat-big-value.likes-color {
+    color: #ff4d79;
+    text-shadow: 0 0 16px rgba(255, 77, 121, 0.45);
+}
+
+.followers-hero-stat-card .stat-big-value.bump {
+    transform: scale(1.1);
+    color: #ffd700 !important;
+}
+
+.followers-hero-stat-card .stat-sub {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: 4px;
+}
+
+.followers-hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.btn-fol-action {
+    border: none;
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+}
+
+.btn-fol-action.primary {
+    background: linear-gradient(135deg, #00f2fe, #0088ff);
+    color: #04101e;
+    box-shadow: 0 4px 15px rgba(0, 242, 254, 0.35);
+}
+
+.btn-fol-action.gold {
+    background: linear-gradient(135deg, #ffd700, #ff8c00);
+    color: #1a0f00;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.35);
+}
+
+.btn-fol-action.secondary {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #fff;
+}
+
+.btn-fol-action.obs {
+    background: linear-gradient(135deg, #ff0050, #7928ca);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(255, 0, 80, 0.35);
+}
+
+.btn-fol-action.link {
+    background: rgba(0, 242, 254, 0.12);
+    border: 1px solid rgba(0, 242, 254, 0.4);
+    color: #00f2fe;
+}
+
+.btn-fol-action:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+}
+
+/* Spotlight Panel inside Control */
+.followers-spotlight-panel {
+    position: relative;
+    background: linear-gradient(135deg, rgba(16, 22, 46, 0.95), rgba(26, 14, 38, 0.95)) !important;
+    border: 2px solid #00f2fe !important;
+    box-shadow: 0 0 28px rgba(0, 242, 254, 0.28) !important;
+}
+
+.fol-spot-body {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+}
+
+.fol-spot-avatar-wrap {
+    position: relative;
+    width: 82px;
+    height: 82px;
+    flex-shrink: 0;
+}
+
+.fol-spot-ring {
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #00f2fe, #ff0050, #ffd700);
+    animation: folSpin 4s linear infinite;
+}
+
+@keyframes folSpin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.fol-spot-avatar {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #0b0f1e;
+    z-index: 1;
+    background: #000;
+}
+
+.fol-spot-rank {
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #ffd700, #ff8c00);
+    color: #000;
+    font-size: 10.5px;
+    font-weight: 900;
+    padding: 2px 10px;
+    border-radius: 999px;
+    z-index: 2;
+    white-space: nowrap;
+}
+
+.fol-spot-info {
+    flex: 1;
+    min-width: 150px;
+}
+
+.fol-spot-role {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 800;
+    color: #ffd700;
+    background: rgba(255, 215, 0, 0.12);
+    border: 1px solid rgba(255, 215, 0, 0.35);
+    padding: 2px 10px;
+    border-radius: 999px;
+    margin-bottom: 4px;
+}
+
+.fol-spot-name {
+    font-size: 20px;
+    font-weight: 900;
+    color: #fff;
+    margin: 0;
+}
+
+.fol-spot-handle {
+    font-size: 12.5px;
+    color: #94a3b8;
+    direction: ltr;
+    display: inline-block;
+}
+
+.fol-spot-substats {
+    display: flex;
+    gap: 10px;
+    font-size: 12px;
+    font-weight: 800;
+    color: #cbd5e1;
+    margin-top: 5px;
+}
+
+.fol-spot-counter-box {
+    background: rgba(6, 10, 22, 0.85);
+    border: 1.5px solid rgba(0, 242, 254, 0.45);
+    border-radius: 16px;
+    padding: 10px 16px;
+    text-align: center;
+    min-width: 145px;
+}
+
+.fol-spot-caption {
+    font-size: 11px;
+    font-weight: 800;
+    color: #94a3b8;
+    display: block;
+}
+
+.fol-spot-digits {
+    font-family: 'Changa', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    color: #00f2fe;
+    direction: ltr;
+    line-height: 1.1;
+    text-shadow: 0 0 14px rgba(0, 242, 254, 0.45);
+}
+
+.fol-spot-gain {
+    font-size: 11.5px;
+    font-weight: 900;
+    color: #00ff88;
+    direction: ltr;
+    display: block;
+}
+
+.fol-goal-box {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    padding: 10px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.fol-goal-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11.5px;
+    font-weight: 800;
+    color: #e2e8f0;
+    margin-bottom: 6px;
+}
+
+.fol-goal-track {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.fol-goal-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00f2fe, #ff0050, #ffd700);
+    border-radius: 999px;
+    transition: width 0.4s ease;
+}
+
+.fol-spot-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.fol-theme-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Visual Grid of All TikTok Users Cards ("وصوره المستخدم في التيك توك ظاهره واسمه وتوتال الفولو لكلو") */
+.fol-users-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(265px, 1fr));
+    gap: 14px;
+}
+
+.fol-user-card {
+    position: relative;
+    background: linear-gradient(145deg, rgba(16, 20, 40, 0.92), rgba(10, 12, 26, 0.95));
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+    border-radius: 20px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: all 0.28s ease;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+}
+
+.fol-user-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(0, 242, 254, 0.55);
+    box-shadow: 0 12px 32px rgba(0, 242, 254, 0.22);
+}
+
+.fol-user-card.is-featured {
+    border: 2px solid #ffd700;
+    background: linear-gradient(145deg, rgba(32, 24, 10, 0.92), rgba(14, 16, 34, 0.95));
+    box-shadow: 0 0 26px rgba(255, 215, 0, 0.28);
+}
+
+.fol-user-card.bump-card {
+    border-color: #00ff88 !important;
+    box-shadow: 0 0 30px rgba(0, 255, 136, 0.45) !important;
+}
+
+.fol-card-top {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+}
+
+.fol-card-avatar-box {
+    position: relative;
+    width: 68px;
+    height: 68px;
+    flex-shrink: 0;
+}
+
+.fol-card-avatar-ring {
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #00f2fe, #ff0050);
+    z-index: 0;
+}
+
+.fol-user-card.is-featured .fol-card-avatar-ring {
+    background: linear-gradient(135deg, #ffd700, #ff8c00, #ff0050);
+}
+
+.fol-card-avatar {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2.5px solid #0b0e1d;
+    z-index: 1;
+    background: #111827;
+}
+
+.fol-card-rank-pill {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #0f172a;
+    border: 1.5px solid #00f2fe;
+    color: #00f2fe;
+    font-size: 11px;
+    font-weight: 900;
+    padding: 1px 7px;
+    border-radius: 999px;
+    z-index: 2;
+}
+
+.fol-user-card.is-featured .fol-card-rank-pill {
+    background: linear-gradient(135deg, #ffd700, #ff8c00);
+    color: #000;
+    border-color: #fff;
+}
+
+.fol-card-identity {
+    flex: 1;
+    min-width: 0;
+}
+
+.fol-card-role {
+    font-size: 10.5px;
+    font-weight: 800;
+    color: #00f2fe;
+    background: rgba(0, 242, 254, 0.1);
+    padding: 1px 8px;
+    border-radius: 999px;
+    display: inline-block;
+    margin-bottom: 3px;
+}
+
+.fol-card-name {
+    font-size: 17px;
+    font-weight: 900;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.25;
+}
+
+.fol-card-handle {
+    font-size: 12px;
+    font-weight: 700;
+    color: #94a3b8;
+    direction: ltr;
+    display: block;
+}
+
+.fol-card-counter-banner {
+    background: rgba(6, 9, 20, 0.85);
+    border: 1px solid rgba(0, 242, 254, 0.3);
+    border-radius: 14px;
+    padding: 10px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.fol-card-count-left {
+    display: flex;
+    flex-direction: column;
+}
+
+.fol-card-count-label {
+    font-size: 11px;
+    font-weight: 800;
+    color: #94a3b8;
+}
+
+.fol-card-count-digits {
+    font-family: 'Changa', 'Cairo', sans-serif;
+    font-size: 25px;
+    font-weight: 900;
+    color: #ffffff;
+    direction: ltr;
+    line-height: 1.1;
+    text-shadow: 0 0 12px rgba(0, 242, 254, 0.45);
+}
+
+.fol-card-count-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 3px;
+}
+
+.fol-card-gain-badge {
+    background: rgba(0, 255, 136, 0.15);
+    border: 1px solid rgba(0, 255, 136, 0.4);
+    color: #00ff88;
+    font-size: 11px;
+    font-weight: 900;
+    padding: 2px 8px;
+    border-radius: 999px;
+    direction: ltr;
+}
+
+.fol-card-likes-badge {
+    font-size: 11px;
+    font-weight: 800;
+    color: #fda4af;
+    direction: ltr;
+}
+
+.fol-card-mini-goal {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.fol-card-mini-goal-text {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10.5px;
+    font-weight: 800;
+    color: #94a3b8;
+}
+
+.fol-card-mini-goal-bar {
+    height: 5px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.fol-card-mini-goal-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00f2fe, #ff0050);
+    border-radius: 999px;
+}
+
+.fol-card-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 6px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.fol-card-btn {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #e2e8f0;
+    padding: 6px 8px;
+    border-radius: 9px;
+    font-family: inherit;
+    font-size: 11.5px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.fol-card-btn:hover {
+    background: rgba(0, 242, 254, 0.2);
+    border-color: #00f2fe;
+    color: #fff;
+}
+
+.fol-card-btn.del:hover {
+    background: rgba(239, 68, 68, 0.25);
+    border-color: #ef4444;
+    color: #fca5a5;
+}
+
+@media (max-width: 980px) {
+    .followers-hero-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (max-width: 560px) {
+    .followers-hero-stats-grid {
+        grid-template-columns: 1fr;
+    }
+}

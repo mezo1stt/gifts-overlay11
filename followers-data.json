@@ -1,0 +1,38 @@
+{
+  "title": "إجمالي المتابعين",
+  "featuredUserId": "mezo_1st",
+  "users": {
+    "mezo_1st": {
+      "id": "mezo_1st",
+      "username": "mezo_1st",
+      "nickname": "M E Z O",
+      "avatar": "https://p16-common-sign.tiktokcdn.com/tos-alisg-avt-0068/efebc69735bed611542788c11d66ecb0~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=57a6d010&x-expires=1791802800&x-signature=0B%2BqTtSM%2BGyZmYWGSXcHcvbeaTc%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my",
+      "followers": 104393,
+      "initialFollowers": 104393,
+      "sessionGain": 0,
+      "lastDelta": 0,
+      "likes": 3840,
+      "following": 112,
+      "videos": 5,
+      "verified": true,
+      "role": "نجم البث 👑",
+      "updatedAt": 1791632674830,
+      "lastCheckedAt": 1791632674830
+    }
+  },
+  "history": [],
+  "settings": {
+    "layoutStyle": "royal_hud",
+    "theme": "cyber_tiktok",
+    "customLabel": "إجمالي المتابعين",
+    "customBadgeText": "نجم البث المباشر 👑",
+    "customGoal": 0,
+    "showGoalBar": true,
+    "showLikesBadge": true,
+    "showSessionGain": true,
+    "showParticles": true,
+    "digitBoxes": true,
+    "soundEnabled": true,
+    "overlayScale": 100
+  }
+}

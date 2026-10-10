@@ -31,7 +31,17 @@ app.use(cors());
 app.use(express.json({ limit: '25mb' }));
 app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 app.use('/images', express.static(imagesDir));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), {
+    etag: false,
+    lastModified: false,
+    setHeaders: (res, filePath) => {
+        if (/\.(html|js|css|json)$/i.test(filePath)) {
+            res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+            res.setHeader('Pragma', 'no-cache');
+            res.setHeader('Expires', '0');
+        }
+    }
+}));
 
 // Configure Multer (Memory Storage for easy upload to Cloud / Disk)
 const upload = multer({
@@ -1457,17 +1467,20 @@ function addRaceHistory(type, text) {
     if (raceState.history.length > 100) raceState.history.pop();
 }
 
-// 1. TikTok User Info Fetcher
+// 1. TikTok User Info & Live Stats Fetcher (Exact statsV2 followerCount)
 function fetchTikTokUser(username) {
     return new Promise((resolve) => {
         const cleanUser = username.trim().replace(/^@/, '');
-        const url = `https://www.tiktok.com/@${cleanUser}`;
+        const url = `https://www.tiktok.com/@${encodeURIComponent(cleanUser)}`;
 
-        https.get(url, {
+        const req = https.get(url, {
+            timeout: 4500,
             headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.5'
+                'Accept-Language': 'en-US,en;q=0.5',
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache'
             }
         }, (res) => {
             let html = '';
@@ -1475,15 +1488,36 @@ function fetchTikTokUser(username) {
             res.on('end', () => {
                 let nickname = cleanUser;
                 let avatar = '';
+                let verified = false;
+                let followers = null;
+                let likes = null;
+                let following = null;
+                let videos = null;
 
                 const sgiMatch = html.match(/<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__"[^>]*>([\s\S]*?)<\/script>/);
                 if (sgiMatch && sgiMatch[1]) {
                     try {
                         const parsed = JSON.parse(sgiMatch[1]);
-                        const userDetail = parsed['__DEFAULT_SCOPE__']?.['webapp.user-detail']?.userInfo?.user;
+                        const userInfo = parsed['__DEFAULT_SCOPE__']?.['webapp.user-detail']?.userInfo;
+                        const userDetail = userInfo?.user;
+                        const statsV2 = userInfo?.statsV2;
+                        const stats = userInfo?.stats;
+
                         if (userDetail) {
                             nickname = userDetail.nickname || userDetail.uniqueId || cleanUser;
                             avatar = userDetail.avatarLarger || userDetail.avatarMedium || userDetail.avatarThumb || '';
+                            verified = !!userDetail.verified;
+                        }
+                        if (statsV2 || stats) {
+                            const fRaw = statsV2?.followerCount ?? stats?.followerCount;
+                            const lRaw = statsV2?.heartCount ?? statsV2?.heart ?? stats?.heartCount ?? stats?.heart;
+                            const fgRaw = statsV2?.followingCount ?? stats?.followingCount;
+                            const vRaw = statsV2?.videoCount ?? stats?.videoCount;
+
+                            if (fRaw !== undefined && fRaw !== null) followers = Math.max(0, parseInt(fRaw, 10) || 0);
+                            if (lRaw !== undefined && lRaw !== null) likes = Math.max(0, parseInt(lRaw, 10) || 0);
+                            if (fgRaw !== undefined && fgRaw !== null) following = Math.max(0, parseInt(fgRaw, 10) || 0);
+                            if (vRaw !== undefined && vRaw !== null) videos = Math.max(0, parseInt(vRaw, 10) || 0);
                         }
                     } catch (e) {}
                 }
@@ -1496,6 +1530,14 @@ function fetchTikTokUser(username) {
                     const nickMatch = html.match(/"nickname":"([^"]+)"/);
                     if (nickMatch) nickname = nickMatch[1];
                 }
+                if (followers === null) {
+                    const fMatch = html.match(/"followerCount"\s*:\s*"?(\d+)"?/);
+                    if (fMatch) followers = parseInt(fMatch[1], 10) || 0;
+                }
+                if (likes === null) {
+                    const lMatch = html.match(/"heartCount"\s*:\s*"?(\d+)"?/) || html.match(/"heart"\s*:\s*"?(\d+)"?/);
+                    if (lMatch) likes = parseInt(lMatch[1], 10) || 0;
+                }
 
                 if (!avatar) {
                     avatar = `https://api.dicebear.com/7.x/bottts/svg?seed=${cleanUser}`;
@@ -1505,15 +1547,45 @@ function fetchTikTokUser(username) {
                     platform: 'tiktok',
                     username: cleanUser,
                     nickname,
-                    avatar
+                    avatar,
+                    verified,
+                    followers: followers !== null ? followers : 0,
+                    likes: likes !== null ? likes : 0,
+                    following: following !== null ? following : 0,
+                    videos: videos !== null ? videos : 0,
+                    fetchedLive: followers !== null
                 });
             });
-        }).on('error', () => {
+        });
+
+        req.on('timeout', () => {
+            req.destroy();
             resolve({
                 platform: 'tiktok',
                 username: cleanUser,
                 nickname: cleanUser,
-                avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${cleanUser}`
+                avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${cleanUser}`,
+                verified: false,
+                followers: 0,
+                likes: 0,
+                following: 0,
+                videos: 0,
+                fetchedLive: false
+            });
+        });
+
+        req.on('error', () => {
+            resolve({
+                platform: 'tiktok',
+                username: cleanUser,
+                nickname: cleanUser,
+                avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${cleanUser}`,
+                verified: false,
+                followers: 0,
+                likes: 0,
+                following: 0,
+                videos: 0,
+                fetchedLive: false
             });
         });
     });
@@ -1799,6 +1871,505 @@ const handleRaceSettings = (req, res) => {
 app.post('/api/race/settings', handleRaceSettings);
 app.post('/api/settings', handleRaceSettings);
 
+// ================= إجمالي المتابعين (LIVE TIKTOK FOLLOWERS - 1s AUTO REFRESH) ================= //
+const followersDataPath = path.join(dataDir, 'followers-data.json');
+
+function getDefaultFollowersState() {
+    return {
+        title: 'إجمالي المتابعين',
+        featuredUserId: 'mezo_1st',
+        users: {},
+        history: [],
+        settings: {
+            layoutStyle: 'royal_hud',
+            theme: 'cyber_tiktok',
+            customLabel: 'إجمالي المتابعين',
+            customBadgeText: 'نجم البث المباشر 👑',
+            customGoal: 0,
+            showGoalBar: true,
+            showLikesBadge: true,
+            showSessionGain: true,
+            showParticles: true,
+            digitBoxes: true,
+            soundEnabled: true,
+            overlayScale: 100
+        }
+    };
+}
+
+let followersState = getDefaultFollowersState();
+if (fs.existsSync(followersDataPath)) {
+    try {
+        const raw = fs.readFileSync(followersDataPath, 'utf8');
+        const parsed = JSON.parse(raw);
+        followersState = {
+            ...getDefaultFollowersState(),
+            ...parsed,
+            settings: { ...getDefaultFollowersState().settings, ...(parsed.settings || {}) }
+        };
+    } catch (e) {
+        console.error('Error reading followers-data.json:', e.message);
+    }
+}
+
+function saveFollowersState() {
+    try {
+        fs.writeFileSync(followersDataPath, JSON.stringify(followersState, null, 2), 'utf8');
+    } catch (e) {
+        console.error('Error saving followers-data.json:', e.message);
+    }
+}
+
+function seedDefaultFollowerUserIfNeeded() {
+    if (!followersState.users) followersState.users = {};
+    if (!followersState.users['mezo_1st']) {
+        const judgeMezo = (raceState && raceState.judges && raceState.judges['tiktok_mezo_1st']) || null;
+        followersState.users['mezo_1st'] = {
+            id: 'mezo_1st',
+            username: 'mezo_1st',
+            nickname: judgeMezo ? judgeMezo.nickname : 'M E Z O',
+            avatar: judgeMezo && judgeMezo.avatar ? judgeMezo.avatar : 'https://api.dicebear.com/7.x/bottts/svg?seed=mezo_1st',
+            followers: 104393,
+            initialFollowers: 104393,
+            sessionGain: 0,
+            lastDelta: 0,
+            likes: 1250000,
+            following: 45,
+            videos: 120,
+            verified: true,
+            role: 'نجم البث 👑',
+            updatedAt: Date.now()
+        };
+    }
+    if (!followersState.featuredUserId || !followersState.users[followersState.featuredUserId]) {
+        followersState.featuredUserId = 'mezo_1st';
+    }
+    saveFollowersState();
+}
+
+seedDefaultFollowerUserIfNeeded();
+
+function getFollowersSortedList() {
+    const list = Object.values(followersState.users || {});
+    list.sort((a, b) => (b.followers || 0) - (a.followers || 0));
+    return list;
+}
+
+function getFollowersFeaturedUser() {
+    if (followersState.featuredUserId && followersState.users && followersState.users[followersState.featuredUserId]) {
+        return followersState.users[followersState.featuredUserId];
+    }
+    const list = getFollowersSortedList();
+    return list.length > 0 ? list[0] : null;
+}
+
+function getNextFollowerMilestone(count) {
+    const c = Math.max(0, parseInt(count, 10) || 0);
+    if (c < 100) return 100;
+    if (c < 500) return Math.ceil((c + 1) / 100) * 100;
+    if (c < 1000) return 1000;
+    if (c < 10000) return Math.ceil((c + 1) / 500) * 500;
+    if (c < 100000) return Math.ceil((c + 1) / 1000) * 1000;
+    return Math.ceil((c + 1) / 1000) * 1000;
+}
+
+function buildFollowersPayload() {
+    const cfg = followersState.settings || getDefaultFollowersState().settings;
+    const customGoalNum = parseInt(cfg.customGoal, 10) || 0;
+
+    const usersList = getFollowersSortedList().map((u, idx) => {
+        const fCount = parseInt(u.followers, 10) || 0;
+        const autoGoal = getNextFollowerMilestone(fCount);
+        const nextGoal = customGoalNum > 0 ? customGoalNum : autoGoal;
+        const stepSize = nextGoal <= 100 ? 100 : (nextGoal <= 1000 ? 100 : (nextGoal <= 10000 ? 500 : 1000));
+        const prevStep = customGoalNum > 0
+            ? Math.max(0, Math.min(u.initialFollowers || Math.floor(fCount * 0.95), nextGoal - stepSize))
+            : Math.max(0, nextGoal - stepSize);
+        const span = Math.max(1, nextGoal - prevStep);
+        const rawPct = fCount >= nextGoal ? 100 : Math.round(((fCount - prevStep) / span) * 100);
+        const progressPct = Math.min(100, Math.max(6, rawPct));
+        return {
+            ...u,
+            rank: idx + 1,
+            nextGoal,
+            remainingToGoal: Math.max(0, nextGoal - fCount),
+            goalProgressPct: progressPct
+        };
+    });
+
+    const featuredRaw = getFollowersFeaturedUser();
+    const featuredUser = featuredRaw ? (usersList.find(u => u.id === featuredRaw.id) || usersList[0]) : null;
+
+    return {
+        success: true,
+        title: followersState.title || 'إجمالي المتابعين',
+        featuredUser,
+        usersList,
+        grandTotalFollowers: featuredUser ? (parseInt(featuredUser.followers, 10) || 0) : 0,
+        grandTotalLikes: featuredUser ? (parseInt(featuredUser.likes, 10) || 0) : 0,
+        grandTotalFollowing: featuredUser ? (parseInt(featuredUser.following, 10) || 0) : 0,
+        grandTotalSessionGain: featuredUser ? (parseInt(featuredUser.sessionGain, 10) || 0) : 0,
+        totalUsersCount: usersList.length,
+        settings: cfg,
+        history: (followersState.history || []).slice(0, 35),
+        lastTickAt: Date.now()
+    };
+}
+
+function broadcastFollowersState() {
+    io.emit('followers_state_update', buildFollowersPayload());
+}
+
+function addFollowersHistory(type, text, meta = {}) {
+    if (!followersState.history) followersState.history = [];
+    followersState.history.unshift({
+        id: Date.now() + Math.random().toString(36).substr(2, 4),
+        type,
+        text,
+        ...meta,
+        time: new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+    });
+    if (followersState.history.length > 100) followersState.history.pop();
+}
+
+async function refreshSingleFollowerUser(userKey, forceExact = false) {
+    const existing = followersState.users ? followersState.users[userKey] : null;
+    if (!existing || !existing.username) return null;
+
+    try {
+        const fetched = await fetchTikTokUser(existing.username);
+        if (!fetched) return existing;
+
+        let changed = false;
+        if (fetched.nickname && fetched.nickname !== existing.username && fetched.nickname !== existing.nickname) {
+            existing.nickname = fetched.nickname;
+            changed = true;
+        }
+        if (fetched.avatar && !fetched.avatar.includes('dicebear') && fetched.avatar !== existing.avatar) {
+            existing.avatar = fetched.avatar;
+            changed = true;
+        }
+        if (fetched.verified !== undefined) {
+            existing.verified = !!fetched.verified;
+        }
+
+        if (fetched.fetchedLive && fetched.followers > 0) {
+            const oldFollowers = parseInt(existing.followers, 10) || 0;
+            if (!existing.initialFollowers || existing.initialFollowers <= 0) {
+                existing.initialFollowers = fetched.followers;
+            }
+
+            const newFollowers = forceExact ? fetched.followers : Math.max(oldFollowers, fetched.followers);
+            const delta = oldFollowers > 0 ? (newFollowers - oldFollowers) : 0;
+
+            if (newFollowers !== oldFollowers) {
+                existing.followers = newFollowers;
+                changed = true;
+            }
+
+            if (delta > 0) {
+                existing.sessionGain = (parseInt(existing.sessionGain, 10) || 0) + delta;
+                existing.lastDelta = delta;
+                existing.lastGainAt = Date.now();
+                changed = true;
+
+                addFollowersHistory(
+                    'gain',
+                    `🔥 متابع جديد لـ ${existing.nickname} (+${delta})! الإجمالي الآن: ${newFollowers.toLocaleString()} متابع`,
+                    { username: existing.username, nickname: existing.nickname, avatar: existing.avatar, delta, followers: newFollowers }
+                );
+
+                io.emit('followers_gain_celebration', {
+                    id: existing.id,
+                    username: existing.username,
+                    nickname: existing.nickname,
+                    avatar: existing.avatar,
+                    followers: newFollowers,
+                    delta
+                });
+            }
+
+            if (fetched.likes > 0) existing.likes = fetched.likes;
+            if (fetched.following > 0) existing.following = fetched.following;
+            if (fetched.videos > 0) existing.videos = fetched.videos;
+        }
+
+        existing.lastCheckedAt = Date.now();
+        if (changed) {
+            existing.updatedAt = Date.now();
+            saveFollowersState();
+        }
+        return existing;
+    } catch (e) {
+        return existing;
+    }
+}
+
+async function refreshAllFollowersUsers(forceExact = false) {
+    const activeKey = followersState.featuredUserId || 'mezo_1st';
+    await refreshSingleFollowerUser(activeKey, forceExact);
+    saveFollowersState();
+    broadcastFollowersState();
+}
+
+// 1-Second Live Auto-Refresh Loop for the Active Single User ("بتتجدد كل ثانيه")
+let isFollowersTickRunning = false;
+
+function startFollowersLiveEngine() {
+    setTimeout(() => {
+        refreshAllFollowersUsers(true).catch(() => {});
+    }, 200);
+
+    setInterval(async () => {
+        if (isFollowersTickRunning) {
+            broadcastFollowersState();
+            return;
+        }
+        isFollowersTickRunning = true;
+        try {
+            const activeKey = followersState.featuredUserId || 'mezo_1st';
+            if (followersState.users && followersState.users[activeKey]) {
+                await refreshSingleFollowerUser(activeKey, false);
+            }
+            broadcastFollowersState();
+        } catch (err) {
+            broadcastFollowersState();
+        } finally {
+            isFollowersTickRunning = false;
+        }
+    }, 1000);
+}
+
+startFollowersLiveEngine();
+
+// Followers REST API Endpoints
+app.get('/api/followers/state', (req, res) => {
+    res.json(buildFollowersPayload());
+});
+
+app.post('/api/followers/user', async (req, res) => {
+    const { username, role, setFeatured, singleUserOnly } = req.body;
+    if (!username || !username.trim()) {
+        return res.status(400).json({ error: 'يرجى إدخال اسم حساب التيك توك (@username)' });
+    }
+
+    const cleanUser = username.trim().replace(/^@/, '');
+    const id = cleanUser.toLowerCase();
+
+    try {
+        const fetched = await fetchTikTokUser(cleanUser);
+        if (!followersState.users) followersState.users = {};
+
+        const prev = followersState.users[id];
+        const followersCount = fetched.followers || (prev ? prev.followers : 0) || 0;
+
+        const userObj = {
+            id,
+            username: fetched.username || cleanUser,
+            nickname: fetched.nickname || (prev ? prev.nickname : cleanUser),
+            avatar: fetched.avatar || (prev ? prev.avatar : `https://api.dicebear.com/7.x/bottts/svg?seed=${cleanUser}`),
+            followers: followersCount,
+            initialFollowers: prev && prev.initialFollowers > 0 ? prev.initialFollowers : followersCount,
+            sessionGain: prev ? (prev.sessionGain || 0) : 0,
+            lastDelta: 0,
+            likes: fetched.likes || (prev ? prev.likes : 0) || 0,
+            following: fetched.following || (prev ? prev.following : 0) || 0,
+            videos: fetched.videos || (prev ? prev.videos : 0) || 0,
+            verified: !!fetched.verified,
+            role: role || (prev ? prev.role : 'نجم البث 👑'),
+            updatedAt: Date.now(),
+            lastCheckedAt: Date.now()
+        };
+
+        if (singleUserOnly !== false) {
+            followersState.users = { [id]: userObj };
+        } else {
+            followersState.users[id] = userObj;
+        }
+        followersState.featuredUserId = id;
+
+        addFollowersHistory('add', `✅ تم تفعيل حساب ${userObj.nickname} (@${cleanUser}) بإجمالي ${followersCount.toLocaleString()} متابع`);
+        saveFollowersState();
+        broadcastFollowersState();
+
+        res.json({ success: true, user: userObj, state: buildFollowersPayload() });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/followers/user/:id/feature', (req, res) => {
+    const id = req.params.id.toLowerCase();
+    if (!followersState.users || !followersState.users[id]) {
+        return res.status(404).json({ error: 'الحساب غير موجود' });
+    }
+    followersState.featuredUserId = id;
+    saveFollowersState();
+    broadcastFollowersState();
+    res.json({ success: true, featuredUser: followersState.users[id] });
+});
+
+app.post('/api/followers/user/:id/refresh', async (req, res) => {
+    const id = req.params.id.toLowerCase();
+    if (!followersState.users || !followersState.users[id]) {
+        return res.status(404).json({ error: 'الحساب غير موجود' });
+    }
+    const updated = await refreshSingleFollowerUser(id, true);
+    saveFollowersState();
+    broadcastFollowersState();
+    res.json({ success: true, user: updated, state: buildFollowersPayload() });
+});
+
+app.post('/api/followers/refresh-all', async (req, res) => {
+    await refreshAllFollowersUsers(true);
+    res.json(buildFollowersPayload());
+});
+
+app.post('/api/followers/import-judges', async (req, res) => {
+    if (!followersState.users) followersState.users = {};
+    let importedCount = 0;
+
+    if (raceState && raceState.judges) {
+        for (const j of Object.values(raceState.judges)) {
+            if (j && (!j.platform || j.platform === 'tiktok') && j.username) {
+                const clean = j.username.trim().replace(/^@/, '');
+                const key = clean.toLowerCase();
+                if (!followersState.users[key]) {
+                    followersState.users[key] = {
+                        id: key,
+                        username: clean,
+                        nickname: j.nickname || clean,
+                        avatar: j.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${clean}`,
+                        followers: 0,
+                        initialFollowers: 0,
+                        sessionGain: 0,
+                        lastDelta: 0,
+                        likes: 0,
+                        following: 0,
+                        videos: 0,
+                        verified: false,
+                        role: j.role || 'حكم / داعم',
+                        updatedAt: Date.now()
+                    };
+                    importedCount++;
+                }
+            }
+        }
+    }
+
+    await refreshAllFollowersUsers(true);
+    addFollowersHistory('import', `📥 تم استيراد وتحديث ${Object.keys(followersState.users).length} حساب تيك توك بنجاح`);
+    saveFollowersState();
+    broadcastFollowersState();
+    res.json({ success: true, importedCount, state: buildFollowersPayload() });
+});
+
+app.post('/api/followers/simulate-gain', (req, res) => {
+    const targetId = (req.body.id || followersState.featuredUserId || '').toLowerCase();
+    const count = Math.max(1, parseInt(req.body.count || 1, 10));
+    const user = (followersState.users && followersState.users[targetId]) || getFollowersFeaturedUser();
+
+    if (!user) {
+        return res.status(404).json({ error: 'يرجى إضافة حساب أولاً' });
+    }
+
+    user.followers = (parseInt(user.followers, 10) || 0) + count;
+    user.sessionGain = (parseInt(user.sessionGain, 10) || 0) + count;
+    user.lastDelta = count;
+    user.lastGainAt = Date.now();
+    user.updatedAt = Date.now();
+
+    addFollowersHistory(
+        'gain',
+        `🎉 متابع جديد لـ ${user.nickname} (+${count})! الإجمالي: ${user.followers.toLocaleString()} متابع`,
+        { username: user.username, nickname: user.nickname, avatar: user.avatar, delta: count, followers: user.followers }
+    );
+
+    saveFollowersState();
+    broadcastFollowersState();
+
+    io.emit('followers_gain_celebration', {
+        id: user.id,
+        username: user.username,
+        nickname: user.nickname,
+        avatar: user.avatar,
+        followers: user.followers,
+        delta: count
+    });
+
+    res.json({ success: true, user, state: buildFollowersPayload() });
+});
+
+app.post('/api/followers/reset-gains', (req, res) => {
+    if (followersState.users) {
+        Object.values(followersState.users).forEach(u => {
+            u.sessionGain = 0;
+            u.lastDelta = 0;
+            u.initialFollowers = u.followers || 0;
+        });
+    }
+    addFollowersHistory('reset', '🔄 تم تصفير عداد الزيادة المباشرة لهذه الجلسة');
+    saveFollowersState();
+    broadcastFollowersState();
+    res.json({ success: true, state: buildFollowersPayload() });
+});
+
+app.delete('/api/followers/user/:id', (req, res) => {
+    const id = req.params.id.toLowerCase();
+    if (followersState.users && followersState.users[id]) {
+        const name = followersState.users[id].nickname || id;
+        delete followersState.users[id];
+        if (followersState.featuredUserId === id) {
+            const remaining = getFollowersSortedList();
+            followersState.featuredUserId = remaining.length > 0 ? remaining[0].id : null;
+        }
+        addFollowersHistory('delete', `🗑️ تم حذف حساب ${name} من القائمة`);
+        saveFollowersState();
+        broadcastFollowersState();
+    }
+    res.json({ success: true, state: buildFollowersPayload() });
+});
+
+app.post('/api/followers/settings', (req, res) => {
+    if (req.body.title !== undefined) {
+        followersState.title = req.body.title.trim() || 'إجمالي المتابعين المباشر';
+    }
+    if (req.body.settings) {
+        followersState.settings = {
+            ...(followersState.settings || getDefaultFollowersState().settings),
+            ...req.body.settings
+        };
+    }
+    saveFollowersState();
+    broadcastFollowersState();
+    res.json({ success: true, settings: followersState.settings, state: buildFollowersPayload() });
+});
+
+app.post('/api/followers/trigger-event', (req, res) => {
+    const { type, message } = req.body;
+    const payload = buildFollowersPayload();
+    const user = payload.featuredUser || (payload.usersList && payload.usersList[0]);
+    const eventData = {
+        type: type || 'hype_goal',
+        message: message || '',
+        user,
+        timestamp: Date.now()
+    };
+
+    if (type === 'goal_reached') {
+        addFollowersHistory('gain', `🏆 احتفالية تحقيق الهدف (${user ? user.nextGoal.toLocaleString() : ''} متابع) على البث المباشر!`);
+    } else if (type === 'hype_goal') {
+        addFollowersHistory('info', `🔥 نداء حماسي للمتابعين: متبقي ${user ? user.remainingToGoal.toLocaleString() : 0} متابع للوصول للهدف!`);
+    } else if (message) {
+        addFollowersHistory('info', `📢 رسالة مباشرة على الأوفرلاي: ${message}`);
+    }
+
+    saveFollowersState();
+    broadcastFollowersState();
+    io.emit('followers_special_event', eventData);
+    res.json({ success: true, event: eventData, state: buildFollowersPayload() });
+});
+
 // Socket.io Connection & Event Forwarding
 io.on('connection', (socket) => {
     socket.emit('race_state_update', {
@@ -1815,6 +2386,7 @@ io.on('connection', (socket) => {
         settings: raceState.settings,
         history: (raceState.history || []).slice(0, 30)
     });
+    socket.emit('followers_state_update', buildFollowersPayload());
     socket.on('corner_trigger', (data) => {
         io.emit('corner_trigger', data);
     });

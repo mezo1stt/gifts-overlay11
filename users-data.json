@@ -1,36 +1,15 @@
 {
   "users": {
-    "user_mezo_admin": {
-      "id": "user_mezo_admin",
-      "username": "mezo",
-      "displayName": "MEZO (المدير)",
-      "salt": "7fc94daa11c12006b491f89da60b6461",
-      "hash": "c7dd89a961c099f3f7428fc1122f7fc9025b3ea55b77b5f056164f5e19786e0d4dbaa67b0beba145ce5f67569fb446c9923ca562337dd6905a13e6b2fa97c6f3",
-      "boardId": "board_XXXX",
+    "user_1212_admin": {
+      "id": "user_1212_admin",
+      "username": "1212",
+      "displayName": "1212",
+      "salt": "1133bcfa8b86ce4ae239ac845c35aab3",
+      "hash": "48c522ab065e822379857996d5167bf94efa7a2455882f68b7fc0f9f71db74811483f83e185ba74edd1fcd6e5b951342df32a78c941f605c4124b94bf3e6427f",
+      "boardId": "board_1212",
       "role": "admin",
       "createdAt": 1791323537291
     }
   },
-  "sessions": {
-    "tok_31768669cadca1049f95e6afcab33ea1bcc04a24bc70b713": {
-      "userId": "user_mezo_admin",
-      "expiresAt": 1793910715223,
-      "createdAt": 1791318715223
-    },
-    "tok_404d911d730e46e23d032c169b0ca08bde2685e8cd1945c8": {
-      "userId": "user_mezo_admin",
-      "expiresAt": 1793913764072,
-      "createdAt": 1791321764072
-    },
-    "tok_3f398c85b970c8c95d82f2b62d003248d082511868d45ec0": {
-      "userId": "user_mezo_admin",
-      "expiresAt": 1793915653126,
-      "createdAt": 1791323653126
-    },
-    "tok_e1d74a672440f87a126f00c7becd3b169fac7a2ae93a93ca": {
-      "userId": "user_mezo_admin",
-      "expiresAt": 1793916357359,
-      "createdAt": 1791324357359
-    }
-  }
+  "sessions": {}
 }

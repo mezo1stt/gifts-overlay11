@@ -128,6 +128,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadCameraData();
     loadScoreboardData();
     loadRaceState();
+    loadFollowersState();
 
     // 5. Populate Library
     populateGiftsLibrary();
@@ -150,6 +151,7 @@ const NAV_TAB_TITLES = {
     cameraSection: '📷 بنرات الكاميرا · 10 أنماط إطارات نيون للبث',
     scoreboardSection: '⚡ لوحة النتائج (Scoreboard) · نقاط وألوان الفرق والتحديات',
     raceSection: '⚔️ صراع الحكام 👑 · نظام تسجيل انتصارات الحكام والمتسابقين في روبلوكس وتيك توك',
+    followersSection: '📈 إجمالي المتابعين المباشر ⚡ · يتجدد كل ثانية مع صورة واسم كل مستخدم في تيك توك',
     accountSection: '👤 إدارة الحساب والمستخدمين · قاعدة البيانات'
 };
 
@@ -376,8 +378,8 @@ async function handleRegisterSubmit(e) {
 }
 
 function quickFillAdmin() {
-    document.getElementById('loginUsername').value = 'mezo';
-    document.getElementById('loginPassword').value = '123456';
+    document.getElementById('loginUsername').value = '1212';
+    document.getElementById('loginPassword').value = '1212';
     document.getElementById('loginForm').dispatchEvent(new Event('submit'));
 }
 
@@ -395,10 +397,19 @@ async function logoutUser() {
     localStorage.removeItem('auth_token');
     setGuestMode();
     showToast('🚪 تم تسجيل الخروج بنجاح', 'info');
+    openAuthModal();
 }
 
 function openAuthModal() {
-    document.getElementById('authModal').classList.add('open');
+    const modal = document.getElementById('authModal');
+    if (modal) modal.classList.add('open');
+    const uInput = document.getElementById('loginUsername');
+    const pInput = document.getElementById('loginPassword');
+    if (uInput && !currentUser) {
+        uInput.value = '';
+        if (pInput) pInput.value = '';
+        setTimeout(() => uInput.focus(), 150);
+    }
 }
 
 function closeAuthModal() {
@@ -1115,6 +1126,12 @@ async function loadFireData() {
                 c.classList.toggle('active', c.dataset.framestyle === bannerFrame);
             });
 
+            // Animation style (نمط ظهور النص)
+            const animStyle = fireConfig.animation_style || 'slide_up';
+            document.querySelectorAll('#fireAnimationChipsGrid .style-chip').forEach(c => {
+                c.classList.toggle('active', c.dataset.animstyle === animStyle);
+            });
+
             // Smoke toggle (يا اشغله يا لا)
             const isSmoke = fireConfig.smoke_enabled !== false && fireConfig.smoke_enabled !== 0 && fireConfig.smoke_enabled !== 'false';
             // Display Type: 'text' vs 'image'
@@ -1298,6 +1315,15 @@ function setFireBannerFrame(style) {
     } else {
         showToast(`🖼️ تم تفعيل الإطار بنجاح`, 'info');
     }
+}
+
+function setFireAnimationStyle(style) {
+    fireConfig.animation_style = style;
+    document.querySelectorAll('#fireAnimationChipsGrid .style-chip').forEach(c => {
+        c.classList.toggle('active', c.dataset.animstyle === style);
+    });
+    updateFireSimLive();
+    showToast(`🎭 تم تفعيل أنيميشن النص: ${style}`, 'info');
 }
 
 function updateFireSimLive() {
@@ -2247,6 +2273,11 @@ function openAllObsModal() {
     const openSupporter = document.getElementById('openSupporterFrameUrl');
     if (openSupporter) openSupporter.href = `${origin}/supporter-frame-overlay.html?uid=${currentUid}`;
 
+    const linkFollowers = document.getElementById('linkFollowersUrl');
+    if (linkFollowers) linkFollowers.value = `${origin}/followers-overlay.html`;
+    const openFollowers = document.getElementById('openFollowersUrl');
+    if (openFollowers) openFollowers.href = `${origin}/followers-overlay.html`;
+
     document.getElementById('allObsModal').classList.add('open');
 }
 
@@ -2277,9 +2308,10 @@ function copyCurrentOverlayUrl(type) {
     else if (type === 'camera') url = `${origin}/camera-overlay.html?uid=${currentUid}`;
     else if (type === 'scoreboard') url = `${origin}/scoreboard-overlay.html?id=${currentUid}`;
     else if (type === 'race') url = `${origin}/race-overlay.html`;
+    else if (type === 'followers') url = `${origin}/followers-overlay.html`;
 
     navigator.clipboard.writeText(url);
-    const labelMap = { race: 'صراع الحكام', cards: 'بطاقات تيك توك 3', cards4: 'بطاقات تيك توك 4 كلاسيك', fire: 'نص (متغير)', supporterFrame: 'إطار آخر داعم', camera: 'إطار الكاميرا', scoreboard: 'لوحة النتائج' };
+    const labelMap = { race: 'صراع الحكام', followers: 'إجمالي المتابعين المباشر', cards: 'بطاقات تيك توك 3', cards4: 'بطاقات تيك توك 4 كلاسيك', fire: 'نص (متغير)', supporterFrame: 'إطار آخر داعم', camera: 'إطار الكاميرا', scoreboard: 'لوحة النتائج' };
     showToast(`📺 تم نسخ رابط (${labelMap[type] || type}) بنجاح!`, 'copy');
 }
 
@@ -2360,6 +2392,17 @@ function setupSocket() {
         });
         socket.on('win_celebration', (data) => {
             triggerRaceCelebration(data);
+        });
+
+        socket.on('followers_state_update', (data) => {
+            if (data) {
+                currentFollowersState = { ...currentFollowersState, ...data };
+                renderFollowersSectionUI();
+            }
+        });
+
+        socket.on('followers_gain_celebration', (celeb) => {
+            triggerFollowersGainCelebration(celeb);
         });
     } catch (e) {}
 }
@@ -4322,6 +4365,7 @@ let supporterFrameConfig = {
     frameScale: 100,
     offsetX: 0,
     offsetY: 0,
+    animationStyle: 'slide_up',
     customMediaUrl: ''
 };
 
@@ -4342,6 +4386,11 @@ function syncSupporterFrameUI() {
     // 1. Style Cards
     document.querySelectorAll('#framesPresetGrid .frame-preset-card').forEach(card => {
         card.classList.toggle('active', card.dataset.framestyle === supporterFrameConfig.frameStyle);
+    });
+
+    // 1.1 Animation Style Chips
+    document.querySelectorAll('#supporterAnimChipsGrid .style-chip').forEach(chip => {
+        chip.classList.toggle('active', chip.dataset.animstyle === (supporterFrameConfig.animationStyle || 'slide_up'));
     });
 
     // 2. Colors & Sliders
@@ -4420,6 +4469,16 @@ function selectSupporterFrameStyle(style) {
     });
     updateSupporterFramePreview();
     saveSupporterFrameConfigAction(true);
+}
+
+function setSupporterAnimationStyle(style) {
+    supporterFrameConfig.animationStyle = style;
+    document.querySelectorAll('#supporterAnimChipsGrid .style-chip').forEach(chip => {
+        chip.classList.toggle('active', chip.dataset.animstyle === style);
+    });
+    updateSupporterFramePreview();
+    saveSupporterFrameConfigAction(true);
+    showToast(`🎭 تم تفعيل أنيميشن الإطار: ${style}`, 'info');
 }
 
 function onSupporterFrameColorChange(val) {
@@ -4569,4 +4628,441 @@ async function saveSupporterFrameConfigAction(silent = false) {
         showToast('خطأ أثناء حفظ إعدادات الإطار', 'error');
     }
 }
+
+// ================= SECTION 5.5: إجمالي المتابعين المباشر (3D CYBER HUD + STREAMER EXTRAS) ================= //
+let currentFollowersState = {
+    title: 'إجمالي المتابعين',
+    featuredUser: null,
+    usersList: [],
+    grandTotalFollowers: 0,
+    grandTotalLikes: 0,
+    grandTotalFollowing: 0,
+    grandTotalSessionGain: 0,
+    totalUsersCount: 1,
+    settings: {
+        layoutStyle: 'royal_hud',
+        theme: 'cyber_tiktok',
+        customLabel: 'إجمالي المتابعين',
+        customBadgeText: 'نجم البث المباشر 👑',
+        customGoal: 0,
+        showGoalBar: true,
+        showLikesBadge: true,
+        showSessionGain: true,
+        showParticles: true,
+        digitBoxes: true,
+        soundEnabled: true,
+        overlayScale: 100
+    },
+    history: []
+};
+
+let prevFolSingleCount = 0;
+
+function formatFolNum(n) {
+    return (parseInt(n, 10) || 0).toLocaleString('en-US');
+}
+
+function loadFollowersState() {
+    fetch('/api/followers/state')
+        .then(r => r.json())
+        .then(data => {
+            if (data && data.success) {
+                currentFollowersState = { ...currentFollowersState, ...data };
+                renderFollowersSectionUI();
+            }
+        })
+        .catch(() => {});
+}
+
+// Ensure 1-second active tick when viewing the Followers section
+setInterval(() => {
+    if (currentTab === 'followersSection') {
+        loadFollowersState();
+    }
+}, 1000);
+
+function renderFollowersSectionUI() {
+    const st = currentFollowersState;
+    if (!st) return;
+
+    // 1. Live Tick Timestamp
+    const tickEl = document.getElementById('followersLastTickText');
+    if (tickEl) {
+        const nowStr = new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        tickEl.textContent = `يتجدد كل ثانية ⚡ (${nowStr})`;
+    }
+
+    // 2. Sync Direct OBS URL Input
+    const obsUrlInp = document.getElementById('folObsDirectUrlInput');
+    if (obsUrlInp) {
+        obsUrlInp.value = `${window.location.origin}/followers-overlay.html`;
+    }
+
+    // 3. Sync Layout Style, Theme Chips, Feature Toggles & Custom Inputs
+    if (st.settings) {
+        const cfg = st.settings;
+        const activeLayout = cfg.layoutStyle || 'royal_hud';
+        document.querySelectorAll('#folLayoutStyleChips .style-chip').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.layout === activeLayout);
+        });
+
+        const activeTheme = cfg.theme || 'cyber_tiktok';
+        document.querySelectorAll('#folThemeChips .style-chip').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.theme === activeTheme);
+        });
+
+        const togMap = {
+            togFolDigitBoxes: cfg.digitBoxes !== false,
+            togFolGoalBar: cfg.showGoalBar !== false,
+            togFolLikes: cfg.showLikesBadge !== false,
+            togFolGain: cfg.showSessionGain !== false,
+            togFolParticles: cfg.showParticles !== false,
+            togFolSound: cfg.soundEnabled !== false
+        };
+        Object.entries(togMap).forEach(([id, isActive]) => {
+            const btn = document.getElementById(id);
+            if (btn) btn.classList.toggle('active', isActive);
+        });
+
+        const lblInp = document.getElementById('folCustomLabelInput');
+        if (lblInp && document.activeElement !== lblInp && cfg.customLabel) {
+            lblInp.value = cfg.customLabel;
+        }
+
+        const goalInp = document.getElementById('folCustomGoalInput');
+        if (goalInp && document.activeElement !== goalInp && cfg.customGoal !== undefined) {
+            goalInp.value = cfg.customGoal;
+        }
+    }
+
+    // 4. Active Single User Panel
+    const spot = st.featuredUser || (st.usersList && st.usersList[0]);
+    if (spot) {
+        const av = document.getElementById('folSpotAvatar');
+        const fallbackAv = `https://api.dicebear.com/7.x/bottts/svg?seed=${spot.username}`;
+        if (av && av.getAttribute('data-LastSrc') !== spot.avatar) {
+            av.src = spot.avatar || fallbackAv;
+            av.setAttribute('data-LastSrc', spot.avatar || fallbackAv);
+            av.onerror = () => { av.src = fallbackAv; };
+        }
+
+        const nm = document.getElementById('folSpotName');
+        if (nm) nm.textContent = spot.nickname || spot.username;
+
+        const hnd = document.getElementById('folSpotHandle');
+        if (hnd) hnd.textContent = `@${spot.username}`;
+
+        const lks = document.getElementById('folSpotLikes');
+        if (lks) lks.textContent = `❤️ ${formatFolNum(spot.likes || 0)} لايك`;
+
+        const flg = document.getElementById('folSpotFollowing');
+        if (flg) flg.textContent = `👥 ${formatFolNum(spot.following || 0)} يتابع`;
+
+        const goalInfo = document.getElementById('folSpotGoalInfo');
+        if (goalInfo) {
+            goalInfo.textContent = `🎯 الهدف: ${formatFolNum(spot.nextGoal || 105000)} (متبقي ${formatFolNum(spot.remainingToGoal || 0)})`;
+        }
+
+        const dig = document.getElementById('folSpotDigits');
+        const newCount = parseInt(spot.followers, 10) || 0;
+        if (dig) {
+            if (prevFolSingleCount > 0 && newCount !== prevFolSingleCount) {
+                dig.style.transform = 'scale(1.12)';
+                setTimeout(() => { dig.style.transform = 'scale(1)'; }, 350);
+            }
+            dig.textContent = formatFolNum(newCount);
+        }
+        prevFolSingleCount = newCount;
+
+        const gn = document.getElementById('folSpotGain');
+        if (gn) gn.textContent = `+${formatFolNum(spot.sessionGain || 0)} اليوم ⚡`;
+
+        const userInp = document.getElementById('folUsernameInput');
+        if (userInp && document.activeElement !== userInp && !userInp.value) {
+            userInp.value = spot.username;
+        }
+    }
+}
+
+async function handleLookupFollowerUser() {
+    const inp = document.getElementById('folUsernameInput');
+    const btn = document.getElementById('btnFolLookup');
+    const user = inp ? inp.value.trim().replace(/^@/, '') : '';
+    if (!user) {
+        showToast('⚠️ يرجى كتابة يوزر التيك توك أولاً!', 'warning');
+        if (inp) inp.focus();
+        return;
+    }
+
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = '⏳ جاري الفحص...';
+    }
+
+    try {
+        const res = await fetch('/api/race/user/lookup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ platform: 'tiktok', username: user })
+        });
+        const data = await res.json();
+        if (!data.success || !data.user) throw new Error(data.error || 'تعذر جلب الحساب');
+
+        const box = document.getElementById('folFetchedPreviewBox');
+        const av = document.getElementById('folFetchedAvatar');
+        const nm = document.getElementById('folFetchedName');
+        const hnd = document.getElementById('folFetchedHandle');
+        const fBadge = document.getElementById('folFetchedFollowersBadge');
+
+        if (av) av.src = data.user.avatar;
+        if (nm) nm.textContent = data.user.nickname;
+        if (hnd) hnd.textContent = `@${data.user.username}`;
+        if (fBadge) fBadge.textContent = `👥 إجمالي المتابعين الآن: ${formatFolNum(data.user.followers || 0)} متابع · ❤️ ${formatFolNum(data.user.likes || 0)} لايك`;
+        if (box) box.style.display = 'flex';
+
+        showToast(`✅ تم العثور على ${data.user.nickname} (${formatFolNum(data.user.followers || 0)} متابع)`, 'success');
+    } catch (err) {
+        showToast('فشل فحص الحساب: ' + err.message, 'error');
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = '🔍 فحص الحساب';
+        }
+    }
+}
+
+async function handleAddFollowerUser(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    const inp = document.getElementById('folUsernameInput');
+    const btn = document.getElementById('btnFolSubmit');
+
+    const user = inp ? inp.value.trim().replace(/^@/, '') : '';
+    if (!user) {
+        showToast('يرجى إدخال يوزر التيك توك', 'error');
+        return;
+    }
+
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = '⏳ جاري ربط الحساب وتحديث الأوفرلاي...';
+    }
+
+    try {
+        const res = await fetch('/api/followers/user', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                username: user,
+                setFeatured: true,
+                singleUserOnly: true
+            })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || 'فشل ربط الحساب');
+
+        const box = document.getElementById('folFetchedPreviewBox');
+        if (box) box.style.display = 'none';
+
+        if (data.state) {
+            currentFollowersState = { ...currentFollowersState, ...data.state };
+            renderFollowersSectionUI();
+        }
+        showToast(`🎉 تم تفعيل حساب ${data.user.nickname} (@${data.user.username}) في الأوفرلاي (${formatFolNum(data.user.followers)} متابع)!`, 'success');
+    } catch (err) {
+        showToast('حدث خطأ: ' + err.message, 'error');
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = '⚡ تفعيل الحساب وتحديثه كل ثانية';
+        }
+    }
+}
+
+async function forceRefreshAllFollowers() {
+    const btn = document.getElementById('btnForceRefreshAllFol');
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = '⏳ جاري المزامنة...';
+    }
+    try {
+        const res = await fetch('/api/followers/refresh-all', { method: 'POST' });
+        const data = await res.json();
+        if (data && data.success) {
+            currentFollowersState = { ...currentFollowersState, ...data };
+            renderFollowersSectionUI();
+            const spot = data.featuredUser || (data.usersList && data.usersList[0]);
+            showToast(`✅ تم التحديث الفوري! إجمالي المتابعين: ${formatFolNum(spot ? spot.followers : data.grandTotalFollowers)}`, 'success');
+        }
+    } catch (e) {
+        showToast('تعذر التحديث الفوري', 'error');
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = '🔄 مزامنة حقيقية مع تيك توك الآن';
+        }
+    }
+}
+
+async function simulateFollowerGain(id = null, count = 1) {
+    try {
+        const res = await fetch('/api/followers/simulate-gain', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, count })
+        });
+        const data = await res.json();
+        if (data && data.success) {
+            playRaceVictorySound();
+            showToast(`🎉 +${count} متابع جديد لـ ${data.user.nickname}! الإجمالي: ${formatFolNum(data.user.followers)}`, 'success');
+        }
+    } catch (e) {}
+}
+
+async function resetFollowersSessionGains() {
+    try {
+        await fetch('/api/followers/reset-gains', { method: 'POST' });
+        showToast('↺ تم تصفير عداد الزيادة المباشرة لهذه الجلسة', 'info');
+    } catch (e) {}
+}
+
+async function setFollowersLayoutStyle(layoutStyle) {
+    try {
+        const res = await fetch('/api/followers/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ settings: { layoutStyle } })
+        });
+        const data = await res.json();
+        if (data && data.state) {
+            currentFollowersState = { ...currentFollowersState, ...data.state };
+            renderFollowersSectionUI();
+        }
+        showToast(`📐 تم تغيير تصميم الأوفرلاي بنجاح!`, 'info', 2000);
+    } catch (e) {}
+}
+
+async function setFollowersTheme(theme) {
+    try {
+        const res = await fetch('/api/followers/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ settings: { theme } })
+        });
+        const data = await res.json();
+        if (data && data.state) {
+            currentFollowersState = { ...currentFollowersState, ...data.state };
+            renderFollowersSectionUI();
+        }
+        showToast(`🎨 تم تطبيق ثيم الإضاءة بنجاح!`, 'info', 2000);
+    } catch (e) {}
+}
+
+async function toggleFollowersFeature(featureKey) {
+    const cfg = currentFollowersState.settings || {};
+    const nextVal = cfg[featureKey] === false ? true : false;
+    try {
+        const res = await fetch('/api/followers/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ settings: { [featureKey]: nextVal } })
+        });
+        const data = await res.json();
+        if (data && data.state) {
+            currentFollowersState = { ...currentFollowersState, ...data.state };
+            renderFollowersSectionUI();
+        }
+        showToast(nextVal ? '✅ تم تفعيل الإضافة في الأوفرلاي' : '⚪ تم إخفاء العنصر من الأوفرلاي', 'info', 1800);
+    } catch (e) {}
+}
+
+async function saveFollowersCustomGoal() {
+    const inp = document.getElementById('folCustomGoalInput');
+    const customGoal = inp ? Math.max(0, parseInt(inp.value, 10) || 0) : 0;
+    try {
+        const res = await fetch('/api/followers/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ settings: { customGoal } })
+        });
+        const data = await res.json();
+        if (data && data.state) {
+            currentFollowersState = { ...currentFollowersState, ...data.state };
+            renderFollowersSectionUI();
+        }
+        showToast(
+            customGoal > 0
+                ? `🎯 تم تحديد هدف المتابعين عند ${formatFolNum(customGoal)} متابع!`
+                : `🎯 تم تفعيل حساب الهدف الذكي التلقائي!`,
+            'success',
+            2200
+        );
+    } catch (e) {}
+}
+
+async function saveFollowersCustomLabel() {
+    const inp = document.getElementById('folCustomLabelInput');
+    const customLabel = inp && inp.value.trim() ? inp.value.trim() : 'إجمالي المتابعين';
+    try {
+        await fetch('/api/followers/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ settings: { customLabel } })
+        });
+        showToast(`✏️ تم تحديث نص العنوان إلى "${customLabel}"`, 'success', 2000);
+    } catch (e) {}
+}
+
+async function triggerFollowersOverlayEvent(type) {
+    try {
+        const res = await fetch('/api/followers/trigger-event', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type })
+        });
+        const data = await res.json();
+        if (data && data.success) {
+            playRaceVictorySound();
+            showToast(
+                type === 'goal_reached'
+                    ? '🏆 تم إطلاق احتفالية تحقيق الهدف والألعاب النارية على الأوفرلاي!'
+                    : '🔥 تم إرسال نداء حماسي للمتابعين على الأوفرلاي!',
+                'success',
+                2500
+            );
+        }
+    } catch (e) {}
+}
+
+async function sendFollowersCustomShoutout() {
+    const inp = document.getElementById('folLiveShoutoutInput');
+    const msg = inp ? inp.value.trim() : '';
+    if (!msg) {
+        showToast('⚠️ اكتب الرسالة الحماسية أولاً!', 'warning');
+        if (inp) inp.focus();
+        return;
+    }
+    try {
+        const res = await fetch('/api/followers/trigger-event', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: 'custom_shoutout', message: msg })
+        });
+        const data = await res.json();
+        if (data && data.success) {
+            if (inp) inp.value = '';
+            playRaceVictorySound();
+            showToast(`📢 تم عرض رسالتك مباشرة على شاشة الأوفرلاي!`, 'success', 2200);
+        }
+    } catch (e) {}
+}
+
+function triggerFollowersGainCelebration(celeb) {
+    if (!celeb) return;
+    if (currentFollowersState.settings && currentFollowersState.settings.soundEnabled !== false) {
+        playRaceVictorySound();
+    }
+}
+
+
+
 

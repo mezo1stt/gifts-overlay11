@@ -71,22 +71,22 @@ function verifyPassword(password, salt, expectedHash) {
     return hash === expectedHash;
 }
 
-// Create default user (mezo)
+// Create default user (1212 / 1212)
 function createDefaultUser() {
-    const { salt, hash } = hashPassword('MOAZ1234');
-    const userId = 'user_mezo_admin';
+    const { salt, hash } = hashPassword('1212');
+    const userId = 'user_1212_admin';
     db.users[userId] = {
         id: userId,
-        username: 'mezo',
-        displayName: 'MEZO (المدير)',
+        username: '1212',
+        displayName: '1212',
         salt,
         hash,
-        boardId: 'board_XXXX',
+        boardId: 'board_1212',
         role: 'admin',
         createdAt: Date.now()
     };
     saveDatabase();
-    console.log('👑 Default admin created: mezo / MOAZ1234 (board_XXXX)');
+    console.log('👑 Default admin created: 1212 / 1212 (board_1212)');
 }
 
 // ================= USER CRUD ================= //
