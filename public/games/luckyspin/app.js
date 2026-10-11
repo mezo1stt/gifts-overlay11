@@ -505,35 +505,8 @@ function _extends(){
   }
 
   var total=i["length"];
-  var isUnder10=total<0xa;
-
-  var cols=0x2;
-  if(total<=0x2){
-    cols=Math["max"](0x1,total);
-  }else if(total<=0x4){
-    cols=0x2;
-  }else if(total<=0x6){
-    cols=0x3;
-  }else if(total<0xa){
-    cols=0x3;
-  }else if(total<0x18){
-    cols=0x5;
-  }else if(total<0x30){
-    cols=0x6;
-  }else if(total<0x64){
-    cols=0x8;
-  }else if(total<0x96){
-    cols=Math["min"](0xc,Math["ceil"](Math["sqrt"](total*1.2)));
-  }else{
-    cols=0xf;
-  }
-
-  var VIBRANT_PALETTE=[
-    "#6366f1","#f97316","#3b82f6","#ef4444","#84cc16","#0ea5e9",
-    "#38bdf8","#ea580c","#06b6d4","#f43f5e","#d946ef","#4f46e5",
-    "#f59e0b","#a855f7","#10b981","#14b8a6","#8b5cf6","#e11d48",
-    "#d97706","#65a30d","#0284c7"
-  ];
+  var cols=Math["min"](0xf,Math["max"](0x2,Math["ceil"](Math["sqrt"](total*1.2))));
+  if(total>=0x96)cols=0xf;
 
   var renderCards=i;
   var startIdx=0x0;
@@ -554,19 +527,12 @@ function _extends(){
     }
   },[j]);
 
-  var autoRowStyle="minmax(0px, 1fr)";
-  if(isUnder10){
-    autoRowStyle=(total<=0x4?"minmax(160px, 1fr)":"minmax(120px, 1fr)");
-  }else if(total>=0x96){
-    autoRowStyle="minmax(36px, 1fr)";
-  }
-
   return React["createElement"]("div",{
     'className':"relative w-full h-full overflow-hidden"
   },React["createElement"]("div",{
     'className':"grid gap-1.5 w-full h-full p-2 overflow-y-auto modal-scroll select-none",'style':{
       'gridTemplateColumns':"repeat("+cols+", minmax(0px, 1fr))",
-      'gridAutoRows':autoRowStyle,
+      'gridAutoRows':total>0x96?"minmax(36px, 1fr)":"minmax(0px, 1fr)",
       'alignContent':"start",
       'justifyContent':"stretch",
       'placeContent':"start stretch"
@@ -577,73 +543,39 @@ function _extends(){
     var isWinner=Boolean(l&&m&&(w['id']===m['id']||(!m['id']&&(w["userId"]||w["name"])===(m["userId"]||m["name"]))));
     var isElim=Boolean(Array["isArray"](elimList)&&elimList["some"](e=>e&&(e['id']===w['id'])));
 
-    var cardColor=VIBRANT_PALETTE[actualIdx%VIBRANT_PALETTE["length"]];
-
     var ringClass="";
     if(isHighlighted){
-      var colRing=k?"ring-red-500 shadow-[0_0_25px_rgb(239,68,68)]":"ring-yellow-400 shadow-[0_0_25px_rgb(250,204,21)]";
-      ringClass="ring-4 scale-105 z-20 "+colRing;
+      var colRing=k?"ring-red-500 shadow-[0_0_20px_rgb(239,68,68)]":"ring-yellow-400 shadow-[0_0_20px_rgb(250,204,21)]";
+      ringClass="ring-2 scale-105 z-20 bg-yellow-400/30 "+colRing;
     }
     if(isWinner){
-      ringClass="ring-4 ring-yellow-400 shadow-[0_0_35px_rgba(250,204,21,1)] z-30 scale-110 animate-pulse";
+      ringClass="ring-2 ring-yellow-400 shadow-[0_0_25px_rgba(250,204,21,1)] z-30 scale-110 animate-pulse bg-yellow-400/50";
     }
 
-    var cardRound=isUnder10?"rounded-xl":(total>0x96?"rounded":"rounded-lg");
-    var topRound=isUnder10?"rounded-t-xl":(total>0x96?"rounded-t":"rounded-t-lg");
-    var botRound=isUnder10?"rounded-b-xl":(total>0x96?"rounded-b":"rounded-b-lg");
-
-    var nameInPicSize=total<=0x2?"1.6rem":total<=0x4?"1.3rem":total<0xa?"1.05rem":total<0x1e?"0.75rem":total<0x64?"0.58rem":"0.42rem";
-    var footerNameSize=total<=0x2?"1.1rem":total<=0x4?"0.95rem":total<0xa?"0.82rem":total<0x1e?"0.62rem":total<0x64?"0.5rem":"0.38rem";
-    var footerCoinSize=total<=0x2?"0.95rem":total<=0x4?"0.82rem":total<0xa?"0.72rem":total<0x1e?"0.52rem":total<0x64?"0.42rem":"0.32rem";
-    var footerIconSize=isUnder10?(total<=0x4?"w-4 h-4 text-yellow-400":"w-3.5 h-3.5 text-yellow-400"):(total<0x64?"w-2.5 h-2.5 text-yellow-400":"w-1.5 h-1.5 text-yellow-400");
-    var footerPadding=isUnder10?"py-1.5 px-1":(total>0x96?"py-0.5 px-0.5":"py-1 px-1");
+    var cardBg=isElim?"bg-red-950/40 border border-red-500/30":"bg-gray-900/90 border border-purple-500/40 shadow-sm";
 
     return React["createElement"]("div",{
       'key':w['id']||("sq_"+actualIdx),
       'id':"sq_card_"+actualIdx,
-      'className':"relative w-full h-full "+cardRound+" transition-all duration-75 flex flex-col items-stretch justify-between overflow-hidden shadow-md border border-white/20 "+ringClass,
-      'style':{
-        'backgroundColor':cardColor,
-        ...(isElim?{'filter':"grayscale(100%) opacity(0.35)"}:{})
-      },
-      'title':plainText(w["name"])
+      'className':"relative w-full h-full rounded-md transition-all duration-75 flex flex-col items-center justify-between p-1 overflow-hidden "+ringClass+" "+(!isHighlighted&&!isWinner?cardBg:''),
+      'style':isElim?{'filter':"grayscale(100%) opacity(0.35)"}:{},
+      'title':w["name"]
     },React["createElement"]("div",{
-      'className':"relative flex-1 w-full min-h-0 flex items-center justify-center overflow-hidden "+topRound,
-      'style':{'backgroundColor':cardColor}
-    },w["pic"]?React["createElement"](React["Fragment"],null,
-      React["createElement"](SafeAvatar,{
-        'src':w["pic"],
-        'name':w["name"],
-        'className':"w-full h-full object-cover",
-        'style':{'backgroundColor':cardColor}
-      }),
-      React["createElement"]("div",{
-        'className':"absolute inset-0 bg-black/25 flex items-center justify-center p-1"
-      },React["createElement"]("span",{
-        'className':"text-white font-black text-center truncate uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]",
-        'style':{'fontSize':nameInPicSize}
-      },plainText(w["name"])))
-    ):React["createElement"]("div",{
-      'className':"w-full h-full flex items-center justify-center text-white font-black p-1 text-center select-none break-words leading-tight uppercase",
-      'style':{
-        'fontSize':nameInPicSize,
-        'textShadow':"0 2px 4px rgba(0,0,0,0.7)"
-      }
-    },plainText(w["name"]))),React["createElement"]("div",{
-      'className':"w-full flex flex-col items-center justify-center leading-none bg-black/90 z-10 select-none "+footerPadding+' '+botRound
+      'className':"relative flex-1 w-full min-h-0 flex items-center justify-center overflow-hidden"
+    },w["pic"]?React["createElement"](SafeAvatar,{
+      'src':w["pic"],
+      'name':w["name"],
+      'className':"w-full h-full object-cover rounded-full max-w-[22px] max-h-[22px]",
+      'style':{'backgroundColor':w["color"]||"#1f2937"}
+    }):React["createElement"]("div",{
+      'className':"w-5 h-5 rounded-full flex items-center justify-center text-white font-black text-[8px]",
+      'style':{'backgroundColor':w["color"]||"#1f2937"}
+    },getInitials(w["name"]))),React["createElement"]("div",{
+      'className':"w-full text-center leading-none mt-0.5"
     },React["createElement"]("span",{
-      'className':"text-white font-black uppercase truncate w-full text-center block tracking-tight",
-      'style':{
-        'fontSize':footerNameSize,
-        'textShadow':"0 1px 2px black"
-      },
-      'title':plainText(w["name"])
-    },plainText(w["name"])),React["createElement"]("span",{
-      'className':"text-yellow-400 font-bold flex items-center justify-center gap-0.5 mt-0.5",
-      'style':{'fontSize':footerCoinSize}
-    },React["createElement"](Coins,{
-      'className':footerIconSize
-    }),String.fromCharCode(0x20),Number(w["coins"]||0x1)["toLocaleString"]())));
+      'className':"text-white font-bold text-[7px] uppercase truncate block tracking-tighter",
+      'style':{'textShadow':"0 1px 2px rgba(0,0,0,0.9)"}
+    },plainText(w["name"]))));
   })))
 }),HUD_THEMES=[{
   'id':"simple",'label':"SIMPLE",'hint':"Cases sobres : libellé en haut, chiffre dessous, sans animation"
