@@ -410,6 +410,31 @@ function _extends(){
 },WheelSVG=React["memo"](({
   slices:i,isProportional:j,lastUpdatedPlayer:k,hideLabels:l,theme:m,wheelBgColor:n,wheelBorderColor:o,multiElimRevealed:elimList
 })=>{
+  var renderSlices=i;
+  if(i["length"]>0x168){
+    var merged=[];
+    for(var idx=0x0;idx<i["length"];idx++){
+      var cur=i[idx];
+      var curKey=cur["userId"]||cur["name"];
+      if(merged["length"]>0x0&&(merged[merged["length"]-0x1]["userId"]||merged[merged["length"]-0x1]["name"])===curKey){
+        var prev=merged[merged["length"]-0x1];
+        prev["endAngle"]=cur["endAngle"];
+        prev["degrees"]+=cur["degrees"];
+      }else{
+        merged["push"]({...cur});
+      }
+    }
+    if(merged["length"]>0x168){
+      var step=merged["length"]/0x168;
+      var sampled=[];
+      for(var sIdx=0x0;sIdx<0x168;sIdx++){
+        sampled["push"](merged[Math["floor"](sIdx*step)]);
+      }
+      renderSlices=sampled;
+    }else{
+      renderSlices=merged;
+    }
+  }
   var fH=fy;
   if(i["length"]===0x0){
     var demoColors=["#2563eb","#db2777","#059669","#d97706","#7c3aed","#0891b2","#dc2626","#ca8a04"];
@@ -466,6 +491,12 @@ function _extends(){
 }),SquareGrid=React["memo"](({
   players:i,highlightIndex:j,isEliminationMode:k,showWinner:l,winner:m,wheelScale:n,wheelTheme:o,instantClaimEnabled:q,instantClaimAmount:r,multiElimRevealed:elimList
 })=>{
+  var gridPlayers=i;
+  if(i["length"]>0x90){
+    var maxG=0x90;
+    var startG=Math["max"](0x0,Math["min"]((j||0x0)-Math["floor"](maxG/0x2),i["length"]-maxG));
+    gridPlayers=i["slice"](startG,startG+maxG);
+  }
   var fJ=fy;
   if(i["length"]===0x0){
     return React["createElement"]("div",{
@@ -2035,35 +2066,15 @@ function pickGiftFromLauncher(i,j,k){
         var eZ=Math["floor"](eO/eH),f0=Math["floor"](eP/eH),f1=f0-eZ;
         if(f1<0x1&&eF)f1=0x1;
         if(f1<0x1)return eX;
-        var userSlices=eX["filter"](s=>(s["userId"]||s["name"])===(ez||eA));
-        if(userSlices["length"]>=0x19){
-          var addPerSlice=Math["floor"](f1/userSlices["length"]);
-          var rem=f1%userSlices["length"];
-          return eX["map"](s=>{
-            if((s["userId"]||s["name"])===(ez||eA)){
-              var extra=addPerSlice+(rem>0x0?0x1:0x0);
-              if(rem>0x0)rem--;
-              return {...s,'tickets':(Number(s["tickets"])||0x1)+extra,'coins':eH,'actualCoins':eP,'actualTickets':f0};
-            }
-            return s;
-          });
-        }
-        var slicesToCreate=Math["min"](f1,0x19);
-        var baseT=Math["floor"](f1/slicesToCreate);
-        var remT=f1%slicesToCreate;
         var f3=[];
-        for(var f4=0x0;f4<slicesToCreate;f4++){
-          var sliceTickets=baseT+(remT>0x0?0x1:0x0);
-          if(remT>0x0)remT--;
+        var maxSlots=Math["min"](f1,0x186a0);
+        for(var f4=0x0;f4<maxSlots;f4++){
           f3["push"]({
             'id':"ticket-"+ez+'-'+Date["now"]()+'-'+f4+'-'+Math["random"]()["toString"](0x24)["substr"](0x2,0x9),
-            'userId':ez,'name':eA,'coins':eH,'pic':eY,'color':dq[(eX["length"]+f4)%dq["length"]],'sortKey':Math["random"](),'joinedViaLike':eE,
-            'tickets':sliceTickets,'actualCoins':eP,'actualTickets':f0
+            'userId':ez,'name':eA,'coins':eH,'pic':eY,'color':dq[(eX["length"]+f4)%dq["length"]],'sortKey':Math["random"](),'joinedViaLike':eE
           });
         }
-        var nextTotal=[...eX,...f3];
-        if(nextTotal["length"]>0x12c)nextTotal=nextTotal["slice"](-0x12c);
-        return nextTotal;
+        return[...eX,...f3];
         
       }else{
         var f5=eX["findIndex"](f7=>f7["userId"]===ez);
@@ -2306,11 +2317,10 @@ function pickGiftFromLauncher(i,j,k){
       return;
       
     }console["log"]("LuckySpin: Processing winner/elimination for "+eA["name"]+" (ID: "+eA['id']+')'),dv("Result: "+eA["name"]),w(![]),d5["current"]=![],y(null);
-    eA["userId"]&&(cR["current"][eA["userId"]]=0x0,a8(eS=>({
-      ...eS,[eA["userId"]]:0x0
-    })),cQ["current"][eA["userId"]]=0x0,a6(eS=>({
-      ...eS,[eA["userId"]]:0x0
-    })));
+    if(eA["userId"]&&cR["current"]){
+      cR["current"][eA["userId"]]=Math["max"](0x0,(cR["current"][eA["userId"]]||0x0)-(eA["coins"]||0x1));
+      a8(eS=>({...eS,[eA["userId"]]:cR["current"][eA["userId"]]}));
+    }
     var eC=cU["current"]||[],eD=eA["userId"],eE=eA["name"],eF;
     if(!ez||eA["isInstantClaim"])console["log"]("LuckySpin: Mode reset/instant - Clearing all players."),eF=[],cR["current"]={
       
@@ -2322,8 +2332,7 @@ function pickGiftFromLauncher(i,j,k){
       
     }),a4(0x0),Y(0x0),b8(![]),dL("reset");
     else{
-      var mainElimUser=eA["userId"]||eA["name"];
-      eF=eC["filter"](eS=>(eS["userId"]||eS["name"])!==mainElimUser);
+      eF=eC["filter"](eS=>eS['id']!==eA['id']);
       if(eF["length"]===eC["length"]&&eC["length"]>0x0){
         console["warn"]("LuckySpin: Removal failed for ID "+eA['id']+". Falling back to removing first matching entry.");
         var eG=![];
@@ -2341,8 +2350,8 @@ function pickGiftFromLauncher(i,j,k){
         ...eS,[eD]:0x0
       })));
       if(eB["length"]>0x0){
-        var eI=new Set(eB["map"](eS=>eS["userId"]||eS["name"]||eS['id']));
-        eF=eF["filter"](eS=>!eI["has"](eS["userId"])&&!eI["has"](eS["name"])&&!eI["has"](eS['id']));
+        var eI=new Set(eB["map"](eS=>eS['id']));
+        eF=eF["filter"](eS=>!eI["has"](eS['id']));
         var eJ=new Set(eF["map"](eS=>eS["userId"]||eS["name"])),eK=eB["map"](eS=>eS["userId"])["filter"](eS=>eS&&!eJ["has"](eS));
         eK["length"]>0x0&&(eK["forEach"](eS=>{
           var il=ii;
@@ -3760,7 +3769,7 @@ function pickGiftFromLauncher(i,j,k){
       !ez[eB]&&(ez[eB]={
         ...eA,'ticketCount':0x0,'totalCoins':0x0,'joinedViaLike':![]
       });
-      ez[eB]["ticketCount"]+=Math["round"](Number(eA["tickets"])||0x1),ez[eB]["totalCoins"]=(cR["current"]&&cR["current"][eB]!==undefined)?cR["current"][eB]:(ez[eB]["totalCoins"]+eA["coins"]);
+      ez[eB]["ticketCount"]++,ez[eB]["totalCoins"]+=eA["coins"];
       if(eA["joinedViaLike"])ez[eB]["joinedViaLike"]=!![];
       
     }),Object["values"](ez)["sort"]((eA,eB)=>eB["totalCoins"]-eA["totalCoins"])["map"](eA=>React["createElement"]("div",{
