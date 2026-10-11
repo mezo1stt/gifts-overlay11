@@ -2010,12 +2010,12 @@ function pickGiftFromLauncher(i,j,k){
   },dM=(ez,eA,eB,eC,eD=![],eE=![],eF=![])=>{
     var i3=fQ,eG=parseInt(eB||0x0);
     if(isNaN(eG)||eG<0x1)return;
-    var eH=Number(d2["current"]||Z||0x1);
-    if(!eD&&!eF&&eG<eH)return;
-    if(aZ&&(b7||t)&&!eD&&!eF){
-      console["log"]("LuckySpin: Entry BLOCKED for "+eA+" because game has started (Lock Entries).");
+    var eH=(cf&&cf["cost"]&&!isNaN(Number(cf["cost"]))&&Number(cf["cost"])>0)?Number(cf["cost"]):Number(d2["current"]||Z||0x1);
+    if(aZ&&(b7||t||o)){
+      console["log"]("LuckySpin: Entry BLOCKED for "+eA+" because entries are locked after spin (Lock Entries).");
       return;
-    }var eI=cU["current"]||[];
+    }
+    if(!eD&&!eF&&eG<eH)return;var eI=cU["current"]||[];
     if(by>0x0){
       var eJ=new Set(eI["map"](eX=>eX["userId"]||eX["name"]))["size"],eK=eI["some"](eX=>eX["userId"]&&eX["userId"]===ez||eX["name"]&&eX["name"]===eA);
       if(!eK&&eJ>=by){
@@ -2139,12 +2139,54 @@ function pickGiftFromLauncher(i,j,k){
     setTimeout(()=>{if(!k&&dX["current"])dX["current"]();},0x14);
   },dN=()=>{
     var i5=fQ;
+    if(aZ&&(b7||t||o)){
+      console.log("LuckySpin: Manual entry blocked - entries locked after first spin.");
+      return;
+    }
     if(!H["trim"]()||t)return;
-    var ez=H["trim"](),eA=parseInt(J)||Math["max"](0x1,Number(d2["current"]||Z||0x1));
-    enqueueSpinEntry(ez,ez,eA,null,![],![],!![]);
+    var ez=H["trim"]();
+    var activeCost=(function(){
+      if(cf&&cf["cost"]&&!isNaN(Number(cf["cost"]))&&Number(cf["cost"])>0)return Number(cf["cost"]);
+      var mb=Number(d2["current"]||Z||1);
+      return (isNaN(mb)||mb<1)?1:mb;
+    })();
+    var rawCoins=parseInt(J);
+    var enteredCoins=(!isNaN(rawCoins)&&rawCoins>0)?rawCoins:activeCost;
+    var slotsToAdd=Math["max"](1,Math["floor"](enteredCoins/activeCost));
+
+    var newTickets=[];
+    var maxSlots=Math["min"](slotsToAdd,0x186a0);
+    for(var f4=0;f4<maxSlots;f4++){
+      newTickets["push"]({
+        'id':"ticket-"+ez+'-'+Date["now"]()+'-'+f4+'-'+Math["random"]()["toString"](0x24)["substr"](0x2,0x9),
+        'userId':ez,
+        'name':ez,
+        'coins':activeCost,
+        'pic':null,
+        'color':dq[((cU["current"]||[])["length"]+f4)%dq["length"]],
+        'sortKey':Math["random"](),
+        'joinedViaLike':![]
+      });
+    }
+    n(eX=>[...eX,...newTickets]);
+
+    var prevCoins=cR["current"][ez]||0;
+    var nextCoins=prevCoins+enteredCoins;
+    cR["current"][ez]=nextCoins;
+    a8(eX=>({...eX,[ez]:nextCoins}));
+    cS["current"]+=enteredCoins;
+    aa(cS["current"]);
+
+    dB("coin",enteredCoins);
     dx("LUCKYSPIN_SPIN_DATA",{
-      'coins':eA,'userName':ez,'userId':ez,'pictureProfil':null
-    }),I(''),K('');
+      'coins':enteredCoins,
+      'userName':ez,
+      'userId':ez,
+      'pictureProfil':null
+    });
+    setTimeout(()=>{if(!k&&dX["current"])dX["current"]();},0x14);
+    I('');
+    K('');
   },handleTikTokConnect=async()=>{
     if(ttStatus==="connected"||ttStatus==="connecting"){
       try{ await fetch(API_BASE+"/api/disconnect",{'method':"POST"}); }catch(e){}
@@ -3783,15 +3825,18 @@ function pickGiftFromLauncher(i,j,k){
     'className':"flex flex-col gap-2 overflow-y-auto pr-1 mt-1 modal-scroll",'style':{
       'maxHeight':"55vh"
     }
-  },!t&&React["createElement"]("div",{
-    'className':"flex gap-2 p-2 bg-white/5 rounded-lg border border-dashed mb-2 "+(aZ?"border-orange-500/50":"border-white/20")
-  },React["createElement"]("input",{
-    'type':"text",'placeholder':aZ?"Name (host only)":"Name",'value':H,'onChange':ez=>I(ez["target"]["value"]),'className':"w-full bg-transparent border-b border-gray-500 text-sm text-white focus:outline-none focus:border-blue-500 placeholder-gray-500"
-  }),React["createElement"]("input",{
-    'type':"number",'placeholder':'$','value':J,'onChange':ez=>K(ez["target"]["value"]),'className':"w-16 bg-transparent border-b border-gray-500 text-sm text-white focus:outline-none focus:border-yellow-500 placeholder-gray-500"
-  }),React["createElement"]("button",{
-    'onClick':dN,'className':"bg-green-600 hover:bg-green-500 text-white w-8 h-6 rounded flex items-center justify-center font-bold text-lg leading-none transition-colors"
-  },'+')),liveGifts["length"]>0x0&&React["createElement"]("div",{
+  },!t&&(()=>{
+    var isLockedAfterSpin=Boolean(aZ&&(b7||t||o));
+    return React["createElement"]("div",{
+      'className':"flex gap-2 p-2 rounded-lg border border-dashed mb-2 "+(isLockedAfterSpin?"border-red-500/60 bg-red-950/20":aZ?"border-orange-500/50 bg-white/5":"border-white/20 bg-white/5")
+    },React["createElement"]("input",{
+      'type':"text",'disabled':isLockedAfterSpin,'placeholder':isLockedAfterSpin?"🔒 Locked after spin":"Name",'value':H,'onChange':ez=>I(ez["target"]["value"]),'className':"w-full bg-transparent border-b border-gray-500 text-sm text-white focus:outline-none focus:border-blue-500 placeholder-gray-500 "+(isLockedAfterSpin?"cursor-not-allowed opacity-60":'')
+    }),React["createElement"]("input",{
+      'type':"number",'disabled':isLockedAfterSpin,'placeholder':'$','value':J,'onChange':ez=>K(ez["target"]["value"]),'className':"w-16 bg-transparent border-b border-gray-500 text-sm text-white focus:outline-none focus:border-yellow-500 placeholder-gray-500 "+(isLockedAfterSpin?"cursor-not-allowed opacity-60":'')
+    }),React["createElement"]("button",{
+      'onClick':dN,'disabled':isLockedAfterSpin,'className':isLockedAfterSpin?"bg-gray-700 text-gray-500 cursor-not-allowed w-8 h-6 rounded flex items-center justify-center font-bold text-lg leading-none":"bg-green-600 hover:bg-green-500 text-white w-8 h-6 rounded flex items-center justify-center font-bold text-lg leading-none transition-colors"
+    },'+'));
+  })(),liveGifts["length"]>0x0&&React["createElement"]("div",{
     'className':"bg-emerald-950/40 border border-emerald-500/40 rounded-xl p-2.5 mb-2 transition-all"
   },React["createElement"]("div",{
     'className':"flex items-center justify-between mb-1.5"
