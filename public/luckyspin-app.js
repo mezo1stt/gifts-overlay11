@@ -491,69 +491,105 @@ function _extends(){
 }),SquareGrid=React["memo"](({
   players:i,highlightIndex:j,isEliminationMode:k,showWinner:l,winner:m,wheelScale:n,wheelTheme:o,instantClaimEnabled:q,instantClaimAmount:r,multiElimRevealed:elimList
 })=>{
-  var gridPlayers=i;
-  if(i["length"]>0x90){
-    var maxG=0x90;
-    var startG=Math["max"](0x0,Math["min"]((j||0x0)-Math["floor"](maxG/0x2),i["length"]-maxG));
-    gridPlayers=i["slice"](startG,startG+maxG);
-  }
-  var fJ=fy;
-  if(i["length"]===0x0){
+  if(!i||i["length"]===0x0){
     return React["createElement"]("div",{
-      'className':"relative w-full h-full overflow-hidden p-2 grid grid-cols-3 sm:grid-cols-4 gap-2"
-    },Array.from({length: 8}).map((_,idx)=>React["createElement"]("div",{
+      'className':"relative w-full h-full overflow-hidden p-2 grid grid-cols-4 gap-2"
+    },Array["from"]({'length':0x8})["map"]((_,idx)=>React["createElement"]("div",{
       'key':"sq_empty_"+idx,
       'className':"rounded-xl border-2 border-purple-500/40 bg-gray-950/85 backdrop-blur-md flex flex-col items-center justify-center p-2 text-center shadow-lg select-none"
     },React["createElement"]("span",{
       'className':"text-xs font-black text-purple-400 mb-0.5"
-    },"#"+(idx+1)),React["createElement"]("span",{
+    },"#"+(idx+0x1)),React["createElement"]("span",{
       'className':"text-[10px] font-bold text-gray-400 uppercase tracking-wider"
     },"+ WAITING"))));
   }
-  var s=i["length"],t=Math["ceil"](Math["sqrt"](s*1.2));
-  if(s<=0x4)t=0x2;
-  var u=s>0x64,v=s>0x190;
-  return React["createElement"]("div",{
-    'className':"relative w-full h-full overflow-hidden"
-  },React["createElement"]("div",{
-    'className':"grid gap-1.5 w-full h-full p-2 overflow-hidden select-none",'style':{
-      'gridTemplateColumns':"repeat("+t+", minmax(0, 1fr))",'gridAutoRows':"minmax(0, 1fr)",'alignContent':"start",'justifyContent':"stretch"
+
+  var playerMap=new Map();
+  for(var idx=0x0;idx<i["length"];idx++){
+    var p=i[idx];
+    if(!p)continue;
+    var pKey=String(p["userId"]||p["name"]||idx);
+    if(!playerMap["has"](pKey)){
+      playerMap["set"](pKey,{
+        'id':p['id'],
+        'userId':p["userId"],
+        'name':p["name"],
+        'pic':p["pic"],
+        'color':p["color"]||"#1f2937",
+        'coins':p["coins"]||0x1,
+        'totalEntries':0x1
+      });
+    }else{
+      var ex=playerMap["get"](pKey);
+      ex["totalEntries"]+=0x1;
+      ex["coins"]=(ex["coins"]||0x0)+(p["coins"]||0x1);
     }
-  },(gridPlayers||i)["map"]((w,x)=>{
-    var fK=fJ,y=x===j,z=l&&m&&w['id']===m['id'],A='';
-    if(y){
-      var B=k?"rgb(239, 68, 68)":o==="cyberpunk"?"rgb(34, 211, 238)":o==="gold_luxury"?"rgb(234, 179, 8)":o==="neon_vibes"?"rgb(168, 85, 247)":"rgb(250, 204, 21)";
-      A="ring-4 scale-110 z-10 bg-white/20 shadow-[0_0_30px_"+B+']',A+=k?" ring-red-500":o==="cyberpunk"?" ring-cyan-400":o==="gold_luxury"?" ring-yellow-500":o==="neon_vibes"?" ring-purple-500":" ring-yellow-400";
-      
-    }var isElimCard = Array["isArray"](elimList) && elimList["some"](e => e && (e['id'] === w['id'] || (e["userId"] && e["userId"] === w["userId"]) || (e["name"] && e["name"] === w["name"])));
-    return z&&(A="ring-4 ring-yellow-400 shadow-[0_0_40px_rgba(250,204,21,1)] z-20 scale-125 animate-pulse bg-yellow-400/50"),React["createElement"]("div",{
-      'key':w['id'],'className':"relative w-full h-full rounded-sm transition-all duration-75 flex flex-col items-center p-0.5 overflow-hidden "+A+'\x20'+(!y&&!z?"bg-gray-800/40 border border-white/5":''),'title':w["name"],'style':isElimCard?{'filter':"grayscale(100%) contrast(70%) brightness(0.6)",'opacity':0.55}:{}
+  }
+  var cards=Array["from"](playerMap["values"]());
+
+  var activePlayerKey=(j!=null&&j>=0x0&&i[j])?String(i[j]["userId"]||i[j]["name"]):null;
+
+  var count=cards["length"];
+  var cols=0x2;
+  if(count<=0x4)cols=0x2;
+  else if(count<=0x6)cols=0x3;
+  else if(count<=0x8)cols=0x4;
+  else if(count<=0xc)cols=0x4;
+  else if(count<=0x10)cols=0x4;
+  else cols=0x5;
+
+  return React["createElement"]("div",{
+    'className':"relative w-full h-full overflow-hidden p-2 flex flex-col items-center justify-center select-none"
+  },React["createElement"]("div",{
+    'className':"grid gap-2 w-full h-full max-h-full overflow-y-auto modal-scroll items-center content-center justify-center",'style':{
+      'gridTemplateColumns':"repeat("+cols+", minmax(0, 1fr))",
+      'gridAutoRows':count<=0x8?"minmax(0, 1fr)":"minmax(85px, 1fr)"
+    }
+  },cards["map"]((w,x)=>{
+    var isHighlighted=Boolean(activePlayerKey&&(String(w["userId"]||w["name"])===activePlayerKey));
+    var isWinner=Boolean(l&&m&&(String(w["userId"]||w["name"])===String(m["userId"]||m["name"])));
+    var isElim=Boolean(Array["isArray"](elimList)&&elimList["some"](e=>e&&(String(e["userId"]||e["name"])===String(w["userId"]||w["name"]))));
+
+    var ringClass="";
+    if(isHighlighted){
+      var colRing=k?"ring-red-500 shadow-[0_0_30px_rgb(239,68,68)]":"ring-yellow-400 shadow-[0_0_30px_rgb(250,204,21)]";
+      ringClass="ring-4 scale-105 z-20 bg-yellow-500/20 "+colRing;
+    }
+    if(isWinner){
+      ringClass="ring-4 ring-yellow-400 shadow-[0_0_40px_rgba(250,204,21,1)] z-30 scale-110 animate-pulse bg-yellow-400/40";
+    }
+
+    var cardBg=isElim?"bg-red-950/40 border border-red-500/30":"bg-gray-900/90 border-2 border-purple-500/40 shadow-lg";
+
+    return React["createElement"]("div",{
+      'key':"card_"+(w["userId"]||w["name"]||x),
+      'className':"relative w-full h-full rounded-2xl transition-all duration-150 flex flex-col items-center justify-between p-2 overflow-hidden backdrop-blur-md "+ringClass+" "+(!isHighlighted&&!isWinner?cardBg:''),
+      'style':isElim?{'filter':"grayscale(100%) opacity(0.55)"}:{},
+      'title':w["name"]
     },React["createElement"]("div",{
-      'className':"relative flex-1 w-full flex items-center justify-center overflow-hidden rounded-sm"
+      'className':"relative flex-1 w-full min-h-[44px] flex items-center justify-center my-0.5"
+    },React["createElement"]("div",{
+      'className':"w-11 h-11 sm:w-13 sm:h-13 rounded-full overflow-hidden border-2 "+(isHighlighted?"border-yellow-400":"border-purple-400/60")+" shadow-md flex items-center justify-center bg-gray-800"
     },w["pic"]?React["createElement"](SafeAvatar,{
-      'src':w["pic"],'name':w["name"],'className':"w-full h-full object-cover opacity-95",'style':{
-        'backgroundColor':w["color"]
-      }
+      'src':w["pic"],'name':w["name"],'className':"w-full h-full object-cover"
     }):React["createElement"]("div",{
-      'className':"w-full h-full flex items-center justify-center text-white font-black p-1 text-center select-none break-words leading-tight",'style':{
-        'backgroundColor':w["color"],'fontSize':s>0x1e?"0.48rem":"0.68rem"
+      'className':"w-full h-full flex items-center justify-center text-white font-black text-xs",'style':{
+        'backgroundColor':w["color"]||"#1f2937"
+      }
+    },getInitials(w["name"])))),React["createElement"]("div",{
+      'className':"w-full px-1 text-center my-0.5 leading-tight"
+    },React["createElement"]("span",{
+      'className':"text-white font-black text-[11px] sm:text-xs uppercase truncate block tracking-wide",'style':{
+        'textShadow':"0 1px 2px rgba(0,0,0,0.9)"
       }
     },plainText(w["name"]))),React["createElement"]("div",{
-      'className':"w-full flex flex-col items-center justify-center px-0.5 pb-0.5 leading-none bg-black/85 z-10 select-none"
-    },React["createElement"]("span",{
-      'className':"text-white font-black uppercase truncate w-full text-center",'style':{
-        'fontSize':s>0x1e?"0.42rem":"0.58rem",'textShadow':"0 1px 1px black"
-      },'title':plainText(w["name"])
-    },plainText(w["name"])),w["coins"]>0x0&&React["createElement"]("span",{
-      'className':"text-yellow-400 font-bold flex items-center gap-0.5",'style':{
-        'fontSize':"0.38rem"
-      }
+      'className':"mt-auto px-2 py-0.5 rounded-full bg-black/75 border border-yellow-500/40 flex items-center gap-1 shadow-inner whitespace-nowrap"
     },React["createElement"](Coins,{
-      'className':"w-1.5 h-1.5"
-    }),String.fromCharCode(0x20),Number(w["coins"]||0)["toLocaleString"]())));
-    
-  })));
-  
+      'className':"w-3 h-3 text-yellow-400 flex-shrink-0"
+    }),React["createElement"]("span",{
+      'className':"text-yellow-400 font-black text-[10px]"
+    },(w["totalEntries"]>0x1?Number(w["totalEntries"])["toLocaleString"]()+" ENTRIES":Number(w["coins"]||0x1)["toLocaleString"]()))));
+  })))
 }),HUD_THEMES=[{
   'id':"simple",'label':"SIMPLE",'hint':"Cases sobres : libellé en haut, chiffre dessous, sans animation"
 },{
@@ -2253,7 +2289,7 @@ function pickGiftFromLauncher(i,j,k){
     
   },[o,r,L,al,k,m,bA,bC,b7]),useEffect(()=>{
     var id=fQ,ez=bC?new Set(m["map"](eA=>eA["userId"]||eA["name"]))["size"]:m["length"];
-    !k&&(L||al)&&V<=0x0&&o&&!t&&!v&&!b7&&(ez>=bA&&(console["log"]("LuckySpin: Security trigger - Wheel started because timer reached 0."),e0()));
+    /* Security trigger handled by interval */
     
   },[V,o,t,v,b7,L,al,k,m,bA,bC]);
   var dT=()=>{
@@ -2368,11 +2404,6 @@ function pickGiftFromLauncher(i,j,k){
       }
     }cU["current"]=eF,n(eF);
     var eL=new Set(eF["map"](eS=>eS["userId"]||eS["name"]))["size"];
-    if(!k&&ez&&ap&&eL>0x1&&N){
-      setTimeout(()=>{
-        if(!d6["current"]&&dk["current"])dk["current"]();
-      },0x15e);
-    }
     if(ez&&eL===0x1&&eF["length"]>0x0){
       var eM=eF[0x0];
       dm(eM),y({
@@ -2382,8 +2413,18 @@ function pickGiftFromLauncher(i,j,k){
     }else{
       var eO=Boolean(N);
       if(eO&&eF["length"]>0x0){
-        var eP=T!==undefined&&T!==null?T:0x14,eQ=ez?eP:P*0x3c+R||0x3c;
-        W(eQ),q(!![]);
+        var nextSec=(typeof T==="number"&&!isNaN(T)&&T>=0)?T:0x14;
+        W(nextSec);
+        d9["current"]=nextSec;
+        if(!k){
+          dx("LUCKYSPIN_GAME_CONTROL",{'action':"set_timer",'seconds':nextSec});
+          dx("LUCKYSPIN_FULL_STATE",{
+            'players':eF,'winner':null,'showWinner':![],'isRunning':!![],'isPaused':![],'isSpinning':![],'timeLeft':nextSec,'timestamp':Date["now"]()
+          });
+        }
+        setTimeout(()=>{
+          q(!![]);
+        },0x32);
       }else{
         q(![]);
         s(![]);
@@ -2391,6 +2432,7 @@ function pickGiftFromLauncher(i,j,k){
         var eR=P*0x3c+R;
         var finalSec=eR>0x0?eR:0x3c;
         W(finalSec);
+        d9["current"]=finalSec;
         if(!k){
           dx("LUCKYSPIN_GAME_CONTROL",{'action':"pause"});
           dx("LUCKYSPIN_FULL_STATE",{
