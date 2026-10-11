@@ -36,18 +36,13 @@
             transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1);
         }
 
-        @keyframes pulse-glow {
-            0%, 100% {
-                box-shadow: 0 0 15px rgba(236, 72, 153, 0.5);
-            }
-            50% {
-                box-shadow: 0 0 30px rgba(236, 72, 153, 0.8);
-            }
-        }
-
-        .animate-pulse-glow {
-            animation: pulse-glow 2s infinite;
-        }
+        .lsh-glint, .lsh-fx, .lsh-giftglint { display: none !important; animation: none !important; }
+        .lsh-giftpic { animation: none !important; }
+        .lsh-coins .lsh-ic { animation: none !important; }
+        .lsh-ic { animation: none !important; }
+        .lsh-chip { animation: none !important; }
+        .lsh-bump { animation: none !important; }
+        .animate-pulse-glow { animation: none !important; }
     </style>
 </head>
 
