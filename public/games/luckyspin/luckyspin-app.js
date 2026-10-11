@@ -504,91 +504,78 @@ function _extends(){
     },"+ WAITING"))));
   }
 
-  var playerMap=new Map();
-  for(var idx=0x0;idx<i["length"];idx++){
-    var p=i[idx];
-    if(!p)continue;
-    var pKey=String(p["userId"]||p["name"]||idx);
-    if(!playerMap["has"](pKey)){
-      playerMap["set"](pKey,{
-        'id':p['id'],
-        'userId':p["userId"],
-        'name':p["name"],
-        'pic':p["pic"],
-        'color':p["color"]||"#1f2937",
-        'coins':p["coins"]||0x1,
-        'totalEntries':0x1
-      });
-    }else{
-      var ex=playerMap["get"](pKey);
-      ex["totalEntries"]+=0x1;
-      ex["coins"]=(ex["coins"]||0x0)+(p["coins"]||0x1);
-    }
+  var total=i["length"];
+  var cols=Math["min"](0xf,Math["max"](0x2,Math["ceil"](Math["sqrt"](total*1.2))));
+  if(total>=0x96)cols=0xf;
+
+  var renderCards=i;
+  var startIdx=0x0;
+  if(total>0x5dc){
+    var maxWin=0x5dc;
+    startIdx=Math["max"](0x0,Math["min"]((j||0x0)-Math["floor"](maxWin/0x2),total-maxWin));
+    renderCards=i["slice"](startIdx,startIdx+maxWin);
   }
-  var cards=Array["from"](playerMap["values"]());
 
-  var activePlayerKey=(j!=null&&j>=0x0&&i[j])?String(i[j]["userId"]||i[j]["name"]):null;
-
-  var count=cards["length"];
-  var cols=0x2;
-  if(count<=0x4)cols=0x2;
-  else if(count<=0x6)cols=0x3;
-  else if(count<=0x8)cols=0x4;
-  else if(count<=0xc)cols=0x4;
-  else if(count<=0x10)cols=0x4;
-  else cols=0x5;
+  React["useEffect"](()=>{
+    if(j!=null&&j>=0x0){
+      try{
+        var el=document["getElementById"]("sq_card_"+j);
+        if(el&&typeof el["scrollIntoView"]==="function"){
+          el["scrollIntoView"]({'block':"nearest",'behavior':"auto"});
+        }
+      }catch(e){}
+    }
+  },[j]);
 
   return React["createElement"]("div",{
-    'className':"relative w-full h-full overflow-hidden p-2 flex flex-col items-center justify-center select-none"
+    'className':"relative w-full h-full overflow-hidden"
   },React["createElement"]("div",{
-    'className':"grid gap-2 w-full h-full max-h-full overflow-y-auto modal-scroll items-center content-center justify-center",'style':{
-      'gridTemplateColumns':"repeat("+cols+", minmax(0, 1fr))",
-      'gridAutoRows':count<=0x8?"minmax(0, 1fr)":"minmax(85px, 1fr)"
+    'className':"grid gap-1.5 w-full h-full p-2 overflow-y-auto modal-scroll select-none",'style':{
+      'gridTemplateColumns':"repeat("+cols+", minmax(0px, 1fr))",
+      'gridAutoRows':total>0x96?"minmax(36px, 1fr)":"minmax(0px, 1fr)",
+      'alignContent':"start",
+      'justifyContent':"stretch",
+      'placeContent':"start stretch"
     }
-  },cards["map"]((w,x)=>{
-    var isHighlighted=Boolean(activePlayerKey&&(String(w["userId"]||w["name"])===activePlayerKey));
-    var isWinner=Boolean(l&&m&&(String(w["userId"]||w["name"])===String(m["userId"]||m["name"])));
-    var isElim=Boolean(Array["isArray"](elimList)&&elimList["some"](e=>e&&(String(e["userId"]||e["name"])===String(w["userId"]||w["name"]))));
+  },renderCards["map"]((w,idx)=>{
+    var actualIdx=startIdx+idx;
+    var isHighlighted=(j!=null&&j>=0x0&&actualIdx===j);
+    var isWinner=Boolean(l&&m&&(w['id']===m['id']||(!m['id']&&(w["userId"]||w["name"])===(m["userId"]||m["name"]))));
+    var isElim=Boolean(Array["isArray"](elimList)&&elimList["some"](e=>e&&(e['id']===w['id'])));
 
     var ringClass="";
     if(isHighlighted){
-      var colRing=k?"ring-red-500 shadow-[0_0_30px_rgb(239,68,68)]":"ring-yellow-400 shadow-[0_0_30px_rgb(250,204,21)]";
-      ringClass="ring-4 scale-105 z-20 bg-yellow-500/20 "+colRing;
+      var colRing=k?"ring-red-500 shadow-[0_0_20px_rgb(239,68,68)]":"ring-yellow-400 shadow-[0_0_20px_rgb(250,204,21)]";
+      ringClass="ring-2 scale-105 z-20 bg-yellow-400/30 "+colRing;
     }
     if(isWinner){
-      ringClass="ring-4 ring-yellow-400 shadow-[0_0_40px_rgba(250,204,21,1)] z-30 scale-110 animate-pulse bg-yellow-400/40";
+      ringClass="ring-2 ring-yellow-400 shadow-[0_0_25px_rgba(250,204,21,1)] z-30 scale-110 animate-pulse bg-yellow-400/50";
     }
 
-    var cardBg=isElim?"bg-red-950/40 border border-red-500/30":"bg-gray-900/90 border-2 border-purple-500/40 shadow-lg";
+    var cardBg=isElim?"bg-red-950/40 border border-red-500/30":"bg-gray-900/90 border border-purple-500/40 shadow-sm";
 
     return React["createElement"]("div",{
-      'key':"card_"+(w["userId"]||w["name"]||x),
-      'className':"relative w-full h-full rounded-2xl transition-all duration-150 flex flex-col items-center justify-between p-2 overflow-hidden backdrop-blur-md "+ringClass+" "+(!isHighlighted&&!isWinner?cardBg:''),
-      'style':isElim?{'filter':"grayscale(100%) opacity(0.55)"}:{},
+      'key':w['id']||("sq_"+actualIdx),
+      'id':"sq_card_"+actualIdx,
+      'className':"relative w-full h-full rounded-md transition-all duration-75 flex flex-col items-center justify-between p-1 overflow-hidden "+ringClass+" "+(!isHighlighted&&!isWinner?cardBg:''),
+      'style':isElim?{'filter':"grayscale(100%) opacity(0.35)"}:{},
       'title':w["name"]
     },React["createElement"]("div",{
-      'className':"relative flex-1 w-full min-h-[44px] flex items-center justify-center my-0.5"
-    },React["createElement"]("div",{
-      'className':"w-11 h-11 sm:w-13 sm:h-13 rounded-full overflow-hidden border-2 "+(isHighlighted?"border-yellow-400":"border-purple-400/60")+" shadow-md flex items-center justify-center bg-gray-800"
+      'className':"relative flex-1 w-full min-h-0 flex items-center justify-center overflow-hidden"
     },w["pic"]?React["createElement"](SafeAvatar,{
-      'src':w["pic"],'name':w["name"],'className':"w-full h-full object-cover"
+      'src':w["pic"],
+      'name':w["name"],
+      'className':"w-full h-full object-cover rounded-full max-w-[22px] max-h-[22px]",
+      'style':{'backgroundColor':w["color"]||"#1f2937"}
     }):React["createElement"]("div",{
-      'className':"w-full h-full flex items-center justify-center text-white font-black text-xs",'style':{
-        'backgroundColor':w["color"]||"#1f2937"
-      }
-    },getInitials(w["name"])))),React["createElement"]("div",{
-      'className':"w-full px-1 text-center my-0.5 leading-tight"
+      'className':"w-5 h-5 rounded-full flex items-center justify-center text-white font-black text-[8px]",
+      'style':{'backgroundColor':w["color"]||"#1f2937"}
+    },getInitials(w["name"]))),React["createElement"]("div",{
+      'className':"w-full text-center leading-none mt-0.5"
     },React["createElement"]("span",{
-      'className':"text-white font-black text-[11px] sm:text-xs uppercase truncate block tracking-wide",'style':{
-        'textShadow':"0 1px 2px rgba(0,0,0,0.9)"
-      }
-    },plainText(w["name"]))),React["createElement"]("div",{
-      'className':"mt-auto px-2 py-0.5 rounded-full bg-black/75 border border-yellow-500/40 flex items-center gap-1 shadow-inner whitespace-nowrap"
-    },React["createElement"](Coins,{
-      'className':"w-3 h-3 text-yellow-400 flex-shrink-0"
-    }),React["createElement"]("span",{
-      'className':"text-yellow-400 font-black text-[10px]"
-    },(w["totalEntries"]>0x1?Number(w["totalEntries"])["toLocaleString"]()+" ENTRIES":Number(w["coins"]||0x1)["toLocaleString"]()))));
+      'className':"text-white font-bold text-[7px] uppercase truncate block tracking-tighter",
+      'style':{'textShadow':"0 1px 2px rgba(0,0,0,0.9)"}
+    },plainText(w["name"]))));
   })))
 }),HUD_THEMES=[{
   'id':"simple",'label':"SIMPLE",'hint':"Cases sobres : libellé en haut, chiffre dessous, sans animation"
