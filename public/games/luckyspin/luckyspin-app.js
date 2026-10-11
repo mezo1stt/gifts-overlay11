@@ -2713,13 +2713,53 @@ function pickGiftFromLauncher(i,j,k){
     
   },[av]),ev=v&&x&&typeof x["isElimination"]!=="undefined"?!x["isElimination"]:al?er<=0x1:!![],ew=ev?"WINNER":"ELIMINATED",ex=dt==="gold_luxury"?ev?"text-yellow-400 border-yellow-400 shadow-yellow-400/50":"text-red-500 border-red-500 shadow-red-500/50":ev?"text-yellow-500 border-yellow-500 shadow-yellow-500/50":"text-red-500 border-red-500 shadow-red-500/50",ey=dt==="gold_luxury"?["#FFD700","#FFC800","#FFB900","#DAA520","#FFF","#FDE68A"]:["#ef4444","#eab308","#3b82f6","#22c55e","#a855f7"];
   return useEffect(()=>{
-    if(!v||k||ev)return;
-    var ez=setTimeout(()=>{
-      var iS=h,eA=document["getElementById"]("btn-close-winner");
-      if(eA)eA["click"]();
-    },0x1388);
-    return()=>clearTimeout(ez);
-  },[v,N,k,ev]),React["createElement"]("div",{
+    if(!v)return;
+    if(ev){
+      var winTimer=setTimeout(()=>{
+        if(!k){
+          w(![]);
+          d5["current"]=![];
+          y(null);
+          cU["current"]=[];
+          n([]);
+          cR["current"]={};
+          a8({});
+          cQ["current"]={};
+          a6({});
+          q(![]);
+          s(![]);
+          u(![]);
+          b8(![]);
+          d7["current"]=![];
+          var initSec=(P||0x0)*0x3c+(R||0x0);
+          var finalSec=initSec>0x0?initSec:0x3c;
+          W(finalSec);
+          d9["current"]=finalSec;
+          dL("reset");
+          dx("LUCKYSPIN_GAME_CONTROL",{'action':"reset"});
+          dx("LUCKYSPIN_FULL_STATE",{
+            'players':[],'winner':null,'showWinner':![],'isRunning':![],'isPaused':![],'isSpinning':![],'timeLeft':finalSec,'timestamp':Date["now"]()
+          });
+        }else{
+          w(![]);
+          d5["current"]=![];
+          y(null);
+          cU["current"]=[];
+          n([]);
+          var initSec=(P||0x0)*0x3c+(R||0x0);
+          W(initSec>0x0?initSec:0x3c);
+        }
+      },15000);
+      return()=>clearTimeout(winTimer);
+    }else{
+      if(k)return;
+      var elimTimer=setTimeout(()=>{
+        var iS=h,eA=document["getElementById"]("btn-close-winner");
+        if(eA)eA["click"]();
+      },0x708);
+      return()=>clearTimeout(elimTimer);
+    }
+  },[v,ev,k,P,R]),React["createElement"]("div",{
     'className':"h-screen overflow-hidden flex flex-col font-sans relative",'style':{
       'background':k?"transparent":"linear-gradient(135deg, #1e0b36 0%, #2e1065 50%, #3b0764 100%)"
     }
