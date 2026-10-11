@@ -2031,7 +2031,7 @@ function pickGiftFromLauncher(i,j,k){
     var i3=fQ,eG=parseInt(eB||0x0);
     if(isNaN(eG)||eG<0x1)return;
     var eH=(cf&&cf["cost"]&&!isNaN(Number(cf["cost"]))&&Number(cf["cost"])>0)?Number(cf["cost"]):Number(d2["current"]||Z||0x1);
-    if(aZ&&(b7||t||o)){
+    if(aZ&&(b7||t)){
       console["log"]("LuckySpin: Entry BLOCKED for "+eA+" because entries are locked after spin (Lock Entries).");
       return;
     }
@@ -2159,7 +2159,7 @@ function pickGiftFromLauncher(i,j,k){
     setTimeout(()=>{if(!k&&dX["current"])dX["current"]();},0x14);
   },dN=()=>{
     var i5=fQ;
-    if(aZ&&(b7||t||o)){
+    if(aZ&&(b7||t)){
       console.log("LuckySpin: Manual entry blocked - entries locked after first spin.");
       return;
     }
@@ -3846,7 +3846,7 @@ function pickGiftFromLauncher(i,j,k){
       'maxHeight':"55vh"
     }
   },!t&&(()=>{
-    var isLockedAfterSpin=Boolean(aZ&&(b7||t||o));
+    var isLockedAfterSpin=Boolean(aZ&&(b7||t));
     return React["createElement"]("div",{
       'className':"flex gap-2 p-2 rounded-lg border border-dashed mb-2 "+(isLockedAfterSpin?"border-red-500/60 bg-red-950/20":aZ?"border-orange-500/50 bg-white/5":"border-white/20 bg-white/5")
     },React["createElement"]("input",{
