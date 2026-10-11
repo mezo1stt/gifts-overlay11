@@ -509,36 +509,18 @@ function _extends(){
   if(total>=0x96)cols=0xf;
 
   var renderCards=i;
-  var startIdx=0x0;
-  if(total>0x5dc){
-    var maxWin=0x5dc;
-    startIdx=Math["max"](0x0,Math["min"]((j||0x0)-Math["floor"](maxWin/0x2),total-maxWin));
-    renderCards=i["slice"](startIdx,startIdx+maxWin);
-  }
-
-  React["useEffect"](()=>{
-    if(j!=null&&j>=0x0){
-      try{
-        var el=document["getElementById"]("sq_card_"+j);
-        if(el&&typeof el["scrollIntoView"]==="function"){
-          el["scrollIntoView"]({'block':"nearest",'behavior':"auto"});
-        }
-      }catch(e){}
-    }
-  },[j]);
 
   return React["createElement"]("div",{
-    'className':"relative w-full h-full overflow-hidden"
+    'className':"relative w-full h-full overflow-hidden select-none"
   },React["createElement"]("div",{
-    'className':"grid gap-1.5 w-full h-full p-2 overflow-y-auto modal-scroll select-none",'style':{
+    'className':"grid gap-1.5 w-full h-full p-2 overflow-hidden select-none",'style':{
       'gridTemplateColumns':"repeat("+cols+", minmax(0px, 1fr))",
-      'gridAutoRows':total>0x96?"minmax(36px, 1fr)":"minmax(0px, 1fr)",
+      'gridAutoRows':"minmax(0px, 1fr)",
       'alignContent':"start",
       'justifyContent':"stretch",
       'placeContent':"start stretch"
     }
-  },renderCards["map"]((w,idx)=>{
-    var actualIdx=startIdx+idx;
+  },renderCards["map"]((w,actualIdx)=>{
     var isHighlighted=(j!=null&&j>=0x0&&actualIdx===j);
     var isWinner=Boolean(l&&m&&(w['id']===m['id']||(!m['id']&&(w["userId"]||w["name"])===(m["userId"]||m["name"]))));
     var isElim=Boolean(Array["isArray"](elimList)&&elimList["some"](e=>e&&(e['id']===w['id'])));
