@@ -4132,6 +4132,48 @@ const CARD4_MC_ITEMS = [
         badge: '🧟 زومبي متحرك',
         desc: 'وحش الزومبي الكلاسيكي السريع',
         image: '/images/mcroyale/zombie.gif'
+    },
+    {
+        id: 'creeper',
+        name: 'كريبـر ماين كرافت (Minecraft Creeper)',
+        badge: '💥 كريبـر متحرك',
+        desc: 'الكريبـر الكلاسيكي المتحرك',
+        image: '/images/1791836597377-minecraft-creeper.gif'
+    },
+    {
+        id: 'creeper_smile',
+        name: 'كريبـر الابتسامة (Creepy Creeper)',
+        badge: '😈 كريبـر مدمر',
+        desc: 'كريبـر متحرك بالابتسامة الشريرة والتدمير',
+        image: '/images/1791836760526-creepy-smile-creeper-minecraft.gif'
+    },
+    {
+        id: 'meteor',
+        name: 'النيزك المتفجر (Meteor Strike)',
+        badge: '☄️ نيزك مشتعل',
+        desc: 'نيزك ناري يسقط ويدمر الساحة',
+        image: '/images/1791837088385-meteor.png'
+    },
+    {
+        id: 'tnt_top',
+        name: 'تي إن تي البناء (TNT Top)',
+        badge: '🏗️ بناء متحرك',
+        desc: 'بناء وحماية متفجرات التي إن تي',
+        image: '/images/1791837339752-minecraft-ban-tnt-top.gif'
+    },
+    {
+        id: 'tnt_bedrock',
+        name: 'بدروك وتي إن تي (TNT Bedrock)',
+        badge: '🧱 بدروك حصين',
+        desc: 'بناء البدروك الصلب مع التي إن تي',
+        image: '/images/1791837348638-minecraft-ban-tnt-bedrock.gif'
+    },
+    {
+        id: 'tnt_island',
+        name: 'جزيرة التي إن تي (TNT Island)',
+        badge: '🏝️ جزيرة البناء',
+        desc: 'بناء الجزيرة بالكامل وحصن الدفاع',
+        image: '/images/1791837367789-minecraft-ban-tnt-island.gif'
     }
 ];
 
@@ -4142,31 +4184,126 @@ function getCard4McItem(cardType) {
     return CARD4_MC_ITEMS[0];
 }
 
-const DEFAULT_DECK_CARDS4 = [
-    { id: 1, cardType: 'skeleton_bandana', customText: 'X1', count: 1, giftName: 'تكبيس (❤️ X100)', giftImage: '/images/tiktok_likes.png', likesCount: 100 },
-    { id: 2, cardType: 'evoker_mage', customText: 'X1', count: 1, giftName: 'وردة', giftImage: '/images/rose.png' },
-    { id: 3, cardType: 'skeleton_cap', customText: 'X2', count: 2, giftName: 'قلب', giftImage: '/images/heart.png' },
-    { id: 4, cardType: 'hog_rider', customText: 'X1', count: 1, giftName: 'دونات', giftImage: '/images/donut.png' },
-    { id: 5, cardType: 'golem_pumpkin', customText: 'X1', count: 1, giftName: 'مكوك فضائي', giftImage: '/images/1791197817001-eb77ead5c3abb6da6034d3cf6cfeb438~tplv-obj.webp' }
-];
-
-let cards4BoardConfig = {
+const DEFAULT_CARDS4_BOARD = {
     neonEnabled: true,
-    fontFamily: 'cairo',
+    fontFamily: 'rubik',
     giftPosition: 'top-left',
     disappearMode: 'gift_only',
     offsetY: 0,
     teamRed: {
         color: '#ff2a4a',
-        title: 'الفريق الأحمر',
-        cards: JSON.parse(JSON.stringify(DEFAULT_DECK_CARDS4))
+        title: 'المخربين',
+        cards: [
+            {
+                id: 1,
+                cardType: 'skeleton_bandana',
+                customText: 'X1',
+                count: 1,
+                giftName: 'تكبيس (❤️ X100)',
+                giftImage: '/images/tiktok_likes.png',
+                likesCount: 100,
+                customImage: '/images/1791836597377-minecraft-creeper.gif',
+                customImageName: 'minecraft-creeper.gif'
+            },
+            {
+                id: 2,
+                cardType: 'evoker_mage',
+                customText: 'X1',
+                count: 1,
+                giftName: 'وردة',
+                giftImage: '/images/rose.png',
+                customImage: '/images/1791836663355-minecraft-creeper.gif',
+                customImageName: 'minecraft-creeper.gif'
+            },
+            {
+                id: 3,
+                cardType: 'skeleton_cap',
+                customText: 'X30',
+                count: 30,
+                giftName: 'Doughnut',
+                giftImage: 'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/4e7ad6bdf0a1d860c538f38026d4e812~tplv-obj.webp',
+                customImage: '/images/1791836738514-minecraft-creeper.gif',
+                customImageName: 'minecraft-creeper.gif'
+            },
+            {
+                id: 4,
+                cardType: 'hog_rider',
+                customText: 'X100',
+                count: 100,
+                giftName: 'Hand Heart',
+                giftImage: 'https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/374dfe46d5b09ce1db19be06202d34f5.png~tplv-obj.webp',
+                customImage: '/images/1791836760526-creepy-smile-creeper-minecraft.gif',
+                customImageName: 'creepy-smile-creeper-minecraft.gif'
+            },
+            {
+                id: 6,
+                cardType: 'tnt',
+                customText: 'X200',
+                count: 200,
+                giftName: 'Hearts',
+                giftImage: 'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/934b5a10dee8376df5870a61d2ea5cb6.png~tplv-obj.webp'
+            },
+            {
+                id: 7,
+                cardType: 'skeleton',
+                customText: 'نيزك',
+                count: 7,
+                giftName: 'Boxing Gloves',
+                giftImage: 'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/9f8bd92363c400c284179f6719b6ba9c~tplv-obj.webp',
+                customImage: '/images/1791837088385-meteor.png',
+                customImageName: 'meteor.png'
+            },
+            {
+                id: 5,
+                cardType: 'golem_pumpkin',
+                customText: 'تدمير الكل',
+                count: 500,
+                giftName: 'Money Gun',
+                giftImage: 'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/e0589e95a2b41970f0f30f6202f5fce6~tplv-obj.webp',
+                customImage: '/images/1791836868548-creepy-smile-creeper-minecraft.gif',
+                customImageName: 'creepy-smile-creeper-minecraft.gif'
+            }
+        ]
     },
     teamBlue: {
         color: '#00b4d8',
-        title: 'الفريق الأزرق',
-        cards: DEFAULT_DECK_CARDS4.map((c, i) => ({ ...c, id: 101 + i }))
+        title: 'المساعدين',
+        cards: [
+            {
+                id: 101,
+                cardType: 'evoker_mage',
+                customText: 'بناء x1',
+                count: 1,
+                giftName: 'Witchy Kitty',
+                giftImage: 'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/399674919c227f886f951fb028542f2a.png~tplv-obj.webp',
+                customImage: '/images/1791837339752-minecraft-ban-tnt-top.gif',
+                customImageName: 'minecraft-ban-tnt-top.gif'
+            },
+            {
+                id: 102,
+                cardType: 'evoker_mage',
+                customText: 'بناء x3',
+                count: 3,
+                giftName: 'Hand Heart',
+                giftImage: 'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/47e9081623cdae9faa55f4d0d67908bf~tplv-obj.webp',
+                customImage: '/images/1791837348638-minecraft-ban-tnt-bedrock.gif',
+                customImageName: 'minecraft-ban-tnt-bedrock.gif'
+            },
+            {
+                id: 103,
+                cardType: 'skeleton_cap',
+                customText: 'بناء الكل',
+                count: 1,
+                giftName: 'Flower Show',
+                giftImage: 'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/b6266323ef3ea0d313cbab6911ff8c46~tplv-obj.webp',
+                customImage: '/images/1791837367789-minecraft-ban-tnt-island.gif',
+                customImageName: 'minecraft-ban-tnt-island.gif'
+            }
+        ]
     }
 };
+
+let cards4BoardConfig = JSON.parse(JSON.stringify(DEFAULT_CARDS4_BOARD));
 
 let activeVisualCard4Team = 'teamRed';
 let activeVisualCard4SlotIdx = null;

@@ -20,5 +20,38 @@
     "updated_at": 1791635643494,
     "team_a_color": "#ff2a4a",
     "team_b_color": "#22ff88"
+  },
+  "mz_6e60223656d3863d21bb918dc1dc": {
+    "board_id": "mz_6e60223656d3863d21bb918dc1dc",
+    "title": "🏆 تحدي الأساطير 🏆",
+    "team_a_name": "المخربين",
+    "team_b_name": "المساعدين",
+    "team_a_score": 0,
+    "team_b_score": 0,
+    "team_a_color": "#ff2a4a",
+    "team_b_color": "#22ff88",
+    "updated_at": 1791837620874
+  },
+  "mz_687cc220aff626bbb93cd2ac5585": {
+    "board_id": "mz_687cc220aff626bbb93cd2ac5585",
+    "title": "🏆 تحدي الأساطير 🏆",
+    "team_a_name": "المخربين",
+    "team_b_name": "المساعدين",
+    "team_a_score": 0,
+    "team_b_score": 0,
+    "team_a_color": "#ff2a4a",
+    "team_b_color": "#22ff88",
+    "updated_at": 1791837628719
+  },
+  "mz_56d466aded6fe9509947f2f00611": {
+    "board_id": "mz_56d466aded6fe9509947f2f00611",
+    "title": "🏆 تحدي الأساطير 🏆",
+    "team_a_name": "المخربين",
+    "team_b_name": "المساعدين",
+    "team_a_score": 0,
+    "team_b_score": 0,
+    "team_a_color": "#ff2a4a",
+    "team_b_color": "#22ff88",
+    "updated_at": 1791837630971
   }
 }

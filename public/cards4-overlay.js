@@ -23,7 +23,14 @@ const CARD4_IMG_MAP = {
     dragon: '/images/mcroyale/dragon.gif',
     wither: '/images/mcroyale/wither.gif',
     tnt: '/images/mcroyale/tnt.gif',
-    zombie: '/images/mcroyale/zombie.gif'
+    zombie: '/images/mcroyale/zombie.gif',
+    creeper: '/images/1791836597377-minecraft-creeper.gif',
+    creeper_smile: '/images/1791836760526-creepy-smile-creeper-minecraft.gif',
+    meteor: '/images/1791837088385-meteor.png',
+    tnt_top: '/images/1791837339752-minecraft-ban-tnt-top.gif',
+    tnt_bedrock: '/images/1791837348638-minecraft-ban-tnt-bedrock.gif',
+    tnt_island: '/images/1791837367789-minecraft-ban-tnt-island.gif',
+    tnt_bomb: '/images/1791836643678-tnt-bomb.gif'
 };
 
 function getImageSrc(image) {

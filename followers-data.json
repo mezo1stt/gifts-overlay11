@@ -6,9 +6,9 @@
       "id": "mezo_1st",
       "username": "mezo_1st",
       "nickname": "MEZO",
-      "avatar": "https://p16-common-sign.tiktokcdn.com/tos-alisg-avt-0068/efebc69735bed611542788c11d66ecb0~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=4e3c45f2&x-expires=1791806400&x-signature=V8bPCtAOl%2FVJUjCPiUjNZuqCmtg%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my2",
-      "followers": 104393,
-      "initialFollowers": 104393,
+      "avatar": "https://p16-common-sign.tiktokcdn.com/tos-alisg-avt-0068/efebc69735bed611542788c11d66ecb0~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=8b9aab19&x-expires=1792008000&x-signature=U6KvzpcvwStwdmq9wj3lY3UrsY8%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my3",
+      "followers": 104414,
+      "initialFollowers": 104414,
       "sessionGain": 0,
       "lastDelta": 0,
       "likes": 3840,
@@ -16,14 +16,66 @@
       "videos": 5,
       "verified": false,
       "role": "نجم البث 👑",
-      "updatedAt": 1791636659972,
-      "lastCheckedAt": 1791636659972
+      "updatedAt": 1791838309029,
+      "lastCheckedAt": 1791838309029
     }
   },
-  "history": [],
+  "history": [
+    {
+      "id": "1791837963502bcds",
+      "type": "add",
+      "text": "✅ تم تفعيل حساب mezo_1st (@mezo_1st) بإجمالي 104,414 متابع",
+      "time": "١١:٤٦:٠٣ م"
+    },
+    {
+      "id": "1791837960043e77c",
+      "type": "reset",
+      "text": "🔄 تم تصفير عداد الزيادة المباشرة لهذه الجلسة",
+      "time": "١١:٤٦:٠٠ م"
+    },
+    {
+      "id": "1791837959169upcd",
+      "type": "reset",
+      "text": "🔄 تم تصفير عداد الزيادة المباشرة لهذه الجلسة",
+      "time": "١١:٤٥:٥٩ م"
+    },
+    {
+      "id": "1791837939206b9c8",
+      "type": "gain",
+      "text": "🎉 متابع جديد لـ MEZO (+10)! الإجمالي: 104,414 متابع",
+      "username": "mezo_1st",
+      "nickname": "MEZO",
+      "avatar": "https://p16-common-sign.tiktokcdn.com/tos-alisg-avt-0068/efebc69735bed611542788c11d66ecb0~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=8b9aab19&x-expires=1792008000&x-signature=U6KvzpcvwStwdmq9wj3lY3UrsY8%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my3",
+      "delta": 10,
+      "followers": 104414,
+      "time": "١١:٤٥:٣٩ م"
+    },
+    {
+      "id": "1791837926264f8ms",
+      "type": "gain",
+      "text": "🎉 متابع جديد لـ MEZO (+10)! الإجمالي: 104,404 متابع",
+      "username": "mezo_1st",
+      "nickname": "MEZO",
+      "avatar": "https://p16-common-sign.tiktokcdn.com/tos-alisg-avt-0068/efebc69735bed611542788c11d66ecb0~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=8b9aab19&x-expires=1792008000&x-signature=U6KvzpcvwStwdmq9wj3lY3UrsY8%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my3",
+      "delta": 10,
+      "followers": 104404,
+      "time": "١١:٤٥:٢٦ م"
+    },
+    {
+      "id": "1791837924486gchg",
+      "type": "gain",
+      "text": "🎉 متابع جديد لـ MEZO (+1)! الإجمالي: 104,394 متابع",
+      "username": "mezo_1st",
+      "nickname": "MEZO",
+      "avatar": "https://p16-common-sign.tiktokcdn.com/tos-alisg-avt-0068/efebc69735bed611542788c11d66ecb0~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=8b9aab19&x-expires=1792008000&x-signature=U6KvzpcvwStwdmq9wj3lY3UrsY8%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my3",
+      "delta": 1,
+      "followers": 104394,
+      "time": "١١:٤٥:٢٤ م"
+    }
+  ],
   "settings": {
     "layoutStyle": "dynamic_island",
-    "theme": "royal_gold",
+    "theme": "diamond_ice",
     "customLabel": "إجمالي المتابعين",
     "customBadgeText": "نجم البث المباشر 👑",
     "customGoal": 0,
